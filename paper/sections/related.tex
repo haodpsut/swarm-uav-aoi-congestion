@@ -1,2 +1,60 @@
-% Placeholder — sub-agent fills this.
-Related work goes here.
+\subsection{AoI-oriented UAV data collection}
+The Age of Information (AoI) was introduced in \cite{kaul2012aoi} as a
+destination-centric measure of data freshness, capturing the time elapsed
+since the generation of the most recently received update. AoI has since
+become a standard objective for UAV-assisted data collection, where a UAV
+visits distributed sources and the design goal is to keep the collected
+information fresh. In the swarm setting, \cite{eldeeb2023swarm} minimizes AoI
+across multiple cooperating UAVs using multi-agent reinforcement learning,
+demonstrating that coordinated trajectories can reduce peak AoI relative to
+uncoordinated flight. That formulation, however, assumes flight endurance is
+unconstrained: it carries no energy state and no recharging model, so the
+depletion and replenishment dynamics that dominate long missions are absent.
+Closest to our objective is \cite{base2024}, which jointly optimizes charging
+station placement, UAV trajectory, and peak AoI, and which we adopt as our
+point of departure. That work is nonetheless single-UAV: with one vehicle
+there is no inter-UAV contention for a charger, no need for multi-port
+capacity, and no swarm assignment, precisely the coupling that our design
+targets.
+
+\subsection{Energy-limited UAVs and charging}
+A second line of work makes energy replenishment explicit. In \cite{wei2024},
+multiple UAVs share a limited charging facility and the resulting charge
+waiting time is folded into the AoI objective, then optimized by deep
+reinforcement learning. The facility there is single and fixed in location,
+which effectively reduces contention to a single-server queue and leaves
+station placement out of scope. Laser-based (LBD) charging is studied in
+\cite{sun2025laser}, where charging sites are at fixed locations and are
+treated without queue contention, so neither where to place stations nor how
+many vehicles may wait is optimized. A different tactic uses mobile chargers:
+\cite{oubbati2024ugv} and \cite{zhao2025aoi} employ ground vehicles that
+follow the UAVs to deliver energy on the move. Because the charger comes to
+the UAV, this removes the fixed-station contention that is central to our
+setting and does not address the placement of fixed, multi-port stations.
+Finally, \cite{ev2022sharing} does model UAV charging stations as a contended
+queue and provides a waiting-time analysis, but it optimizes neither AoI nor
+trajectory nor station placement, so the queueing model is not coupled to any
+freshness or mobility decision.
+
+\subsection{Positioning and gap}
+Read together, these works each supply a subset of the ingredients our problem
+requires but never their combination. Swarm operation with AoI appears in
+\cite{eldeeb2023swarm} yet without charging; placement with AoI appears in
+\cite{base2024} yet only for a single UAV; charge waiting is captured in
+\cite{wei2024} yet at a single fixed server without placement; and a contended
+charging queue is analyzed in \cite{ev2022sharing} yet without AoI,
+trajectory, or placement. No prior formulation simultaneously carries all four
+of station placement, swarm operation, multi-server charging contention, and a
+peak-AoI objective. Our work closes this gap by jointly optimizing station
+placement, port capacity, swarm trajectory, and source-to-UAV assignment under
+a charging model that is a contended, multi-server, and finite-source (closed)
+queue, validated against discrete-event simulation. The finite-source aspect
+is not a cosmetic refinement: because the number of UAVs competing for a
+station is small and closed, modeling the queue as an open M/M/c system
+over-predicts waiting time and thereby distorts both placement and capacity
+decisions, an effect we quantify and correct with the finite-source model
+detailed in Section~\ref{sec:model}. This coupled formulation also yields two
+structural findings that a decoupled treatment cannot expose: a congestion
+threshold, beyond which peak AoI is non-monotone in swarm size, and a
+placement inversion, whereby coverage-optimal station placement becomes
+AoI-suboptimal once contention is accounted for.

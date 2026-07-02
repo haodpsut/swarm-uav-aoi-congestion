@@ -1,2 +1,208 @@
-% Placeholder — sub-agent fills this.
-Formulation goes here.
+% !TeX root = ../main.tex
+% System Model and Problem Formulation (input into \section in main.tex).
+
+\subsection{Network model}
+\label{subsec:network}
+We consider a swarm data-collection system, illustrated in Fig.~\ref{fig:system}.
+A set $\mathcal{K}=\{1,\dots,K\}$ of ground sensors is deployed over a square
+field, with sensor $k$ located at $\mathbf{w}_k\in\mathbb{R}^2$. A swarm of
+$M$ rotary-wing UAVs, indexed by $\mathcal{M}=\{1,\dots,M\}$, flies at a fixed
+altitude $H$ with horizontal position $\mathbf{q}_m(t)\in\mathbb{R}^2$ over
+discrete slots $t=1,\dots,T$ of length $\delta_t$. Each UAV holds a battery with
+state of charge $e_m(t)\in[0,E_{\max}]$. A set
+$\mathcal{S}=\{1,\dots,S\}$ of candidate charging-station sites is given, with
+site $s$ at $\mathbf{b}_s\in\mathbb{R}^2$; the system may build a station and
+provision it with charging ports.
+
+Freshness is measured by the Age of Information (AoI)~\cite{kaul2012aoi}. Let
+$u_k(t)$ be the generation time of the freshest update from sensor $k$ that has
+been delivered by time $t$. The instantaneous AoI is
+\begin{equation}
+  \Aoi_k(t) = t - u_k(t),
+  \label{eq:aoi}
+\end{equation}
+which grows at unit rate and drops on each successful collection: when a UAV
+collects at time $\tau$ a packet generated at $g$, $u_k$ jumps to $g$ and
+$\Aoi_k(\tau^{+})=\tau-g$. Following the base setting, the network objective is
+the worst-case peak AoI,
+\begin{equation}
+  \bar{A} \;=\; \max_{k\in\mathcal{K}}\ \limsup_{t\to\infty}\ \Aoi_k(t),
+  \label{eq:peakaoi}
+\end{equation}
+which we seek to minimize. A UAV collects from sensor $k$ while
+$\|\mathbf{q}_m(t)-\mathbf{w}_k\|\le r_c$.
+
+\subsection{Rotary-wing energy}
+\label{subsec:energy}
+The charging cadence is not assumed constant: it emerges from how fast a UAV
+drains its battery in flight. For a rotary-wing UAV cruising at horizontal speed
+$V$, the propulsion power follows the closed-form model of Zeng~\emph{et
+al.}~\cite{zeng2019energy},
+\begin{equation}
+  P(V) = P_0\!\left(1+\frac{3V^2}{U_{\mathrm{tip}}^2}\right)
+       + P_i\!\left(\sqrt{1+\frac{V^4}{4v_0^4}}-\frac{V^2}{2v_0^2}\right)^{\!1/2}
+       + \tfrac{1}{2}d_0\rho s A\,V^3,
+  \label{eq:power}
+\end{equation}
+where $P_0$ and $P_i$ are the blade-profile and induced power constants,
+$U_{\mathrm{tip}}$ the rotor tip speed, $v_0$ the mean rotor induced velocity in
+hover, and $d_0,\rho,s,A$ the fuselage drag ratio, air density, rotor solidity,
+and disc area. Hovering during collection consumes $P(0)=P_0+P_i$. The charge
+evolves as $e_m(t+1)=e_m(t)-P(V_m(t))\,\delta_t$ while flying or collecting, and
+increases while docked at a charging port.
+
+Only a usable fraction of the pack is spent between charges, keeping a reserve
+$\eta$, so $E_{\mathrm{use}}=(1-\eta)E_{\max}$. Given a patrol loop of flight
+time $t_{\mathrm{fly}}^{\mathrm{loop}}$ and hover-collection time
+$t_{\mathrm{col}}^{\mathrm{loop}}$, the energy drawn per loop is
+$e_{\mathrm{loop}} = P(V)\,t_{\mathrm{fly}}^{\mathrm{loop}}
++ P(0)\,t_{\mathrm{col}}^{\mathrm{loop}}$, so a UAV can fly
+$n_{\mathrm{loop}}=\lfloor E_{\mathrm{use}}/e_{\mathrm{loop}}\rfloor$ loops before
+recharging, giving a physical flight budget between charges
+\begin{equation}
+  \tau_{\mathrm{fly}} = n_{\mathrm{loop}}\, t_{\mathrm{loop}},
+  \qquad
+  t_{\mathrm{loop}} = t_{\mathrm{fly}}^{\mathrm{loop}}+t_{\mathrm{col}}^{\mathrm{loop}}.
+  \label{eq:taufly}
+\end{equation}
+A recharge-feasibility condition requires each UAV to retain enough charge to
+reach its assigned open station at all times:
+$e_m(t)\ge E_{\mathrm{reach}}(\mathbf{q}_m(t),\mathbf{b}_{a_m})$.
+
+\subsection{Air-to-ground collection}
+\label{subsec:comms}
+Collection dwell is derived from a physical link rather than assumed
+instantaneous. With a line-of-sight, free-space channel of reference gain
+$\beta_0$ at $1$~m, a sensor at horizontal distance $d$ is seen at slant distance
+$\sqrt{H^2+d^2}$, and the achievable rate is
+\begin{equation}
+  R(d) = B\,\log_2\!\left(1+\frac{p_{\mathrm{tx}}\,\beta_0}
+       {(H^2+d^2)\,N_0 B}\right),
+  \label{eq:rate}
+\end{equation}
+with bandwidth $B$, sensor transmit power $p_{\mathrm{tx}}$, and noise power
+spectral density $N_0$. Collecting a status blob of $L$ bits at the
+closest-approach distance therefore takes a dwell time
+$t_{\mathrm{col}}(d)=L/R(d)$, which enters $t_{\mathrm{loop}}$ in
+\eqref{eq:taufly} and hence the revisit period.
+
+\subsection{Finite-source charging queue}
+\label{subsec:queue}
+The load-bearing coupling of the swarm is contention for charging ports. A
+station $s$ serving the $N_s$ UAVs assigned to it with $c_s$ parallel ports is
+\emph{not} an open queue: only $N_s$ UAVs exist, so the request rate falls as
+more of them are already at the station. The correct model is the finite-source
+(machine-repair) queue $M/M/c//N_s$~\cite{grossharris}.
+
+Each assigned UAV, while patrolling, requests a charge after a mean operating
+time, at rate $\lambda=1/T_{\mathrm{up}}$; each port serves at
+$\mu=1/\tau_{\mathrm{charge}}$. The operating time between two charge requests is
+the whole time a UAV spends away from the station in a cycle, so it must include
+the round-trip travel to the station and not the flight budget alone:
+\begin{equation}
+  T_{\mathrm{up}} = \tau_{\mathrm{fly}} + \frac{2\,d(m,s)}{V},
+  \label{eq:uptime}
+\end{equation}
+where $d(m,s)=\|\mathbf{q}_m-\mathbf{b}_s\|$. Omitting the travel term overstates
+$\lambda$ and over-predicts the wait by roughly a factor of two.
+
+Let $n\in\{0,\dots,N_s\}$ be the number of UAVs at the station. The birth-death
+chain has state-dependent rates
+\begin{equation}
+  n\!\to\! n{+}1:\ (N_s-n)\lambda,
+  \qquad
+  n\!\to\! n{-}1:\ \min(n,c_s)\mu,
+  \label{eq:rates}
+\end{equation}
+where the up-rate $(N_s-n)\lambda$ vanishes as $n\to N_s$: this closed-population
+term is exactly why the queue cannot blow up. The stationary distribution is
+\begin{equation}
+  p_n = p_0\prod_{k=0}^{n-1}\frac{(N_s-k)\,\lambda}{\min(k{+}1,c_s)\,\mu},
+  \qquad
+  \sum_{n=0}^{N_s} p_n = 1.
+  \label{eq:pn}
+\end{equation}
+The mean number waiting, the effective throughput, and, by Little's law, the mean
+queue wait are
+\begin{align}
+  L_q &= \sum_{n=0}^{N_s}\max(0,\,n-c_s)\,p_n,
+  \qquad
+  \lambda_{\mathrm{eff}} = \sum_{n=0}^{N_s}(N_s-n)\,\lambda\,p_n,
+  \label{eq:lqlam}\\
+  \Wq(N_s,c_s) &= \frac{L_q}{\lambda_{\mathrm{eff}}}.
+  \label{eq:wq}
+\end{align}
+Because the population is finite, no stability constraint (of the form
+$\rho_s<1$) is needed: the wait \emph{saturates} rather than diverging. This
+finite-source model replaces the open $M/M/c$ (Erlang-C) form, which treats
+arrivals as an inexhaustible stream and, for the cycling swarm, over-predicts the
+wait by roughly a factor of six. A discrete-event validation of the true cycling
+UAVs, reported in Section~\ref{sec:exp}, confirms that \eqref{eq:wq} tracks the
+simulation to within a few percent and is a conservative upper bound on the real,
+near-deterministic wait.
+
+\subsection{Peak-AoI expression}
+\label{subsec:peakaoi}
+For a UAV $m$ that patrols a sub-field and leaves it to recharge, the worst-case
+revisit gap seen by its sensors is one patrol period plus one charging excursion:
+\begin{equation}
+  \Aoi_m = t_{\mathrm{loop},m}
+         + \frac{2\,d(m,s)}{V}
+         + \Wq(N_s,c_s)
+         + \tau_{\mathrm{charge}}.
+  \label{eq:peak_m}
+\end{equation}
+The first term is the patrol revisit period, the second the round trip to the
+assigned station, the third the finite-source queue wait from \eqref{eq:wq} (the
+term that couples the swarm), and the last the charging time. The network peak
+AoI \eqref{eq:peakaoi} is the maximum of \eqref{eq:peak_m} over the swarm. The
+coupling in $\Wq$ is the mechanism behind the non-monotone behavior of
+$\bar{A}$ in the swarm size $M$: more UAVs shrink the coverage term but lengthen
+the wait, up to the ceiling set by the finite population.
+
+\subsection{Joint optimization problem}
+\label{subsec:problem}
+We jointly optimize the placement decisions $x_s\in\{0,1\}$ (build a station at
+$s$), the capacities $c_s\in\mathbb{Z}_{\ge0}$ (ports per station), the UAV
+trajectories $\{\mathbf{q}_m(\cdot)\}$, and the station assignment
+$\{a_m\}$. The problem is
+\begin{subequations}\label{eq:P0}
+\begin{align}
+  \text{(P0)}\quad
+  \argmin_{\mathbf{x},\,\mathbf{c},\,\{\mathbf{q}_m\},\,\{a_m\}}\ \
+    & \bar{A}=\max_{k\in\mathcal{K}}\ \limsup_{t\to\infty}\ \Aoi_k(t)
+    \label{eq:P0obj}\\
+  \text{s.t.}\quad
+    & e_m(t)\in[0,E_{\max}],\ \forall m,t,
+    \label{eq:P0e1}\\
+    & e_m(t)\ge E_{\mathrm{reach}}(\mathbf{q}_m(t),\mathbf{b}_{a_m}),\ \forall m,t,
+    \label{eq:P0e2}\\
+    & \Aoi_k(t)\ \text{driven by collections along}\ \{\mathbf{q}_m\},
+    \label{eq:P0aoi}\\
+    & \textstyle\sum\nolimits_{s} x_s \le S_{\max},\quad
+      \sum\nolimits_{s} c_s \le C_{\mathrm{tot}},
+    \label{eq:P0bud}\\
+    & c_s \le C_{\mathrm{port}}\,x_s,\quad
+      x_s\in\{0,1\},\ c_s\in\mathbb{Z}_{\ge0},
+    \label{eq:P0cap}\\
+    & \|\mathbf{q}_m(t{+}1)-\mathbf{q}_m(t)\|\le V_{\max}\delta_t,\ \forall m,t,
+    \label{eq:P0kin}\\
+    & a_m\in\{s:x_s=1\},\ \forall m,
+    \label{eq:P0asg}\\
+    & \|\mathbf{q}_m(t)-\mathbf{q}_{m'}(t)\|\ge d_{\min},\ \forall m\ne m',t.
+    \label{eq:P0sep}
+\end{align}
+\end{subequations}
+Constraint \eqref{eq:P0e2} is recharge feasibility, \eqref{eq:P0aoi} ties peak
+AoI to collection events through \eqref{eq:peak_m} and the queue wait
+\eqref{eq:wq}, \eqref{eq:P0bud} and \eqref{eq:P0cap} enforce the station and port
+budgets, \eqref{eq:P0kin} is UAV kinematics, \eqref{eq:P0asg} restricts
+assignment to open stations, and \eqref{eq:P0sep} is inter-UAV separation.
+
+Problem (P0) mixes binary placement $\mathbf{x}$, integer capacity $\mathbf{c}$,
+continuous trajectories, and a combinatorial assignment, and its objective embeds
+the nonconvex finite-source wait \eqref{eq:wq} through the coupling
+\eqref{eq:peak_m}. It is therefore a mixed-integer nonlinear program (MINLP) and
+NP-hard, which motivates the block-coordinate decomposition (trajectory, queue
+fixed point, capacity allocation, assignment, and outer placement) detailed in
+Section~\ref{sec:solver}.
