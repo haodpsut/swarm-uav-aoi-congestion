@@ -69,6 +69,63 @@ def fig_mstar():
     print("wrote", out)
 
 
+def fig_prop1_phys():
+    path = os.path.join(RES, "prop1_phys_curves.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
+    by_c = {}
+    for r in rows:
+        by_c.setdefault(int(r["c"]), []).append(r)
+    plt.figure(figsize=(6.5, 4.2))
+    for c in sorted(by_c):
+        rs = sorted(by_c[c], key=lambda r: int(r["M"]))
+        M = [int(r["M"]) for r in rs]
+        y = [float(r["aoi_mean_s"]) / 60.0 for r in rs]   # -> minutes
+        M2 = [m for m, v in zip(M, y) if math.isfinite(v)]
+        y2 = [v for v in y if math.isfinite(v)]
+        plt.plot(M2, y2, marker="o", ms=3, label=f"c={c}")
+        if y2:
+            i = min(range(len(y2)), key=lambda k: y2[k])
+            plt.scatter([M2[i]], [y2[i]], color="k", zorder=5, s=28)
+    plt.xlabel("Swarm size M")
+    plt.ylabel("Peak AoI (min)")
+    plt.title("Prop.1 (physical model): non-monotone AoI(M)")
+    plt.legend(fontsize=8, ncol=2)
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    out = os.path.join(RES, "fig_prop1_phys.png")
+    plt.savefig(out, dpi=150)
+    print("wrote", out)
+
+
+def fig_prop2():
+    path = os.path.join(RES, "prop2_placement.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
+    seeds = [int(r["seed"]) for r in rows]
+    cov = [float(r["aoi_cov_s"]) / 60.0 for r in rows]
+    traf = [float(r["aoi_traf_s"]) / 60.0 for r in rows]
+    x = range(len(seeds))
+    plt.figure(figsize=(7.0, 4.0))
+    w = 0.4
+    plt.bar([i - w / 2 for i in x], cov, width=w, label="coverage-optimal")
+    plt.bar([i + w / 2 for i in x], traf, width=w, label="traffic-optimal")
+    plt.xlabel("Seed")
+    plt.ylabel("Peak AoI (min)")
+    plt.title("Prop.2: traffic-driven placement beats coverage-driven")
+    plt.xticks(list(x), seeds, fontsize=7)
+    plt.legend()
+    plt.grid(alpha=0.3, axis="y")
+    plt.tight_layout()
+    out = os.path.join(RES, "fig_prop2.png")
+    plt.savefig(out, dpi=150)
+    print("wrote", out)
+
+
 if __name__ == "__main__":
     fig_curves()
     fig_mstar()
+    fig_prop1_phys()
+    fig_prop2()

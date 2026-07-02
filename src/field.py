@@ -97,3 +97,28 @@ def patrol_time(K: int, L: float, M: int, V: float, seed: int) -> float:
     groups = _kmeans(pts, M, rng)
     tour_times = [_group_tour_len(g) / V for g in groups if g]
     return sum(tour_times) / len(tour_times)
+
+
+def _centroid(pts):
+    return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
+
+
+def patrol_geometry(K: int, L: float, M: int, seed: int):
+    """Per-UAV sub-field geometry for the physical model (SI metres).
+
+    Returns a list of M dicts: {tour_len, n, centroid, mean_collect_d}, where
+    mean_collect_d is the mean sensor distance to its sub-field centroid (a
+    proxy for the horizontal offset at collection). Same field per seed.
+    """
+    rng = random.Random(seed)
+    pts = [(rng.uniform(0, L), rng.uniform(0, L)) for _ in range(K)]
+    groups = _kmeans(pts, M, rng)
+    out = []
+    for g in groups:
+        if not g:
+            continue
+        cen = _centroid(g)
+        mean_d = sum(math.dist(p, cen) for p in g) / len(g)
+        out.append(dict(tour_len=_group_tour_len(g), n=len(g),
+                        centroid=cen, mean_collect_d=mean_d))
+    return out

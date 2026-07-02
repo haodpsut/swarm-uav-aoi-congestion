@@ -20,10 +20,16 @@ conda activate swarm-uav-aoi
 # make-or-break gate (sanity: U-shape binds under optimal assignment)
 python experiments/gate_ushape.py
 
-# Prop. 1 full validation -> CSVs in results/
+# Prop. 1, semi-analytical  -> results/prop1_*.csv
 python experiments/validate_prop1.py
 
-# render figures from the CSVs -> results/*.png
+# Prop. 1, PHYSICAL model (rotary-wing energy + air-to-ground comms, SI)
+python experiments/validate_prop1_phys.py
+
+# Prop. 2, placement inversion (coverage- vs traffic-optimal), ~1-3 min
+python experiments/prop2_placement.py
+
+# render all figures from the CSVs -> results/*.png
 python experiments/make_figures.py
 ```
 
