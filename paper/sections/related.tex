@@ -1,40 +1,92 @@
-\subsection{AoI-oriented UAV data collection}
+\subsection{Age of Information foundations}
 The Age of Information (AoI) was introduced in \cite{kaul2012aoi} as a
 destination-centric measure of data freshness, capturing the time elapsed
-since the generation of the most recently received update. AoI has since
-become a standard objective for UAV-assisted data collection, where a UAV
-visits distributed sources and the design goal is to keep the collected
-information fresh. In the swarm setting, \cite{eldeeb2023swarm} minimizes AoI
-across multiple cooperating UAVs using multi-agent reinforcement learning,
-demonstrating that coordinated trajectories can reduce peak AoI relative to
-uncoordinated flight. That formulation, however, assumes flight endurance is
-unconstrained: it carries no energy state and no recharging model, so the
-depletion and replenishment dynamics that dominate long missions are absent.
-Closest to our objective is \cite{base2024}, which jointly optimizes charging
-station placement, UAV trajectory, and peak AoI, and which we adopt as our
-point of departure. That work is nonetheless single-UAV: with one vehicle
-there is no inter-UAV contention for a charger, no need for multi-port
-capacity, and no swarm assignment, precisely the coupling that our design
-targets.
+since the generation of the most recently received update. The concept has
+since matured into a substantial body of theory, surveyed comprehensively in
+\cite{yates2021aoi} and developed as a self-contained metric and analysis tool
+in \cite{kosta2017aoi}. Two threads of this literature are directly relevant to
+our problem. The first concerns sampling and transmission policy: \cite{sun2017update}
+shows that, contrary to intuition, freshness is not always improved by updating
+as often as possible, and that an optimal policy may deliberately wait, while
+\cite{costa2016age} analyzes how buffer and packet management shape the age
+process. The second concerns scheduling across contending sources:
+\cite{kadota2018scheduling} derives age-optimal and near-optimal policies for
+broadcasting updates from many sources over a shared wireless channel. These
+foundations motivate our use of peak AoI as the design objective and, more
+subtly, they anticipate the tension our formulation confronts, namely that
+serving more sources with a shared resource (here, a shared charger) can raise
+age once contention is taken into account.
+
+\subsection{UAV communications, trajectory, and placement}
+Unmanned aerial vehicles have become a central platform for flexible wireless
+service, with the opportunities and open problems laid out in \cite{zeng2016uav}
+and a broad tutorial treatment in \cite{mozaffari2019tutorial}; the networking
+of cooperating aerial nodes is surveyed in \cite{bekmezci2013fanet}. Trajectory
+design is the dominant control lever in this setting: \cite{wu2018multiuav}
+jointly optimizes the paths and communication of multiple UAVs, and for data
+collection specifically \cite{zhan2018energy} minimizes collection energy while
+\cite{gong2018flight} minimizes the flight time needed to gather data from a
+field of sensors. The quality of the air-to-ground link that these designs
+exploit is governed by the elevation-dependent line-of-sight probability
+characterized in \cite{alhourani2014optimal} and by the aerial channel models
+standardized in \cite{tr36777}, which we draw on when specifying the collection
+link. Two combinatorial structures recur in our own design. Deciding where to
+site a small number of charging stations is a facility-location problem, whose
+models and algorithms are treated in \cite{daskin2013}. Planning a visiting tour
+in which a source is served whenever the UAV enters its communication range is a
+close-enough traveling salesman problem, formulated and solved exactly in
+\cite{behdani2014cetsp} and heuristically in \cite{cetsp}. Our formulation
+couples these two structures, which are typically studied in isolation, to the
+freshness and charging dynamics described below.
+
+\subsection{AoI-oriented UAV data collection}
+Building on these foundations, AoI has become a standard objective for
+UAV-assisted data collection, where a UAV visits distributed sources and the
+design goal is to keep the collected information fresh. Single-UAV formulations
+establish the basic tradeoffs: \cite{liu2021uav} designs UAV-aided collection to
+maximize information freshness across a sensor field, and \cite{abdelmagid2019average}
+minimizes average peak AoI in a UAV-assisted IoT network, jointly treating
+trajectory and update scheduling. In the swarm setting, \cite{eldeeb2023swarm}
+minimizes AoI across multiple cooperating UAVs using multi-agent reinforcement
+learning, demonstrating that coordinated trajectories can reduce peak AoI
+relative to uncoordinated flight; learning-based control of multiple UAVs is
+itself an active area, with resource allocation studied in \cite{cui2020multiagent}
+and deployment and movement design in \cite{liu2019rl}. That family of
+formulations, however, assumes flight endurance is unconstrained: it carries no
+energy state and no recharging model, so the depletion and replenishment
+dynamics that dominate long missions are absent. Closest to our objective is
+\cite{base2024}, which jointly optimizes charging station placement, UAV
+trajectory, and peak AoI, and which we adopt as our point of departure. That
+work is nonetheless single-UAV: with one vehicle there is no inter-UAV
+contention for a charger, no need for multi-port capacity, and no swarm
+assignment, precisely the coupling that our design targets.
 
 \subsection{Energy-limited UAVs and charging}
-A second line of work makes energy replenishment explicit. In \cite{wei2024},
-multiple UAVs share a limited charging facility and the resulting charge
-waiting time is folded into the AoI objective, then optimized by deep
-reinforcement learning. The facility there is single and fixed in location,
-which effectively reduces contention to a single-server queue and leaves
-station placement out of scope. Laser-based (LBD) charging is studied in
-\cite{sun2025laser}, where charging sites are at fixed locations and are
-treated without queue contention, so neither where to place stations nor how
-many vehicles may wait is optimized. A different tactic uses mobile chargers:
-\cite{oubbati2024ugv} and \cite{zhao2025aoi} employ ground vehicles that
-follow the UAVs to deliver energy on the move. Because the charger comes to
-the UAV, this removes the fixed-station contention that is central to our
-setting and does not address the placement of fixed, multi-port stations.
-Finally, \cite{ev2022sharing} does model UAV charging stations as a contended
-queue and provides a waiting-time analysis, but it optimizes neither AoI nor
-trajectory nor station placement, so the queueing model is not coupled to any
-freshness or mobility decision.
+A second line of work makes energy replenishment explicit. The battery lifetime
+of aerial nodes is a first-order operational constraint, as argued in
+\cite{galkin2019uavs}, and wireless power transfer offers one replenishment
+mechanism whose trajectory and energy tradeoffs are optimized in \cite{xu2018wpt}.
+Turning to shared charging infrastructure, \cite{wei2024} lets multiple UAVs
+share a limited charging facility and folds the resulting charge waiting time
+into the AoI objective, then optimizes it by deep reinforcement learning. The
+facility there is single and fixed in location, which effectively reduces
+contention to a single-server queue and leaves station placement out of scope.
+Laser-based (LBD) charging is studied in \cite{sun2025laser}, where charging
+sites are at fixed locations and are treated without queue contention, so
+neither where to place stations nor how many vehicles may wait is optimized. A
+different tactic uses mobile chargers: \cite{oubbati2024ugv} and \cite{zhao2025aoi}
+employ ground vehicles that follow the UAVs to deliver energy on the move.
+Because the charger comes to the UAV, this removes the fixed-station contention
+that is central to our setting and does not address the placement of fixed,
+multi-port stations. Finally, \cite{ev2022sharing} does model UAV charging
+stations as a contended queue and provides a waiting-time analysis, but it
+optimizes neither AoI nor trajectory nor station placement, so the queueing
+model is not coupled to any freshness or mobility decision. When we make
+contention explicit, we model a station as a finite-source (closed) service
+system rather than an open queue. This places our analysis in the lineage of the
+machine-repair, or machine-interference, problem surveyed in \cite{haque2007machine}
+and treated within the classical queueing framework of \cite{grossharris}, from
+which we adapt the finite-source multi-server results used in Section~\ref{sec:model}.
 
 \subsection{Positioning and gap}
 Read together, these works each supply a subset of the ingredients our problem

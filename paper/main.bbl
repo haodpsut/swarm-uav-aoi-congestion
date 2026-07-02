@@ -79,20 +79,132 @@ E.~Eldeeb, M.~Shehab, and H.~Alves, ``Age minimization in massive {IoT} via
   \url{https://arxiv.org/abs/2208.06782}
 \BIBentrySTDinterwordspacing
 
-\bibitem{zeng2019energy}
-Y.~Zeng, J.~Xu, and R.~Zhang, ``Energy minimization for wireless communication
-  with rotary-wing {UAV},'' \emph{IEEE Transactions on Wireless
-  Communications}, vol.~18, no.~4, pp. 2329--2345, 2019.
+\bibitem{yates2021aoi}
+R.~D. Yates, Y.~Sun, D.~R. Brown, S.~K. Kaul, E.~Modiano, and S.~Ulukus, ``Age
+  of information: An introduction and survey,'' \emph{IEEE Journal on Selected
+  Areas in Communications}, vol.~39, no.~5, pp. 1183--1210, 2021.
 
-\bibitem{grossharris}
-D.~Gross, J.~F. Shortle, J.~M. Thompson, and C.~M. Harris, \emph{Fundamentals
-  of Queueing Theory}, 4th~ed.\hskip 1em plus 0.5em minus 0.4em\relax Wiley,
-  2008.
+\bibitem{kosta2017aoi}
+A.~Kosta, N.~Pappas, and V.~Angelakis, \emph{Age of Information: A New Concept,
+  Metric, and Tool}, ser. Foundations and Trends in Networking.\hskip 1em plus
+  0.5em minus 0.4em\relax Now Publishers, 2017, vol.~12, no.~3.
+
+\bibitem{sun2017update}
+Y.~Sun, E.~Uysal-Biyikoglu, R.~D. Yates, C.~E. Koksal, and N.~B. Shroff,
+  ``Update or wait: How to keep your data fresh,'' \emph{IEEE Transactions on
+  Information Theory}, vol.~63, no.~11, pp. 7492--7508, 2017, arXiv:1601.02284.
+
+\bibitem{costa2016age}
+M.~Costa, M.~Codreanu, and A.~Ephremides, ``On the age of information in status
+  update systems with packet management,'' \emph{IEEE Transactions on
+  Information Theory}, vol.~62, no.~4, pp. 1897--1910, 2016.
+
+\bibitem{kadota2018scheduling}
+I.~Kadota, A.~Sinha, E.~Uysal-Biyikoglu, R.~Singh, and E.~Modiano, ``Scheduling
+  policies for minimizing age of information in broadcast wireless networks,''
+  \emph{IEEE/ACM Transactions on Networking}, vol.~26, no.~6, pp. 2637--2650,
+  2018.
+
+\bibitem{zeng2016uav}
+Y.~Zeng, R.~Zhang, and T.~J. Lim, ``Wireless communications with unmanned
+  aerial vehicles: Opportunities and challenges,'' \emph{IEEE Communications
+  Magazine}, vol.~54, no.~5, pp. 36--42, 2016.
+
+\bibitem{mozaffari2019tutorial}
+M.~Mozaffari, W.~Saad, M.~Bennis, Y.-H. Nam, and M.~Debbah, ``A tutorial on
+  {UAVs} for wireless networks: Applications, challenges, and open problems,''
+  \emph{IEEE Communications Surveys \& Tutorials}, vol.~21, no.~3, pp.
+  2334--2360, 2019.
+
+\bibitem{bekmezci2013fanet}
+{\.I}.~Bekmezci, O.~K. Sahingoz, and {\c{S}}.~Temel, ``Flying ad-hoc networks
+  ({FANETs}): A survey,'' \emph{Ad Hoc Networks}, vol.~11, no.~3, pp.
+  1254--1270, 2013.
+
+\bibitem{wu2018multiuav}
+Q.~Wu, Y.~Zeng, and R.~Zhang, ``Joint trajectory and communication design for
+  multi-{UAV} enabled wireless networks,'' \emph{IEEE Transactions on Wireless
+  Communications}, vol.~17, no.~3, pp. 2109--2121, 2018, arXiv:1705.02723.
+
+\bibitem{zhan2018energy}
+C.~Zhan, Y.~Zeng, and R.~Zhang, ``Energy-efficient data collection in {UAV}
+  enabled wireless sensor network,'' \emph{IEEE Wireless Communications
+  Letters}, vol.~7, no.~3, pp. 328--331, 2018, arXiv:1708.00221.
+
+\bibitem{gong2018flight}
+J.~Gong, T.-H. Chang, C.~Shen, and X.~Chen, ``Flight time minimization of {UAV}
+  for data collection over wireless sensor networks,'' \emph{IEEE Journal on
+  Selected Areas in Communications}, vol.~36, no.~9, pp. 1942--1954, 2018.
+
+\bibitem{alhourani2014optimal}
+A.~Al-Hourani, S.~Kandeepan, and S.~Lardner, ``Optimal {LAP} altitude for
+  maximum coverage,'' \emph{IEEE Wireless Communications Letters}, vol.~3,
+  no.~6, pp. 569--572, 2014.
+
+\bibitem{tr36777}
+{3GPP}, ``Study on enhanced {LTE} support for aerial vehicles,'' 3rd Generation
+  Partnership Project (3GPP), Tech. Rep. TR 36.777, V15.0.0, 2017.
+
+\bibitem{daskin2013}
+M.~S. Daskin, \emph{Network and Discrete Location: Models, Algorithms, and
+  Applications}, 2nd~ed.\hskip 1em plus 0.5em minus 0.4em\relax Wiley, 2013.
+
+\bibitem{behdani2014cetsp}
+B.~Behdani and J.~C. Smith, ``An integer-programming-based approach to the
+  close-enough traveling salesman problem,'' \emph{INFORMS Journal on
+  Computing}, vol.~26, no.~3, pp. 415--432, 2014.
 
 \bibitem{cetsp}
 W.~K. Mennell, ``Heuristics for solving three routing problems: Close-enough
   traveling salesman problem, close-enough vehicle routing problem, and
   sequence-dependent team orienteering problem,'' Ph.D. dissertation,
   University of Maryland, College Park, 2009.
+
+\bibitem{liu2021uav}
+J.~Liu, P.~Tong, X.~Wang, B.~Bai, and H.~Dai, ``{UAV}-aided data collection for
+  information freshness in wireless sensor networks,'' \emph{IEEE Transactions
+  on Wireless Communications}, vol.~20, no.~4, pp. 2368--2382, 2021.
+
+\bibitem{abdelmagid2019average}
+M.~A. Abd-Elmagid and H.~S. Dhillon, ``Average peak age-of-information
+  minimization in {UAV}-assisted {IoT} networks,'' \emph{IEEE Transactions on
+  Vehicular Technology}, vol.~68, no.~2, pp. 2003--2008, 2019,
+  arXiv:1804.06543.
+
+\bibitem{cui2020multiagent}
+J.~Cui, Y.~Liu, and A.~Nallanathan, ``Multi-agent reinforcement learning-based
+  resource allocation for {UAV} networks,'' \emph{IEEE Transactions on Wireless
+  Communications}, vol.~19, no.~2, pp. 729--743, 2020.
+
+\bibitem{liu2019rl}
+X.~Liu, Y.~Liu, and Y.~Chen, ``Reinforcement learning in multiple-{UAV}
+  networks: Deployment and movement design,'' \emph{IEEE Transactions on
+  Vehicular Technology}, vol.~68, no.~8, pp. 8036--8049, 2019,
+  arXiv:1904.05242.
+
+\bibitem{galkin2019uavs}
+B.~Galkin, J.~Kibilda, and L.~A. DaSilva, ``{UAVs} as mobile infrastructure:
+  Addressing battery lifetime,'' \emph{IEEE Communications Magazine}, vol.~57,
+  no.~6, pp. 132--137, 2019.
+
+\bibitem{xu2018wpt}
+J.~Xu, Y.~Zeng, and R.~Zhang, ``{UAV}-enabled wireless power transfer:
+  Trajectory design and energy optimization,'' \emph{IEEE Transactions on
+  Wireless Communications}, vol.~17, no.~8, pp. 5092--5106, 2018.
+
+\bibitem{haque2007machine}
+L.~Haque and M.~J. Armstrong, ``A survey of the machine interference problem,''
+  \emph{European Journal of Operational Research}, vol. 179, no.~2, pp.
+  469--482, 2007.
+
+\bibitem{grossharris}
+D.~Gross, J.~F. Shortle, J.~M. Thompson, and C.~M. Harris, \emph{Fundamentals
+  of Queueing Theory}, 4th~ed.\hskip 1em plus 0.5em minus 0.4em\relax Wiley,
+  2008.
+
+\bibitem{zeng2019energy}
+Y.~Zeng, J.~Xu, and R.~Zhang, ``Energy minimization for wireless communication
+  with rotary-wing {UAV},'' \emph{IEEE Transactions on Wireless
+  Communications}, vol.~18, no.~4, pp. 2329--2345, 2019.
 
 \end{thebibliography}
