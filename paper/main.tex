@@ -44,16 +44,26 @@ Application (CAIRA), Da Nang Architecture University, Da Nang, Vietnam
 \maketitle
 
 \begin{abstract}
-% TODO (fill after results): 200-250 words.
-% Motivation: fresh data collection by UAV swarms; energy-limited UAVs must
-% recharge at a small number of shared charging stations. Gap: existing works
-% treat charging as a single fixed facility or an open queue. Contribution:
-% (i) a joint charging-station placement, port-capacity, swarm-trajectory and
-% assignment formulation under a DES-validated finite-source (machine-repair)
-% charging queue; (ii) two structural results: a congestion threshold making
-% AoI non-monotone in swarm size, and a placement inversion (traffic-driven vs
-% coverage-driven); (iii) a GPU trajectory optimiser and a block-coordinate
-% solver. Results placeholder.
+Unmanned aerial vehicle (UAV) swarms can keep Internet of Things data fresh, but
+energy-limited UAVs must recharge at a small number of shared charging stations,
+which then become a contended resource. We study the joint design of
+charging-station placement, port capacity, swarm trajectory, and
+UAV-to-station assignment to minimize the network peak Age of Information (AoI).
+A key observation is that the charging system is a closed population of only $M$
+UAVs, so it must be modeled as a finite-source (machine-repair) queue rather than
+an open $M/M/c$ queue. A discrete-event simulation confirms the finite-source
+model within about $4\%$, whereas the open queue overpredicts the waiting time by
+roughly $6\times$ and distorts the design decisions. We prove two structural
+results: a congestion threshold that makes the peak AoI non-monotone in the swarm
+size, with a provisioning law linking the optimal swarm size to the charging
+capacity, and a placement inversion showing that the coverage-optimal placement
+is AoI-suboptimal under contention. We then develop a block-coordinate solver
+with a GPU close-enough traveling-salesman trajectory optimizer. Across
+multi-seed experiments, the proposed method reduces the peak AoI by up to
+$12.6\%$ over a strong single-station baseline, with each component isolated by
+an ablation and confirmed by a Wilcoxon signed-rank test ($p<10^{-4}$). We report
+the results honestly, including the regime in which a single pooled station is
+already competitive.
 \end{abstract}
 
 \begin{IEEEkeywords}

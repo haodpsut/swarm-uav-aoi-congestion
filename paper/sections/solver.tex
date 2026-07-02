@@ -26,11 +26,14 @@ differentiable in the coordinates). Only the coordinates slide; the visiting
 order is frozen. The objective is the total closed-tour length plus a coverage
 penalty,
 \begin{equation}
+\begin{split}
   \mathcal{L}
   = \sum_{m\in\mathcal{M}}
-    \Bigg[\underbrace{\sum_{j=1}^{n_m}\big\|\mathbf{p}_{m,j{+}1}-\mathbf{p}_{m,j}\big\|}_{\text{tour length}}
-    + \lambda_{\mathrm{cov}}
+    \Bigg[
+    &\underbrace{\sum_{j=1}^{n_m}\big\|\mathbf{p}_{m,j{+}1}-\mathbf{p}_{m,j}\big\|}_{\text{tour length}}\\
+    &+ \lambda_{\mathrm{cov}}
       \underbrace{\sum_{k\in\mathcal{K}_m}\big[\,d_{m,k}^{\min}-r_c\,\big]_+^2}_{\text{coverage violation}}\Bigg],
+\end{split}
   \label{eq:cetsp_loss}
 \end{equation}
 where indices are cyclic ($\mathbf{p}_{m,n_m{+}1}\equiv\mathbf{p}_{m,1}$),

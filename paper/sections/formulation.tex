@@ -67,9 +67,11 @@ drains its battery in flight. For a rotary-wing UAV cruising at horizontal speed
 $V$, the propulsion power follows the closed-form model of Zeng~\emph{et
 al.}~\cite{zeng2019energy},
 \begin{equation}
-  P(V) = P_0\!\left(1+\frac{3V^2}{U_{\mathrm{tip}}^2}\right)
-       + P_i\!\left(\sqrt{1+\frac{V^4}{4v_0^4}}-\frac{V^2}{2v_0^2}\right)^{\!1/2}
-       + \tfrac{1}{2}d_0\rho s A\,V^3,
+\begin{split}
+  P(V) = {}& P_0\!\left(1+\frac{3V^2}{U_{\mathrm{tip}}^2}\right)
+       + P_i\!\left(\sqrt{1+\frac{V^4}{4v_0^4}}-\frac{V^2}{2v_0^2}\right)^{\!1/2}\\
+       &{}+ \tfrac{1}{2}d_0\rho s A\,V^3,
+\end{split}
   \label{eq:power}
 \end{equation}
 where $P_0$ and $P_i$ are the blade-profile and induced power constants,
@@ -154,9 +156,9 @@ The mean number waiting, the effective throughput, and, by Little's law, the mea
 queue wait are
 \begin{align}
   L_q &= \sum_{n=0}^{N_s}\max(0,\,n-c_s)\,p_n,
-  \qquad
-  \lambda_{\mathrm{eff}} = \sum_{n=0}^{N_s}(N_s-n)\,\lambda\,p_n,
   \label{eq:lqlam}\\
+  \lambda_{\mathrm{eff}} &= \sum_{n=0}^{N_s}(N_s-n)\,\lambda\,p_n,
+  \nonumber\\
   \Wq(N_s,c_s) &= \frac{L_q}{\lambda_{\mathrm{eff}}}.
   \label{eq:wq}
 \end{align}
@@ -197,7 +199,7 @@ $\{a_m\}$. The problem is
 \begin{subequations}\label{eq:P0}
 \begin{align}
   \text{(P0)}\quad
-  \argmin_{\mathbf{x},\,\mathbf{c},\,\{\mathbf{q}_m\},\,\{a_m\}}\ \
+  \argmin_{\substack{\mathbf{x},\,\mathbf{c},\\ \{\mathbf{q}_m\},\,\{a_m\}}}\ \
     & \bar{A}=\max_{k\in\mathcal{K}}\ \limsup_{t\to\infty}\ \Aoi_k(t)
     \label{eq:P0obj}\\
   \text{s.t.}\quad
