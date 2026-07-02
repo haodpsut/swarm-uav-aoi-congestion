@@ -1,0 +1,139 @@
+% !TeX root = ../main.tex
+% Joint Solver (input into \section{Joint Solver} in main.tex).
+
+Problem (P0) in \eqref{eq:P0} couples binary placement, integer port capacity,
+continuous trajectories, a combinatorial assignment, and the nonconvex
+finite-source wait \eqref{eq:wq}. Rather than attack this MINLP monolithically,
+we decompose it into blocks that are each tractable and solve them in a loop:
+a trajectory block, a finite-source queue evaluation, a port-allocation block,
+an assignment block, and an outer placement search. Fig.~\ref{fig:solver}
+sketches the flow. The blocks share the peak-AoI objective \eqref{eq:peak_m},
+so a change accepted by one block is scored by the same criterion the others
+use, and the loop drives the peak AoI down monotonically until no block can
+improve it. We describe each block, then the overall algorithm.
+
+\subsection{Trajectory block (GPU CETSP)}
+\label{subsec:traj_block}
+A UAV collects from any sensor within a horizontal radius $r_c$, so a patrol
+need not visit every sensor point: it need only pass within $r_c$ of each
+assigned sensor. The shortest patrol is therefore the shortest closed tour of
+hover points whose $r_c$-disks cover the UAV's sub-field, a Close-Enough
+Traveling Salesman Problem (CETSP)~\cite{cetsp}. We solve it by differentiable
+optimization. For UAV $m$, let $\mathbf{p}_{m,1},\dots,\mathbf{p}_{m,n_m}$ be
+its hover points in a fixed cyclic order (initialized by an angular sort of
+$k$-means centroids of the sub-field, which keeps the closed-tour length
+differentiable in the coordinates). Only the coordinates slide; the visiting
+order is frozen. The objective is the total closed-tour length plus a coverage
+penalty,
+\begin{equation}
+  \mathcal{L}
+  = \sum_{m\in\mathcal{M}}
+    \Bigg[\underbrace{\sum_{j=1}^{n_m}\big\|\mathbf{p}_{m,j{+}1}-\mathbf{p}_{m,j}\big\|}_{\text{tour length}}
+    + \lambda_{\mathrm{cov}}
+      \underbrace{\sum_{k\in\mathcal{K}_m}\big[\,d_{m,k}^{\min}-r_c\,\big]_+^2}_{\text{coverage violation}}\Bigg],
+  \label{eq:cetsp_loss}
+\end{equation}
+where indices are cyclic ($\mathbf{p}_{m,n_m{+}1}\equiv\mathbf{p}_{m,1}$),
+$\mathcal{K}_m$ is the sensor set assigned to UAV $m$, $d_{m,k}^{\min}$ is the
+distance from sensor $k$ to its nearest hover point, $[\cdot]_+=\max(0,\cdot)$,
+and $\lambda_{\mathrm{cov}}$ weights coverage against length. We minimize
+\eqref{eq:cetsp_loss} by Adam over the hover-point coordinates. All UAVs of a
+scenario are stacked into one padded, masked batch and optimized in parallel on
+a GPU, so the whole swarm (and, by stacking seeds, whole sweeps) is optimized in
+a single pass. The block returns each UAV's optimized tour length, hence its
+flight time $t_{\mathrm{fly}}^{\mathrm{loop}}$ and, through \eqref{eq:taufly},
+its revisit period $t_{\mathrm{loop}}$ and flight budget $\tau_{\mathrm{fly}}$.
+Because the sub-fields are fixed by the field partition, this block is
+independent of placement and is solved once at the start.
+
+\subsection{Charging queue and port allocation}
+\label{subsec:port_block}
+Given an assignment, each open station $s$ is the finite-source queue of
+Section~\ref{sec:model}. Its mean wait $\Wq(N_s,c_s)$ follows the machine-repair
+fixed point \eqref{eq:pn}--\eqref{eq:wq} from the number of assigned UAVs $N_s$,
+the ports $c_s$, the operating time \eqref{eq:uptime}, and the charge time
+$\tau_{\mathrm{charge}}$; this evaluation is what turns a candidate configuration
+into a peak AoI through \eqref{eq:peak_m}. Ports are then allocated across the
+open stations to reduce the peak wait under the budget
+$\sum_s c_s\le C_{\mathrm{tot}}$. Since $\Wq$ is convex-decreasing in the port
+count, the peak-reducing allocation adds ports where they buy the most, that is,
+to the most contended stations: a water-filling allocation. We realize it by
+scanning the integer port splits that sum to $C_{\mathrm{tot}}$ and keeping the
+split that yields the lowest peak AoI, which is exact for the small station
+budgets $S_{\max}$ considered here.
+
+\subsection{Assignment}
+\label{subsec:assign_block}
+With placement and ports fixed, UAVs are assigned to open stations to balance the
+queueing load. Starting from the nearest-station assignment, we run a greedy
+load-balancing local search: we repeatedly reassign the single UAV whose move
+gives the largest reduction in peak AoI \eqref{eq:peak_m}, and stop when no
+single reassignment improves it. Because the peak AoI is set by the worst
+station, driving it down repeatedly pulls UAVs off the most contended station
+onto lighter ones, so the search approximates the min--max (load-balancing)
+assignment $\argmin_{a}\max_s \Wq(N_s,c_s)$ without enumerating all
+assignments.
+
+\subsection{Placement (outer search)}
+\label{subsec:place_block}
+The open-site subset $\mathbf{x}$ is chosen by an outer search over the candidate
+combinations. Candidate sites are the interior nodes of a regular grid over the
+field, and the search enumerates the $\binom{S}{S_{\max}}$ subsets of size
+$S_{\max}$. For each subset, the inner blocks (port allocation, assignment, and
+the queue evaluation) are run and the resulting peak AoI recorded; the subset
+with the lowest peak AoI is kept. This outer search is where the placement flips
+from coverage-driven to traffic-driven: a subset that spreads stations to split
+the charging load can beat the minimum-detour subset once contention is priced
+in through $\Wq$.
+
+\subsection{Overall algorithm}
+\label{subsec:algorithm}
+Algorithm~\ref{alg:solver} assembles the blocks. The trajectory block is solved
+once, after which the placement, port, and assignment blocks are alternated: for
+each candidate placement the port split and the load-balancing assignment are
+optimized against the same peak-AoI objective, each evaluated through the
+finite-source queue.
+
+\begin{algorithm}[t]
+\caption{Block-coordinate joint solver for (P0)}
+\label{alg:solver}
+\begin{algorithmic}[1]
+\REQUIRE sensors $\mathcal{K}$, candidate sites $\mathcal{S}$, station budget
+  $S_{\max}$, port budget $C_{\mathrm{tot}}$, swarm size $M$
+\ENSURE placement $\mathbf{x}$, ports $\mathbf{c}$, assignment $\mathbf{a}$,
+  trajectories $\{\mathbf{q}_m\}$, peak AoI $\bar{A}$
+\STATE partition $\mathcal{K}$ into $M$ sub-fields
+\STATE \textbf{trajectory block:} minimize \eqref{eq:cetsp_loss} by Adam on the
+  GPU for all UAVs; obtain $t_{\mathrm{loop},m}$, $\tau_{\mathrm{fly},m}$
+\STATE $\bar{A}^\star \gets +\infty$
+\FOR{each site subset $\mathbf{x}$ of size $S_{\max}$ in $\mathcal{S}$}
+  \FOR{each port split $\mathbf{c}$ with $\sum_s c_s = C_{\mathrm{tot}}$}
+    \STATE $\mathbf{a}\gets$ nearest-station assignment
+    \REPEAT
+      \STATE among all single-UAV reassignments, pick the one that most reduces
+        the peak AoI \eqref{eq:peak_m}, evaluating $\Wq$ by \eqref{eq:wq}
+      \STATE apply it if it improves the peak AoI
+    \UNTIL{no single reassignment improves the peak AoI}
+    \STATE $\bar{A}\gets$ peak AoI of $(\mathbf{x},\mathbf{c},\mathbf{a})$
+    \IF{$\bar{A} < \bar{A}^\star$}
+      \STATE $\bar{A}^\star\gets\bar{A}$; store $(\mathbf{x},\mathbf{c},\mathbf{a})$
+    \ENDIF
+  \ENDFOR
+\ENDFOR
+\RETURN stored $(\mathbf{x},\mathbf{c},\mathbf{a})$, $\{\mathbf{q}_m\}$, $\bar{A}^\star$
+\end{algorithmic}
+\end{algorithm}
+
+\emph{Complexity and convergence.} The trajectory block costs one batched
+GPU optimization independent of the placement search. The outer loops evaluate
+$\binom{S}{S_{\max}}$ placements times the number of port splits, and each
+evaluation runs the greedy assignment, whose local search terminates because
+every accepted move strictly lowers the peak AoI (a quantity bounded below by
+zero) and there are finitely many assignments. Each block leaves the peak AoI no
+higher than it found it: the port and assignment blocks accept a change only when
+it lowers \eqref{eq:peak_m}, and the placement search keeps the best subset seen.
+The peak AoI is therefore non-increasing across the alternation and the procedure
+converges to a coordinate-wise local optimum. We do not claim global optimality:
+the trajectory order is fixed and the assignment search is greedy, so the result
+is the best configuration reachable by improving one block at a time from the
+initialization.

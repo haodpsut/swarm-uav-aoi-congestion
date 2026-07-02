@@ -1,0 +1,73 @@
+% Introduction
+Many Internet of Things applications depend on data that is not only correct but
+also fresh. In precision agriculture, environmental monitoring, disaster
+response, and industrial inspection, a control loop or an operator acts on the
+most recent sensor reading, so a stale reading can be worse than no reading at
+all. Ground sensors in these settings are often sparse, spread over a wide area,
+and far from any gateway, which makes continuous fresh collection difficult with
+fixed infrastructure alone.
+
+Unmanned aerial vehicles (UAVs) are attractive data collectors for such
+deployments: they fly close to ground sensors, establish strong line-of-sight
+links, and reach areas without fixed infrastructure. When the collected data is
+time-sensitive, the relevant metric is the Age of Information (AoI)
+\cite{kaul2012aoi}, that is, the time elapsed since the freshest delivered
+update was generated. Keeping the network AoI low requires a UAV to revisit each
+sensor often, which conflicts with the limited battery of a rotary-wing UAV: the
+platform must periodically leave the field to recharge at a charging station.
+
+A single UAV can only keep a small area fresh, so practical deployments use a
+\emph{swarm}. A swarm sharing a small number of charging stations creates a
+problem that a single UAV never faces: the stations become a \emph{contended}
+resource. When several UAVs need to recharge at the same time, they compete for
+a limited number of charging ports and must wait, and this waiting time inflates
+the AoI. The system designer must therefore decide jointly where to place the
+charging stations, how many ports to install at each, how the swarm should fly,
+and which UAV recharges where.
+
+\subsection{Limitations of prior work}
+Existing studies address parts of this problem but not the whole. The closest
+work jointly optimises charging-station placement and trajectory, but for a
+\emph{single} UAV, so there is no contention \cite{base2024}. Multi-UAV studies
+that model charging either assume a single fixed facility \cite{wei2024}, use
+mid-flight laser charging with fixed emitters and no queue \cite{sun2025laser},
+or use mobile ground vehicles that follow the UAVs and thereby remove the
+fixed-station contention \cite{oubbati2024ugv,zhao2025aoi}. Swarm-AoI studies
+that ignore energy altogether \cite{eldeeb2023swarm} cannot capture recharging
+at all. A separate line models UAV charging stations as a queue with waiting
+time \cite{ev2022sharing}, but without any AoI objective, trajectory, or
+placement. Crucially, a naive queueing model here is misleading: the charging
+system is a \emph{closed} population of only $M$ UAVs, so an open $M/M/c$ queue
+substantially overpredicts the wait, as we show against a discrete-event
+simulation.
+
+\subsection{Contributions}
+\begin{itemize}
+\item We formulate the first joint charging-station \emph{placement}, port
+\emph{capacity}, swarm \emph{trajectory}, and \emph{assignment} problem for
+peak-AoI fresh data collection with a contended, multi-server charging resource,
+as a mixed-integer nonlinear program (Section~\ref{sec:model}).
+\item We model the charging stations as a \emph{finite-source} (machine-repair)
+queue and validate it against a discrete-event simulation. The finite-source
+model matches the simulation within about $4\%$ and is a conservative upper
+bound on the real wait, whereas the open $M/M/c$ overpredicts by about $6\times$
+and distorts the design decisions.
+\item We prove two structural results
+(Section~\ref{sec:analysis}): a \emph{congestion threshold} that makes the AoI
+non-monotone in the swarm size, with a provisioning law linking the optimal
+swarm size to the charging capacity, and a \emph{placement inversion} showing
+that the coverage-optimal placement is AoI-suboptimal under contention.
+\item We design a block-coordinate solver with a GPU close-enough-TSP trajectory
+optimiser (Section~\ref{sec:solver}) and evaluate it against single-UAV,
+single-station, coverage-optimal, and round-robin baselines
+(Section~\ref{sec:exp}). The proposed method reduces peak AoI significantly, and
+we report the results honestly, including the regime where a single pooled
+station is already strong.
+\end{itemize}
+
+The remainder of the paper is organised as follows.
+Section~\ref{sec:related} reviews related work,
+Section~\ref{sec:model} presents the model and problem,
+Section~\ref{sec:analysis} the structural analysis,
+Section~\ref{sec:solver} the solver, and
+Section~\ref{sec:exp} the experiments. Section~\ref{sec:concl} concludes.

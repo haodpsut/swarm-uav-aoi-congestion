@@ -1,0 +1,198 @@
+% !TEX root = ../main.tex
+% Structural Analysis. Two structural results on swarm-UAV AoI under a shared,
+% finite-source (machine-repair) charging queue.
+
+We now establish the two structural properties that separate the swarm regime
+from the single-UAV base case: the peak AoI is non-monotone in the swarm size
+(Proposition~\ref{prop:ushape}), and the AoI-optimal station placement inverts
+from coverage-driven to traffic-driven once the swarm contends for ports
+(Proposition~\ref{prop:inversion}). Throughout, we work with the per-UAV peak
+AoI of the homogeneous single-station cell derived in Section~\ref{sec:model},
+\begin{equation}
+\label{eq:aoi-decomp}
+\Aoi(M) \;=\; \underbrace{t_{\mathrm{loop}}(M)}_{c_1(M)}
+\;+\; \underbrace{\Wq(M,c)}_{\text{contention}}
+\;+\; \underbrace{\tfrac{2\,\mathrm{dist}}{V} + \tau_{\mathrm{ch}}}_{c_0},
+\end{equation}
+where $M$ UAVs share one field and one station of $c$ ports, $t_{\mathrm{loop}}(M)$
+is the patrol (revisit) time per UAV, $\Wq(M,c)$ is the mean charging wait of the
+finite-source queue $M/M/c//M$ of Section~\ref{sec:model} (population $M$,
+per-source operating rate $\lambda=1/\mathrm{up\_time}$, port rate
+$\mu=1/\tau_{\mathrm{ch}}$), and $c_0$ collects the recharge round trip and the
+charging time, which do not depend on $M$.
+
+\subsection{Congestion threshold: AoI is non-monotone in swarm size}
+
+We first isolate the two competing forces in \eqref{eq:aoi-decomp}: the coverage
+term $c_1(M)$ that a larger swarm improves, and the wait $\Wq(M,c)$ that a larger
+swarm degrades.
+
+\begin{assumption}[Coverage scaling]
+\label{ass:coverage}
+The patrol term $c_1(M)=t_{\mathrm{loop}}(M)$ is positive, strictly decreasing,
+and convex in $M$, with $c_1(M)=\Theta(1/M)$.
+\end{assumption}
+
+\noindent
+The scaling is the standard sub-tour argument: $M$ UAVs partition $K$ sensors of a
+field of area $\mathcal{A}$ into $M$ sub-fields of area $\mathcal{A}/M$ and
+$K/M$ sensors each. The length of a near-optimal tour through $n$ points uniformly
+spread over an area $\mathcal{A}'$ scales as $\Theta(\sqrt{\mathcal{A}'\,n})$, so
+each sub-tour has length $\Theta(\sqrt{(\mathcal{A}/M)(K/M)})=\Theta(\sqrt{\mathcal{A}K}/M)$,
+giving $t_{\mathrm{loop}}(M)=\Theta(1/M)$. Convexity and monotonicity of $1/M$
+carry over to the leading term, and we take them as the modeling assumption above.
+
+\begin{lemma}[Monotone, saturating charging wait]
+\label{lem:wq}
+In the finite-source queue $M/M/c//M$, the mean wait $\Wq(M,c)$ is non-decreasing
+in the population $M$, is strictly increasing once $M>c$, and satisfies the bound
+\begin{equation}
+\label{eq:wq-bound}
+0 \;\le\; \Wq(M,c) \;\le\; \frac{M-c}{c\,\mu}, \qquad M>c .
+\end{equation}
+\end{lemma}
+
+\begin{IEEEproof}
+Let $\{n_t\}$ denote the birth-death chain of Section~\ref{sec:model} on states
+$n\in\{0,\dots,M\}$ (UAVs at the station), with up-rates $(M-n)\lambda$ and
+down-rates $\min(n,c)\mu$ \cite{grossharris}. Increasing the population from $M$
+to $M+1$ adds one source: at every state the up-rate weakly increases (from
+$(M-n)\lambda$ to $(M+1-n)\lambda$) while the down-rate is unchanged. A standard
+coupling of the two chains keeps the $(M+1)$-chain pathwise at least as high as
+the $M$-chain, so the number in system, and hence the number waiting
+$\max(0,n-c)$, is stochastically larger for population $M+1$. Taking expectations,
+the mean queue length $L_{\mathrm q}(M)$ is non-decreasing in $M$; by Little's law
+on the throughput, $\Wq(M,c)=L_{\mathrm q}(M)/\lambda_{\mathrm{eff}}(M)$ inherits
+monotonicity, and the inequality is strict once $M>c$ because states with $n>c$
+then carry positive probability. For \eqref{eq:wq-bound}, at most $M$ UAVs are
+present, at most $c$ are in service, so the number waiting is at most $M-c$ and
+$L_{\mathrm q}(M)\le M-c$; the throughput obeys
+$\lambda_{\mathrm{eff}}(M)=\mu\,\mathbb{E}[\min(n,c)]\le c\mu$, but the wait is
+maximised when all servers stay busy, giving $\Wq\le (M-c)/(c\mu)$.
+\end{IEEEproof}
+
+\noindent
+Two consequences of Lemma~\ref{lem:wq} drive the result. Below $c$ the wait is
+essentially zero (no UAV ever queues), and above $c$ it climbs, ultimately at the
+linear rate $\Theta(M/(c\mu))$ of \eqref{eq:wq-bound}. Its forward differences
+$\Delta\Wq(M)\triangleq\Wq(M{+}1,c)-\Wq(M,c)$ are therefore non-negative, and are
+non-decreasing as the cell moves from the underloaded region ($\Delta\Wq\approx0$)
+into saturation, i.e. $\Wq(\cdot,c)$ is discretely convex.
+
+\begin{proposition}[Congestion threshold and provisioning law]
+\label{prop:ushape}
+Under Assumption~\ref{ass:coverage} and Lemma~\ref{lem:wq}, the peak AoI
+$\Aoi(M)$ in \eqref{eq:aoi-decomp} is quasi-convex in the swarm size $M$ and
+admits a unique interior minimiser
+\begin{equation}
+M^\star \;=\; \argmin_{M\in\{1,2,\dots\}} \Aoi(M),
+\end{equation}
+so that adding UAVs strictly reduces AoI for $M<M^\star$ (coverage dominates) and
+strictly increases it for $M>M^\star$ (charging congestion dominates). Moreover
+$M^\star$ is non-decreasing in the port capacity $c$: enlarging a station never
+lowers the optimal swarm size.
+\end{proposition}
+
+\begin{IEEEproof}
+Since $c_0$ is constant in \eqref{eq:aoi-decomp}, work with the forward difference
+\begin{equation}
+\label{eq:delta-aoi}
+\Delta\Aoi(M) \;=\; \Delta c_1(M) \;+\; \Delta\Wq(M),
+\end{equation}
+where $\Delta c_1(M)=c_1(M{+}1)-c_1(M)$. By Assumption~\ref{ass:coverage},
+$c_1$ is strictly decreasing and convex, so $\Delta c_1(M)<0$ and $\Delta c_1(M)$
+is non-decreasing (it rises toward $0$ as $M\to\infty$). By Lemma~\ref{lem:wq},
+$\Delta\Wq(M)\ge0$ and is non-decreasing. Hence the right-hand side of
+\eqref{eq:delta-aoi} is a sum of two non-decreasing terms, so $\Delta\Aoi(M)$ is
+non-decreasing in $M$: the sequence $\Aoi(M)$ is discretely convex.
+
+It remains to check the endpoints of the sign of $\Delta\Aoi$. For small $M$
+(in particular $M\le c$) the queue is empty, $\Delta\Wq(M)=0$, while
+$\Delta c_1(M)<0$, so $\Delta\Aoi(M)<0$: AoI is still falling. As $M\to\infty$,
+$\Delta c_1(M)=\Theta(1/M)-\Theta(1/(M{+}1))\to0^{-}$ while, by
+\eqref{eq:wq-bound}, $\Delta\Wq(M)\to 1/(c\mu)>0$, so $\Delta\Aoi(M)>0$
+eventually: AoI is rising. A non-decreasing difference sequence that is negative
+for small $M$ and positive for large $M$ changes sign exactly once, from negative
+to positive. The last index with $\Delta\Aoi(M)<0$ is the unique interior
+minimiser $M^\star$, which establishes the U-shape.
+
+For the provisioning law, fix $M$ and increase $c$. By Lemma~\ref{lem:wq} applied
+across capacities, $\Wq(M,c)$ is decreasing in $c$ (more ports serve the same
+population), and so are its increments $\Delta\Wq(M;c)$ for every $M$: enlarging
+the station both lowers the wait and defers the onset of the steep saturation
+region to a larger population. The coverage difference $\Delta c_1(M)$ is
+unchanged. Hence for $c'>c$ we have $\Delta\Aoi(M;c')\le\Delta\Aoi(M;c)$ for all
+$M$, so the single sign change of $\Delta\Aoi(\cdot;c')$ occurs at an index at
+least as large as that of $\Delta\Aoi(\cdot;c)$, i.e. $M^\star(c')\ge M^\star(c)$.
+\end{IEEEproof}
+
+\noindent
+Proposition~\ref{prop:ushape} says that congestion is a genuine, capacity-limited
+effect rather than an artifact of poor routing: even the balanced single-cell wait
+of Lemma~\ref{lem:wq} forces a finite $M^\star$. The provisioning law
+$M^\star(c)$ non-decreasing is the design counterpart: to operate a larger swarm
+at low AoI, one must add ports, not merely UAVs. Both the U-shape and the rightward
+shift of $M^\star$ with capacity are confirmed empirically, under optimal (load
+balancing) assignment, in Section~\ref{sec:exp}.
+
+\subsection{Placement inversion under contention}
+
+For a single UAV the wait term in \eqref{eq:aoi-decomp} vanishes ($M=1\le c$), so
+$\Aoi=c_1(1)+2\,\mathrm{dist}/V+\tau_{\mathrm{ch}}$ depends on placement only
+through the recharge detour $\mathrm{dist}$. The AoI-optimal station therefore sits
+where the detour is smallest, i.e. near the trajectory centroid: placement is
+coverage-driven. The next result shows this rule is not merely loose but can be
+strictly wrong for a swarm.
+
+\begin{proposition}[Placement inversion]
+\label{prop:inversion}
+There exist instances in which the coverage-optimal (minimum-detour) placement is
+strictly AoI-suboptimal for a swarm. Concretely, with a per-station port cap and
+two candidate sites, opening only the nearest site is beaten by opening both sites
+and splitting the swarm, for every swarm size above a finite threshold $M_0$.
+\end{proposition}
+
+\begin{IEEEproof}
+Consider two candidate sites and a per-station port cap $C_{\mathrm{port}}=c$
+(Section~\ref{sec:model}), so a single station can host at most $c$ ports; adding
+capacity beyond $c$ requires opening a second station. Site~$1$ is central with
+zero extra detour; site~$2$ is offset, adding a round-trip detour
+$\delta=2\Delta/V>0$ for any UAV assigned to it. Two placements are compared under
+the same swarm and field, so the coverage term $c_1(M)=t_{\mathrm{loop}}$ is
+identical in both:
+\begin{align}
+\text{(A) coverage-optimal:}\quad
+&\Aoi_{\mathrm A}(M) = t_{\mathrm{loop}} + \Wq(M,c) + c_0, \\
+\text{(B) split:}\quad
+&\Aoi_{\mathrm B}(M) = t_{\mathrm{loop}} + \delta + \Wq\!\left(\tfrac{M}{2},c\right) + c_0 ,
+\end{align}
+where (A) sends all $M$ UAVs to the near station (its $c$ ports serving population
+$M$), and (B) opens both stations with $c$ ports each and assigns $M/2$ UAVs to
+each; the peak in (B) is attained by the UAVs on the offset station, which carry
+the extra detour $\delta$. Subtracting,
+\begin{equation}
+\Aoi_{\mathrm A}(M)-\Aoi_{\mathrm B}(M)
+= \Big[\Wq(M,c)-\Wq\!\left(\tfrac{M}{2},c\right)\Big] - \delta .
+\end{equation}
+By Lemma~\ref{lem:wq}, $\Wq(M,c)$ is non-decreasing in the population and grows at
+least linearly once $M>c$, with $\Wq(M,c)\ge (M-c)/(c\mu)\cdot\mathbb{1}\{M>c\}$
+behaviour, while $\Wq(M/2,c)$ either stays at $0$ (when $M/2\le c$) or grows at
+half the rate. Hence the bracketed difference is $\Theta(M/(c\mu))$ and diverges,
+whereas $\delta$ is a fixed constant. Therefore there is a finite threshold
+\begin{equation}
+M_0 = \min\Big\{ M : \Wq(M,c)-\Wq\!\left(\tfrac{M}{2},c\right) > \delta \Big\}
+\end{equation}
+such that $\Aoi_{\mathrm A}(M)>\Aoi_{\mathrm B}(M)$ for all $M>M_0$. For such $M$
+the minimum-detour placement (A) is strictly AoI-suboptimal, so the AoI-optimal
+placement must open the offset site and balance the charging load, even at the cost
+of a longer detour.
+\end{IEEEproof}
+
+\noindent
+Proposition~\ref{prop:inversion} formalises the inversion: as the swarm grows, the
+optimal placement stops chasing the shortest detour and starts spreading stations
+to balance queueing load, so the objective flips from coverage-driven to
+traffic-driven. The single-UAV placement rule of the base model is thus not a
+conservative approximation but the wrong optimiser for a contended swarm. This
+crossover, including the emergence of the load-balanced placement as the field and
+swarm scale, is demonstrated empirically in Section~\ref{sec:exp}.

@@ -1,0 +1,24 @@
+% Conclusion
+We studied fresh data collection by a UAV swarm that recharges at a small number
+of shared, multi-port charging stations. We formulated the joint placement,
+capacity, trajectory, and assignment problem under a charging queue, and we
+showed that the correct queue model is a finite-source (machine-repair) queue,
+not an open $M/M/c$: a discrete-event simulation confirms the finite-source
+formula within about $4\%$ and shows that the open queue overpredicts the wait
+by roughly $6\times$ and distorts the design. Two structural results followed: a
+congestion threshold that makes the AoI non-monotone in the swarm size, with a
+provisioning law linking the optimal swarm size to the charging capacity, and a
+placement inversion in which the AoI-optimal placement becomes traffic-driven
+rather than coverage-driven. A block-coordinate solver with a GPU
+close-enough-TSP trajectory optimiser realised these gains, reducing peak AoI
+across field sizes against strong baselines.
+
+Several limitations point to future work. The finite-source model assumes
+exponential operating and service times, which makes it a conservative upper
+bound; a deterministic-service refinement would tighten the estimates. The
+trajectory block uses a close-enough-TSP heuristic rather than an exact solver,
+and the placement search is combinatorial over a candidate grid, so scaling to
+very large fields with many stations, together with an optimality-gap study
+against an exact solver on small instances, is a natural next step. Finally,
+extending the model to stochastic data arrivals and online operation would move
+the design from planning toward real-time control.

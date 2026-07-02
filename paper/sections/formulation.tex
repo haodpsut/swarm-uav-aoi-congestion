@@ -1,6 +1,34 @@
 % !TeX root = ../main.tex
 % System Model and Problem Formulation (input into \section in main.tex).
 
+The main symbols are summarised in Table~\ref{tab:notation}.
+
+\begin{table}[t]
+  \centering
+  \caption{Summary of notation.}
+  \label{tab:notation}
+  \begin{tabular}{ll}
+    \toprule
+    Symbol & Meaning \\
+    \midrule
+    $K,\;\mathcal{K}$ & number and set of ground sensors \\
+    $M$ & swarm size (number of UAVs) \\
+    $\mathcal{S},\;S_{\max}$ & candidate sites, station budget \\
+    $x_s\in\{0,1\}$ & open a station at candidate site $s$ \\
+    $c_s,\;C_{\mathrm{tot}}$ & ports at station $s$, total port budget \\
+    $\mathbf{q}_m(t)$ & trajectory of UAV $m$ \\
+    $a_m$ & station assigned to UAV $m$ \\
+    $A_k(t),\;\bar A$ & AoI of sensor $k$, network peak AoI (objective) \\
+    $V,\;H$ & cruise speed, altitude \\
+    $E_{\max},\;\eta$ & battery, reserve fraction \\
+    $\tau_{\mathrm{fly}},\;\tau_{\mathrm{charge}}$ & flight budget, charge time \\
+    $N_s$ & UAVs assigned to station $s$ \\
+    $\lambda,\;\mu$ & charge-request rate, service rate \\
+    $\Wq,\;t_{\mathrm{loop}}$ & mean queue wait, sub-field revisit period \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsection{Network model}
 \label{subsec:network}
 We consider a swarm data-collection system, illustrated in Fig.~\ref{fig:system}.

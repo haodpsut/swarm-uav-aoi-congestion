@@ -6,6 +6,7 @@
 \documentclass[journal]{IEEEtran}
 
 \usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
@@ -22,6 +23,7 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+\newtheorem{assumption}{Assumption}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\Aoi}{\mathrm{AoI}}
 \newcommand{\Wq}{W_{\mathrm q}}
@@ -63,17 +65,7 @@ Internet of Things.
 %=======================================================================
 \section{Introduction}
 \label{sec:intro}
-% TODO: motivation, gap, contributions bullet list, paper organisation.
-% Contributions:
-% C1) First joint placement + port-capacity + swarm-trajectory + assignment
-%     formulation for peak-AoI fresh data collection with a CONTENDED,
-%     multi-server charging resource.
-% C2) A DES-validated finite-source (machine-repair) queue model; we show the
-%     open M/M/c over-predicts wait ~6x and distorts decisions.
-% C3) Proposition 1 (congestion threshold: AoI non-monotone in swarm size) and
-%     Proposition 2 (placement inversion: coverage-optimal is suboptimal).
-% C4) A GPU CETSP trajectory optimiser and a block-coordinate joint solver;
-%     evaluation vs single-UAV / single-station / coverage baselines.
+\input{sections/intro}
 
 %=======================================================================
 \section{Related Work}
@@ -98,14 +90,12 @@ Internet of Things.
 %=======================================================================
 \section{Structural Analysis}
 \label{sec:analysis}
-% TODO (sub-agent / later): Proposition 1 (congestion threshold, U-shape,
-% provisioning law) and Proposition 2 (placement inversion) with proofs.
+\input{sections/analysis}
 
 %=======================================================================
 \section{Joint Solver}
 \label{sec:solver}
-% TODO: block-coordinate solver; CETSP trajectory (GPU); finite-source queue;
-% water-filling port allocation; load-balanced assignment; placement search.
+\input{sections/solver}
 
 \begin{figure}[t]
   \centering
@@ -119,21 +109,12 @@ Internet of Things.
 %=======================================================================
 \section{Experiments}
 \label{sec:exp}
-% TODO (fill from server results): setup, queue-model validation vs DES,
-% Prop.1 U-shape + provisioning, Prop.2 placement inversion, joint comparison
-% + ablation + Wilcoxon.
-
-% --- result figure placeholders (uncomment when PNGs/CSVs are in) ---
-% \begin{figure}[t]\centering
-%   \includegraphics[width=\columnwidth]{../results/fig_des_validation.png}
-%   \caption{Queue-model validation against discrete-event simulation.}
-%   \label{fig:des}
-% \end{figure}
+\input{sections/experiments}
 
 %=======================================================================
 \section{Conclusion}
 \label{sec:concl}
-% TODO.
+\input{sections/conclusion}
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}   % <-- sub-agent fills refs.bib
