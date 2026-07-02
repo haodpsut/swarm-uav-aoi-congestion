@@ -43,7 +43,9 @@ def swarm_peak_aoi(M, c, sc, seed):
     if not t_loops:
         return math.inf, 0.0
     tau_fly_mean = sum(tau_flys) / len(tau_flys)
-    w, _, _, rho = finite_source_wq(M, c, tau_fly_mean, tau_charge)
+    mean_travel = sum(2.0 * d / sc["V"] for d in dists) / len(dists)
+    up_time = tau_fly_mean + mean_travel      # operating time incl. round-trip travel
+    w, _, _, rho = finite_source_wq(M, c, up_time, tau_charge)
     aoi = max(t_loops[i] + 2.0 * dists[i] / sc["V"] + w + tau_charge
               for i in range(len(t_loops)))
     return aoi, rho

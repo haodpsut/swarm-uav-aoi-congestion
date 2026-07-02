@@ -66,9 +66,13 @@ def peak_aoi(states, sites, ports, assign, mu, tau_charge, V, reach_budget=None)
         if ports[s] <= 0:
             return math.inf
         tau_fly_mean = sum(states[i]["tau_fly"] for i in idx) / len(idx)
-        # Finite-source (machine-repair) wait: the correct closed-loop model for
-        # the UAVs cycling to this station (validated vs DES). Always stable.
-        w, _, _, _ = finite_source_wq(len(idx), ports[s], tau_fly_mean, tau_charge)
+        # Mean operating time between charges = patrol budget + round-trip travel
+        # to THIS station (the finite-source up-time; travel matters, see DES).
+        mean_travel = sum(2.0 * math.dist(states[i]["centroid"], sites[s]) / V for i in idx) / len(idx)
+        up_time = tau_fly_mean + mean_travel
+        # Finite-source (machine-repair) wait: the correct closed-loop model,
+        # validated vs DES. Always stable.
+        w, _, _, _ = finite_source_wq(len(idx), ports[s], up_time, tau_charge)
         for i in idx:
             d = math.dist(states[i]["centroid"], sites[s])
             if reach_budget is not None and d / V > reach_budget:

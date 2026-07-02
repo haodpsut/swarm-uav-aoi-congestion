@@ -177,18 +177,18 @@ def fig_des():
     path = os.path.join(RES, "des_validation.csv")
     if not os.path.exists(path):
         return
-    rows = [r for r in load(path) if float(r["des_exp_wq"]) > 0.5]
+    rows = [r for r in load(path) if float(r["des_mm_wq"]) > 0.5]
     rows.sort(key=lambda r: float(r["rho"]))
     rho = [float(r["rho"]) for r in rows]
     mmc = [float(r["mmc_wq"]) for r in rows]
     fs = [float(r["finite_wq"]) for r in rows]
-    de = [float(r["des_exp_wq"]) for r in rows]
-    dd = [float(r["des_det_wq"]) for r in rows]
+    de = [float(r["des_mm_wq"]) for r in rows]
+    dd = [float(r["des_real_wq"]) for r in rows]
     plt.figure(figsize=(6.5, 4.2))
-    plt.scatter(rho, mmc, s=18, marker="x", label="open M/M/c (over-predicts ~6x)")
+    plt.scatter(rho, mmc, s=18, marker="x", label="open M/M/c (wrong: over-predicts ~6x)")
     plt.scatter(rho, fs, s=18, marker="s", label="finite-source (our model)")
-    plt.scatter(rho, de, s=18, marker="o", label="DES (exponential service)")
-    plt.scatter(rho, dd, s=18, marker="^", label="DES (deterministic service, real)")
+    plt.scatter(rho, de, s=18, marker="o", label="DES, exp op+svc (finite-source assumptions)")
+    plt.scatter(rho, dd, s=18, marker="^", label="DES, deterministic (real system)")
     plt.xlabel("Station utilisation rho")
     plt.ylabel("Mean queue wait (s)")
     plt.title("Queue-model validation vs discrete-event simulation")

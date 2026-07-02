@@ -34,22 +34,27 @@ def erlang_c(c: int, a: float) -> float:
     return top / (s + top)
 
 
-def finite_source_wq(N: int, c: int, tau_fly: float, tau_charge: float):
+def finite_source_wq(N: int, c: int, up_time: float, tau_charge: float):
     """Finite-source (machine-repair) queue M/M/c//N -- the CORRECT model for M
     cycling UAVs sharing c charging ports, validated against DES.
 
-    Each of N UAVs, while operating (patrolling), needs to charge after an
-    operating time with mean tau_fly (rate lam = 1/tau_fly); c ports serve at
-    rate mu = 1/tau_charge. Because it is a CLOSED population, the arrival rate
-    falls as more UAVs are already at the station, so the wait is far below the
-    open M/M/c (which over-predicts by 5-50x, per des_validation.py).
+    up_time = mean OPERATING time between two charge requests, i.e. the whole time
+    a UAV spends away from the station per cycle = patrol budget tau_fly PLUS the
+    round-trip travel to the station (2*dist/V). Using tau_fly alone (omitting
+    travel) over-states the arrival rate and over-predicts the wait ~2x; including
+    travel makes the model match DES(exp op+svc) to a few percent.
+
+    Each UAV requests charge at rate lam = 1/up_time; c ports serve at
+    mu = 1/tau_charge. Because it is a CLOSED population, the arrival rate falls
+    as more UAVs are already at the station, so the wait is far below the open
+    M/M/c (which over-predicts by ~6x, per des_validation.py).
 
     Birth-death chain, state n = UAVs at the station (0..N):
       up-rate   n->n+1 : (N-n) * lam
       down-rate n->n-1 : min(n,c) * mu
     Returns (Wq, Lq, throughput, rho_eff) where Wq is the mean queue wait.
     """
-    lam = 1.0 / tau_fly
+    lam = 1.0 / up_time
     mu = 1.0 / tau_charge
     # Unnormalised p_n via product of birth/death ratios (log-space for stability).
     log_p = [0.0] * (N + 1)

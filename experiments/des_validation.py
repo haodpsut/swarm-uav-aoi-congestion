@@ -26,15 +26,21 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from queue_model import wq as erlang_wq, solve_fixed_point, finite_source_wq  # noqa: E402
 
 
-def simulate(M, c, tau_fly, tau_charge, travel, service="det",
+def simulate(M, c, tau_fly, tau_charge, travel, service="det", operating="det",
              jitter=0.15, horizon_cycles=400, seed=0, warmup=40):
     """Event-driven single-station queue with M cycling UAVs and c ports.
 
-    Returns the mean queue wait per charging visit (steady state, after warmup).
+    operating/service in {"exp","det"}: exponential vs near-deterministic
+    patrol-between-charges / charge duration. "exp"+"exp" reproduces the
+    finite-source M/M/c//N assumptions (formula check); "det"+"det" is the
+    realistic system. Returns the mean queue wait per charging visit (steady
+    state, after warmup).
     """
     rng = random.Random(seed)
 
     def patrol_budget():
+        if operating == "exp":
+            return rng.expovariate(1.0 / tau_fly)
         return tau_fly * (1.0 + rng.uniform(-jitter, jitter))
 
     def charge_time():
@@ -96,44 +102,55 @@ def main():
         for M in range(2, 4 * c + 1):
             configs.append((M, c))
 
-    print("Wq [s]: open M/M/c vs finite-source M/M/c//N vs DES "
-          "(exp = exponential service, det = deterministic)\n")
+    print("Mean queue wait Wq [s]. DES columns: 'MM' = exp operating + exp service "
+          "(== finite-source assumptions); 'real' = deterministic (the true system).\n")
     print(f"{'M':>3} {'c':>2} {'rho':>5} | {'MMc':>8} {'FiniteS':>8} | "
-          f"{'DESexp':>8} {'FS/exp':>7} | {'DESdet':>8} {'FS/det':>7}")
+          f"{'DES_MM':>7} {'FS/MM':>6} | {'DESreal':>7} {'FS/real':>7}")
     rows = []
     for M, c in configs:
-        # open M/M/c (self-consistent fixed point)
         lam, w_mmc, rho, stable = solve_fixed_point(M, c, mu, tau_fly, tau_charge)
         if not stable:
             continue
-        # finite-source (the correct closed model)
-        w_fs, Lq, lam_eff, rho_fs = finite_source_wq(M, c, tau_fly, tau_charge)
+        # up-time = patrol budget + round-trip travel (matches the DES cycle).
+        up_time = tau_fly + 2.0 * travel
+        w_fs, Lq, lam_eff, rho_fs = finite_source_wq(M, c, up_time, tau_charge)
 
-        des_exp = sum(simulate(M, c, tau_fly, tau_charge, travel, "exp", seed=s) for s in seeds) / len(seeds)
-        des_det = sum(simulate(M, c, tau_fly, tau_charge, travel, "det", seed=s) for s in seeds) / len(seeds)
-        r_exp = w_fs / des_exp if des_exp > 0.5 else float("nan")
-        r_det = w_fs / des_det if des_det > 0.5 else float("nan")
+        # DES with exp-operating + exp-service reproduces finite-source assumptions.
+        des_mm = sum(simulate(M, c, tau_fly, tau_charge, travel, "exp", "exp", seed=s) for s in seeds) / len(seeds)
+        # DES with deterministic operating + service is the realistic system.
+        des_real = sum(simulate(M, c, tau_fly, tau_charge, travel, "det", "det", seed=s) for s in seeds) / len(seeds)
+        r_mm = w_fs / des_mm if des_mm > 0.5 else float("nan")
+        r_real = w_fs / des_real if des_real > 0.5 else float("nan")
         print(f"{M:>3} {c:>2} {rho_fs:>5.2f} | {w_mmc:>8.1f} {w_fs:>8.1f} | "
-              f"{des_exp:>8.1f} {r_exp:>7.2f} | {des_det:>8.1f} {r_det:>7.2f}")
-        rows.append([M, c, rho_fs, w_mmc, w_fs, des_exp, des_det])
+              f"{des_mm:>7.1f} {r_mm:>6.2f} | {des_real:>7.1f} {r_real:>7.2f}")
+        rows.append([M, c, rho_fs, w_mmc, w_fs, des_mm, des_real])
 
-    # Accuracy of finite-source vs DES-exp (its matching regime) where wait > 1s.
-    pairs = [(r[4], r[5]) for r in rows if r[5] > 1.0]
-    if pairs:
-        err = sum(abs(wf - de) / de for wf, de in pairs) / len(pairs)
-        print(f"\nFinite-source vs DES(exp): mean rel. error = {100*err:.1f}% "
-              f"(should be small -> validates the closed-queue model).")
+    # (1) Formula check: finite-source should MATCH DES under exp-operating+service.
+    mm_pairs = [(r[4], r[5]) for r in rows if r[5] > 1.0]
+    if mm_pairs:
+        err = sum(abs(wf - de) / de for wf, de in mm_pairs) / len(mm_pairs)
+        print(f"\n[formula check] finite-source vs DES(exp op+svc): mean rel. error "
+              f"= {100*err:.1f}% (small -> the M/M/c//N formula is correct).")
+    # (2) Realism: finite-source is a CONSERVATIVE upper bound on the real system.
+    real_pairs = [(r[4], r[6]) for r in rows if r[6] > 1.0]
+    if real_pairs:
+        cons = sum(1 for wf, dr in real_pairs if wf >= dr - 1e-6)
+        fac = sum(wf / dr for wf, dr in real_pairs) / len(real_pairs)
+        print(f"[realism] finite-source >= DES(real) in {cons}/{len(real_pairs)} "
+              f"configs (conservative), mean factor {fac:.1f}x. Real waits are lower "
+              f"because operating+charging are near-deterministic, not exponential.")
+    # (3) Why M/M/c is wrong.
     mmc_pairs = [(r[3], r[5]) for r in rows if r[5] > 1.0]
     if mmc_pairs:
         fac = sum(wm / de for wm, de in mmc_pairs) / len(mmc_pairs)
-        print(f"Open M/M/c vs DES(exp): mean over-prediction factor = {fac:.1f}x "
-              f"(why M/M/c is the WRONG model here).")
+        print(f"[open M/M/c] over-predicts DES(exp) by {fac:.1f}x -> the WRONG model "
+              f"(its bias distorted decisions, e.g. a spurious placement crossover).")
 
     out = os.path.join(os.path.dirname(__file__), "..", "results")
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "des_validation.csv"), "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["M", "c", "rho", "mmc_wq", "finite_wq", "des_exp_wq", "des_det_wq"])
+        w.writerow(["M", "c", "rho", "mmc_wq", "finite_wq", "des_mm_wq", "des_real_wq"])
         w.writerows(rows)
     print("\nSaved results/des_validation.csv")
 

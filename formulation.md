@@ -156,18 +156,26 @@ with field size (travel-driven). Measured (M=12, C_tot=4, 20 seeds):
 
 | Field L | proposed vs single pooled station |
 |---------|-----------------------------------|
-| 5 km    | +3.8%                             |
-| 8 km    | +7.3%                             |
-| 14 km   | +10.7%                            |
-| 20 km   | +12.4%                            |
+| 5 km    | +4.2%                             |
+| 8 km    | +7.9%                             |
+| 14 km   | +11.3%                            |
+| 20 km   | +12.6%                            |
 
 Note: an earlier M/M/c draft showed a spurious "crossover" (single-pooled winning
 in small fields). That was an artifact of the over-pessimistic open queue; the
 finite-source model (which does not over-penalise split stations) removes it. The
 finite-source wait saturates rather than diverging, so distributed placement's
 travel saving is not swamped by a phantom queue penalty. Ablation at L=15 km:
-proposed 42.8 min vs no_cetsp 44.4 (CETSP helps +3.5%), coverage 52.7
-(contention-awareness helps far more), single pooled 48.1; Wilcoxon p=9.5e-6.
+proposed 41.4 min vs no_cetsp 42.8 (CETSP helps +3.1%), coverage 50.8
+(contention-awareness helps far more), single pooled 46.8; Wilcoxon p=1.3e-4.
+
+The finite-source model is DES-validated (`experiments/des_validation.py`): with
+exponential operating+service it matches the discrete-event simulation to ~4%
+(formula correct), and it is a conservative upper bound on the real
+near-deterministic system (real waits ~4.5x lower). The open M/M/c over-predicts
+the wait ~6x, which is what produced the phantom crossover. The **operating time
+between charges must include the round-trip travel to the station** (up_time =
+tau_fly + 2*dist/V); omitting travel over-predicts wait ~2x.
 
 ## 8. Roadmap
 - [x] S1 brainstorm + prior-art sweep (queue-coupling gap OCCUPIED → pivot to placement+capacity+structural results).
