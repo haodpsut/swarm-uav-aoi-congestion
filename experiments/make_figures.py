@@ -60,7 +60,7 @@ METHOD_COLOR = {
 
 plt.rcParams.update({
     "figure.dpi": 200,
-    "savefig.dpi": 200,
+    "savefig.dpi": 600,          # crisp high-res PNG previews
     "font.size": 11,
     "axes.labelsize": 12,
     "axes.titlesize": 12,
@@ -71,6 +71,10 @@ plt.rcParams.update({
     "lines.linewidth": 1.8,
     "figure.autolayout": False,
     "font.family": "DejaVu Sans",
+    # Embed TrueType fonts so the vector PDF is portable and text stays selectable.
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
+    "svg.fonttype": "none",
 })
 
 
@@ -88,10 +92,15 @@ def style_axes(ax, grid_axis="both"):
 
 
 def save(fig, name):
-    out = os.path.join(RES, name)
-    fig.savefig(out, bbox_inches="tight", facecolor="white")
+    """Write each figure as BOTH a vector PDF (sharp in the paper) and a
+    high-resolution PNG (dpi=600, for previews). `name` may be given with or
+    without a .png suffix; the base name is reused for both outputs."""
+    base = name[:-4] if name.lower().endswith(".png") else name
+    for ext in (".pdf", ".png"):
+        out = os.path.join(RES, base + ext)
+        fig.savefig(out, bbox_inches="tight", facecolor="white")
+        print("wrote", out, "(%.0f KB)" % (os.path.getsize(out) / 1024))
     plt.close(fig)
-    print("wrote", out, "(%.0f KB)" % (os.path.getsize(out) / 1024))
 
 
 # ---------------------------------------------------------------------------
@@ -116,7 +125,7 @@ def fig_des():
     mmc_over = float(np.mean(mmc[sig] / de[sig]))       # how far M/M/c overshoots DES
     fs_err = float(np.mean(np.abs(fs[sig] - de[sig]) / de[sig]) * 100.0)
 
-    fig, ax = plt.subplots(figsize=(3.5, 3.2))
+    fig, ax = plt.subplots(figsize=(3.7, 3.3))
     ax.plot(rho, mmc, marker="x", ms=5, ls="--", color=OI["verm"],
             label="open M/M/c (assumes $\\infty$ sources)")
     ax.plot(rho, fs, marker="s", ms=4, ls="-", color=OI["blue"],
@@ -131,18 +140,28 @@ def fig_des():
     ax.set_ylabel("Mean queue wait (s)")
     style_axes(ax)
 
-    # both callouts sit in the empty upper-left pocket, arrows to their series
-    ax.annotate("M/M/c overpredicts\n" + r"$\approx %.0f\times$" % mmc_over,
-                xy=(rho[-4], mmc[-4]), xytext=(0.255, 470),
-                fontsize=8.5, color=OI["verm"], ha="left",
-                arrowprops=dict(arrowstyle="->", color=OI["verm"], lw=1.0))
-    fi = int(np.argmin(np.abs(rho - 0.51)))
-    ax.annotate("finite-source matches\nDES within " + r"$\approx %.0f\%%$" % fs_err,
-                xy=(rho[fi], fs[fi]), xytext=(0.255, 150),
-                fontsize=8.5, color=OI["blue"], ha="left",
-                arrowprops=dict(arrowstyle="->", color=OI["blue"], lw=1.0))
+    # Raise the top so both callouts live in a clean band above every series.
+    ax.set_ylim(top=mmc.max() * 3.2)
 
-    ax.legend(loc="lower right", frameon=False, fontsize=7.4)
+    # Orange callout (right): a clean vertical leader onto the M/M/c curve, which
+    # is the topmost series there, so the arrow crosses no other line or marker.
+    oi = int(np.argmin(np.abs(rho - 0.55)))
+    ax.annotate("open M/M/c\noverpredicts " + r"$\approx %.0f\times$" % mmc_over,
+                xy=(rho[oi], mmc[oi]), xytext=(rho[oi], mmc.max() * 1.85),
+                fontsize=8.5, color=OI["verm"], ha="center", va="bottom",
+                bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=1),
+                arrowprops=dict(arrowstyle="->", color=OI["verm"], lw=0.9))
+
+    # Blue callout (left): colour-coded label parked in the empty pocket that sits
+    # above all series at low utilisation, so no leader is needed and none crosses.
+    ax.text(0.245, 300, "finite-source matches\nDES within "
+            + r"$\approx %.0f\%%$" % fs_err,
+            fontsize=8.5, color=OI["blue"], ha="left", va="center",
+            bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=1))
+
+    leg = ax.legend(loc="lower right", frameon=True, fontsize=7.4,
+                    framealpha=0.9, edgecolor="none")
+    leg.get_frame().set_facecolor("white")
     save(fig, "fig_des_validation.png")
 
 
@@ -159,7 +178,7 @@ def fig_prop1_phys():
         by_c.setdefault(int(r["c"]), []).append(r)
     cs = sorted(by_c)
 
-    fig, ax = plt.subplots(figsize=(3.5, 3.3))
+    fig, ax = plt.subplots(figsize=(3.8, 3.5))
     norm = Normalize(vmin=min(cs), vmax=max(cs))
     cmap = plt.get_cmap("viridis")
 
@@ -173,28 +192,34 @@ def fig_prop1_phys():
         i = int(np.argmin(y))
         star_pts.append((M[i], y[i], c))
 
-    # mark each curve's M* and label the extreme ones
+    # mark each curve's M*
     for k, (mx, my, c) in enumerate(star_pts):
         ax.scatter([mx], [my], color="k", zorder=6, s=34, marker="*")
-        if c == cs[0]:
-            ax.annotate(r"$M^\ast{=}%d$" % mx, xy=(mx, my),
-                        xytext=(mx + 0.6, my - 5), fontsize=8, color="k")
-        elif c == cs[-1]:
-            ax.annotate(r"$M^\ast{=}%d$" % mx, xy=(mx, my),
-                        xytext=(mx - 5.2, my + 5), fontsize=8, color="k")
 
     # dashed line connecting the minima to make the provisioning trend visible
     sx = [p[0] for p in star_pts]
     sy = [p[1] for p in star_pts]
     ax.plot(sx, sy, ls=":", color="k", lw=1.0, zorder=5)
 
-    # region annotations: coverage-limited (falling) vs congestion-limited (rising)
-    ax.annotate("coverage-limited\n(too few UAVs)", xy=(2, 33), xytext=(2.5, 55),
-                fontsize=8, color=OI["grey"], ha="left",
+    # label the two extreme M* with a white backing box (they sit near curves)
+    lblbox = dict(facecolor="white", alpha=0.8, edgecolor="none", pad=1)
+    mx0, my0, _ = star_pts[0]        # smallest capacity: M* small, on the falling edge
+    ax.annotate(r"$M^\ast{=}%d$" % mx0, xy=(mx0, my0), xytext=(1.5, 62),
+                fontsize=8, color="k", ha="left", va="center", zorder=7,
+                bbox=lblbox, arrowprops=dict(arrowstyle="->", color="k", lw=0.8))
+    mxL, myL, _ = star_pts[-1]       # largest capacity: M* pinned at the swarm-size cap
+    ax.annotate(r"$M^\ast{=}%d$" % mxL, xy=(mxL, myL), xytext=(16.4, 38),
+                fontsize=8, color="k", ha="left", va="center", zorder=7,
+                bbox=lblbox, arrowprops=dict(arrowstyle="->", color="k", lw=0.8))
+
+    # region annotations, parked in the empty upper-left pocket with leaders that
+    # approach the topmost relevant curve from above (so they cross no other curve)
+    ax.annotate("coverage-limited\n(too few UAVs)", xy=(2.5, 42), xytext=(3.0, 92),
+                fontsize=8, color=OI["grey"], ha="left", va="center",
                 arrowprops=dict(arrowstyle="->", color=OI["grey"], lw=1.0))
-    ax.annotate("congestion-limited\n(charger queue)", xy=(18, 60), xytext=(8.6, 118),
-                fontsize=8, color=OI["grey"], ha="left",
-                arrowprops=dict(arrowstyle="->", color=OI["grey"], lw=1.0))
+    ax.annotate("congestion-limited\n(charger queue)", xy=(12, 79.7),
+                xytext=(5.3, 128), fontsize=8, color=OI["grey"], ha="left",
+                va="center", arrowprops=dict(arrowstyle="->", color=OI["grey"], lw=1.0))
 
     ax.set_xlabel("Swarm size $M$ (number of UAVs)")
     ax.set_ylabel("Peak AoI (min)")
@@ -222,18 +247,20 @@ def fig_mstar():
     ms = np.array([int(r["M_star"]) for r in rows])
     cap_cap = 20  # swarm-size grid ceiling
 
-    fig, ax = plt.subplots(figsize=(3.5, 3.0))
+    fig, ax = plt.subplots(figsize=(4.3, 3.0))
     ax.plot(cap, ms, marker="s", ms=6, color=ACCENT, zorder=4)
     ax.fill_between(cap, ms, 0, color=ACCENT, alpha=0.08)
 
     # ceiling line: M* saturates when it hits the simulated swarm cap
     ax.axhline(cap_cap, ls="--", color=OI["grey"], lw=1.0)
-    ax.text(cap.max(), cap_cap + 0.3, "swarm-size cap", fontsize=8,
+    ax.text(cap.max(), cap_cap + 0.4, "swarm-size cap", fontsize=8,
             color=OI["grey"], ha="right", va="bottom")
 
+    # Callout sits in the clean band just above the cap line (left of the "swarm-
+    # size cap" tag); leader drops onto the rising curve, crossing no data.
     ax.annotate("provisioning law:\n$M^\\ast$ grows with capacity",
-                xy=(cap[2], ms[2]), xytext=(cap[1], ms[-1] - 1),
-                fontsize=8.5, color=ACCENT, ha="left",
+                xy=(cap[3], ms[3]), xytext=(cap[0] + 0.02, cap_cap + 1.5),
+                fontsize=8.5, color=ACCENT, ha="left", va="center",
                 arrowprops=dict(arrowstyle="->", color=ACCENT, lw=1.0))
 
     ax.set_xlabel(r"Charging capacity $c\,\mu$ (charges/min)")
