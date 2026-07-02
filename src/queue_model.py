@@ -47,25 +47,38 @@ def wq(lmbda: float, c: int, mu: float) -> float:
 
 
 def solve_fixed_point(M: int, c: int, mu: float, tau_fly: float,
-                      tau_charge: float, tol: float = 1e-9, it: int = 10000):
+                      tau_charge: float, tol: float = 1e-12, it: int = 200):
     """Solve lambda = M / (tau_fly + W_q(lambda) + tau_charge) self-consistently.
 
-    The map is self-limiting: larger W_q lowers lambda, so a simple damped
-    iteration converges. Returns (lambda, W_q, rho, stable).
+    Define h(lambda) = M/(tau_fly + W_q(lambda) + tau_charge) - lambda on the
+    open interval (0, c*mu). W_q is increasing in lambda, so the first term is
+    decreasing and h is strictly decreasing => a UNIQUE root, found by bisection.
+    This is monotone in M by construction (no oscillation/cap artifacts).
+    Returns (lambda, W_q, rho, stable).
     """
-    lam = 0.5 * min(M / (tau_fly + tau_charge), c * mu * 0.999)
-    for _ in range(it):
-        w = wq(lam, c, mu)
-        if math.isinf(w):
-            # Pull lambda back below capacity and continue.
-            lam = 0.9 * (c * mu)
-            w = wq(lam, c, mu)
-        new = M / (tau_fly + w + tau_charge)
-        new = min(new, 0.999999 * c * mu)  # keep strictly stable
-        if abs(new - lam) < tol:
-            lam = new
-            break
-        lam = 0.5 * lam + 0.5 * new  # damping
+    cap = c * mu
+
+    def h(lam):
+        return M / (tau_fly + wq(lam, c, mu) + tau_charge) - lam
+
+    lo, hi = 1e-15, cap * (1.0 - 1e-12)
+    hlo, hhi = h(lo), h(hi)
+    # h(lo) > 0 (arrival wants > 0); h(hi) -> -cap < 0 since W_q -> inf. Root exists.
+    if hlo <= 0.0:
+        # Degenerate: essentially no charging demand.
+        lam = lo
+    else:
+        for _ in range(it):
+            mid = 0.5 * (lo + hi)
+            hm = h(mid)
+            if abs(hm) < tol or (hi - lo) < tol * cap:
+                lo = hi = mid
+                break
+            if hm > 0.0:
+                lo = mid
+            else:
+                hi = mid
+        lam = 0.5 * (lo + hi)
     w = wq(lam, c, mu)
     rho = (lam / mu) / c
     stable = rho < 1.0 and math.isfinite(w)
@@ -73,16 +86,17 @@ def solve_fixed_point(M: int, c: int, mu: float, tau_fly: float,
 
 
 def peak_aoi(M: int, c: int, mu: float, tau_fly: float, tau_charge: float,
-             alpha: float, travel_to_station: float):
-    """Peak AoI(M) = patrol revisit (alpha/M) + one charging excursion.
+             t_patrol: float, travel_to_station: float):
+    """Peak AoI(M) = measured patrol revisit + one charging excursion.
 
+    t_patrol : measured per-UAV patrol time for this M (from field.patrol_time),
+               NOT an alpha/M abstraction, so no cross-M normalization artifact.
     excursion = round-trip travel to station + queue wait + charge time.
     Returns (aoi, details dict).
     """
     lam, w, rho, stable = solve_fixed_point(M, c, mu, tau_fly, tau_charge)
     if not stable:
         return math.inf, dict(lam=lam, wq=math.inf, rho=rho, stable=False)
-    t_patrol = alpha / M
     excursion = travel_to_station + w + tau_charge
     aoi = t_patrol + excursion
     return aoi, dict(lam=lam, wq=w, rho=rho, stable=True,

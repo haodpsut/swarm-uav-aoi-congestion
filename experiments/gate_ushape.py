@@ -20,7 +20,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from queue_model import peak_aoi          # noqa: E402
-from field import coverage_alpha          # noqa: E402
+from field import patrol_time             # noqa: E402
 
 
 def sweep(M_values, c, mu, tau_fly, tau_charge, K, L, V, travel, seeds):
@@ -29,8 +29,8 @@ def sweep(M_values, c, mu, tau_fly, tau_charge, K, L, V, travel, seeds):
     for M in M_values:
         vals, rhos = [], []
         for sd in seeds:
-            alpha = coverage_alpha(K, L, M, V, sd)
-            aoi, det = peak_aoi(M, c, mu, tau_fly, tau_charge, alpha, travel)
+            tp = patrol_time(K, L, M, V, sd)
+            aoi, det = peak_aoi(M, c, mu, tau_fly, tau_charge, tp, travel)
             vals.append(aoi)
             rhos.append(det["rho"])
         finite = [v for v in vals if math.isfinite(v)]
@@ -81,8 +81,8 @@ def main():
     tau_fly, tau_charge = 20.0, 10.0  # 20 min endurance, 10 min charge (mu=0.1)
     mu = 1.0 / tau_charge
     travel = 4.0                      # round-trip to central station (min)
-    M_values = list(range(1, 13))
-    seeds = list(range(10))           # 10 seeds, no single-seed wins
+    M_values = list(range(1, 15))
+    seeds = list(range(20))           # 20 seeds, no single-seed wins
 
     # --- Capacity-LIMITED regime (the gate): few ports ---
     c_lim = 2
@@ -94,22 +94,25 @@ def main():
     rows_rich = sweep(M_values, c_rich, mu, tau_fly, tau_charge, K, L, V, travel, seeds)
     u_rich, _ = report(f"Capacity-RICH, pooled M/M/c  (c={c_rich} ports, control)", rows_rich)
 
-    # --- Naive split (c separate M/M/1) vs pooled, capacity-limited: does optimal dissolve it? ---
-    print("\n=== Naive split (c separate M/M/1) vs pooled, capacity-limited ===")
+    # --- Naive split (c_lim separate single-port M/M/1 stations) vs pooled ---
+    # Same c_lim ports, but as c_lim independent M/M/1 queues with UAVs split
+    # evenly, instead of one pooled M/M/c. Pooling is optimal, so split >= pooled.
+    print("\n=== Naive split: c_lim single-port stations, UAVs split evenly ===")
     rows_split = []
     for M in M_values:
-        vals = []
+        vals, rhos = [], []
         for sd in seeds:
-            alpha = coverage_alpha(K, L, M, V, sd)
-            # naive: split M UAVs across c single-port stations -> per-station M/M/1
-            # effective: each station sees lambda_total/c but with 1 server.
-            aoi, det = peak_aoi(M, 1, mu, tau_fly * 1.0, tau_charge, alpha, travel)
-            # emulate per-station load by scaling: a single M/M/1 serving M/c UAVs
-            aoi_s, det_s = peak_aoi(max(1, round(M / c_lim)), 1, mu, tau_fly, tau_charge, alpha, travel)
-            vals.append(aoi_s)
+            tp = patrol_time(K, L, M, V, sd)
+            M_per = M / c_lim                      # UAVs per station (fractional)
+            M_eff = max(1, round(M_per))
+            aoi, det = peak_aoi(M_eff, 1, mu, tau_fly, tau_charge, tp, travel)
+            vals.append(aoi)
+            rhos.append(det["rho"])
         finite = [v for v in vals if math.isfinite(v)]
         mean = sum(finite) / len(finite) if finite else math.inf
-        rows_split.append(dict(M=M, aoi_mean=mean, aoi_std=0.0, rho=0.0,
+        std = math.sqrt(sum((v - mean) ** 2 for v in finite) / len(finite)) if finite else 0.0
+        rows_split.append(dict(M=M, aoi_mean=mean, aoi_std=std,
+                               rho=sum(rhos) / len(rhos),
                                unstable_frac=sum(1 for v in vals if not math.isfinite(v)) / len(vals)))
     report("Naive split (per-station M/M/1)", rows_split)
 

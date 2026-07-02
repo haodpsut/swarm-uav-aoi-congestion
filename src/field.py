@@ -1,12 +1,13 @@
 """
-Field / patrol geometry: derive the coverage coefficient alpha empirically
-(NOT from a hand-picked constant), so the U-shape test is honest.
+Field / patrol geometry: measure the per-UAV patrol time DIRECTLY (not via an
+alpha/M abstraction), so the coverage term of peak AoI carries no cross-M
+normalization artifact.
 
-alpha is the per-UAV patrol revisit time scaled so that T_patrol = alpha / M:
-we place K sensors at random, partition them into M balanced sub-fields by
-k-means, build a nearest-neighbour tour per sub-field, take the mean tour time,
-and back out alpha = M * mean_tour_time. Averaging over sensor realisations gives
-a seed-dependent alpha, used for multi-seed robustness.
+patrol_time(K,L,M,V,seed): place K sensors at random (fixed by seed, so the SAME
+field is reused across all M within a seed), partition into M groups by k-means,
+build a nearest-neighbour tour improved by 2-opt per group, and return the mean
+per-UAV tour time. This is T_patrol(M); it decreases ~1/M but is a real measured
+geometry, averaged over seeds for robustness.
 """
 
 import math
@@ -33,36 +34,66 @@ def _kmeans(points, k, rng, iters=25):
     return groups
 
 
-def _nn_tour_length(pts):
-    """Closed nearest-neighbour tour length over pts (heuristic patrol route)."""
-    if len(pts) <= 1:
-        return 0.0
-    unvisited = pts[:]
+def _nn_order(pts):
+    """Nearest-neighbour visiting order over pts (indices into a closed tour)."""
+    unvisited = list(range(len(pts)))
     cur = unvisited.pop(0)
-    start = cur
-    total = 0.0
+    order = [cur]
     while unvisited:
         nxt_i, nd = 0, float("inf")
-        for i, p in enumerate(unvisited):
-            d = math.dist(cur, p)
+        for i, j in enumerate(unvisited):
+            d = math.dist(pts[cur], pts[j])
             if d < nd:
                 nd, nxt_i = d, i
-        total += nd
         cur = unvisited.pop(nxt_i)
-    total += math.dist(cur, start)  # close the loop
-    return total
+        order.append(cur)
+    return order
 
 
-def coverage_alpha(K: int, L: float, M: int, V: float, seed: int) -> float:
-    """Empirical alpha such that per-UAV patrol time ~ alpha / M for this M.
+def _tour_len(pts, order):
+    n = len(order)
+    return sum(math.dist(pts[order[i]], pts[order[(i + 1) % n]]) for i in range(n))
 
-    Returns alpha = M * (mean per-sub-field tour time). Because tour length of n
-    points in area A scales ~ sqrt(n*A), alpha is roughly M-invariant, which is
-    exactly the 1/M coverage benefit we want to test rather than assume.
+
+def _two_opt(pts, order, max_pass=6):
+    """Light 2-opt to stabilise tour length (reduces NN heuristic variance)."""
+    n = len(order)
+    if n < 4:
+        return order
+    improved = True
+    passes = 0
+    while improved and passes < max_pass:
+        improved = False
+        passes += 1
+        for i in range(n - 1):
+            for k in range(i + 1, n):
+                a, b = order[i], order[(i + 1) % n]
+                c, d = order[k], order[(k + 1) % n]
+                if a == c or b == d:
+                    continue
+                delta = (math.dist(pts[a], pts[c]) + math.dist(pts[b], pts[d])
+                         - math.dist(pts[a], pts[b]) - math.dist(pts[c], pts[d]))
+                if delta < -1e-12:
+                    order[i + 1:k + 1] = reversed(order[i + 1:k + 1])
+                    improved = True
+    return order
+
+
+def _group_tour_len(pts):
+    if len(pts) <= 1:
+        return 0.0
+    order = _two_opt(pts, _nn_order(pts))
+    return _tour_len(pts, order)
+
+
+def patrol_time(K: int, L: float, M: int, V: float, seed: int) -> float:
+    """Measured mean per-UAV patrol (revisit) time T_patrol(M) for this field.
+
+    Same field per seed (reused across M); k-means into M groups; 2-opt tour per
+    group; return mean tour time. Peak AoI uses this directly (no alpha/M).
     """
     rng = random.Random(seed)
     pts = [(rng.uniform(0, L), rng.uniform(0, L)) for _ in range(K)]
     groups = _kmeans(pts, M, rng)
-    tour_times = [_nn_tour_length(g) / V for g in groups if g]
-    mean_tour = sum(tour_times) / len(tour_times)
-    return M * mean_tour
+    tour_times = [_group_tour_len(g) / V for g in groups if g]
+    return sum(tour_times) / len(tour_times)
