@@ -8,7 +8,10 @@ dependencies:
   - matplotlib
   - pip
   - pip:
-      # On the Linux GPU server, the default torch wheel is the CUDA build, so
-      # the CETSP trajectory optimiser (src/trajectory.py) runs on the RTX 4090
-      # automatically (it falls back to CPU if CUDA is absent).
+      # RTX 4090 server driver supports up to CUDA 12.5, so pin the cu124 torch
+      # build (the default/latest wheel targets a newer CUDA and fails with
+      # "NVIDIA driver too old"). cu124 runs on driver 12.5. Falls back to CPU if
+      # CUDA is unavailable. If cu124 still errors, use cu121.
+      - --index-url https://download.pytorch.org/whl/cu124
+      - --extra-index-url https://pypi.org/simple
       - torch
