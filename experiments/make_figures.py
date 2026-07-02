@@ -109,9 +109,12 @@ def fig_des():
     de = np.array([float(r["des_mm_wq"]) for r in rows])
     dd = np.array([float(r["des_real_wq"]) for r in rows])
 
-    # quantify the two headline claims straight from the data
-    mmc_over = np.median(mmc / de)                     # how far M/M/c overshoots DES
-    fs_err = np.median(np.abs(fs - de) / de) * 100.0   # finite-source vs DES(exp)
+    # Quantify the two headline claims from the data, using the SAME statistic as
+    # des_validation.py and the paper text: mean over rows with a non-trivial
+    # wait (des_mm > 1 s). This makes the figure print 6x / 4%, matching the body.
+    sig = de > 1.0
+    mmc_over = float(np.mean(mmc[sig] / de[sig]))       # how far M/M/c overshoots DES
+    fs_err = float(np.mean(np.abs(fs[sig] - de[sig]) / de[sig]) * 100.0)
 
     fig, ax = plt.subplots(figsize=(3.5, 3.2))
     ax.plot(rho, mmc, marker="x", ms=5, ls="--", color=OI["verm"],
@@ -279,7 +282,7 @@ def fig_prop2():
     style_axes(ax, grid_axis="x")
 
     ax.set_title("Traffic-driven placement lowers peak AoI\n"
-                 "mean $-%.1f\\%%$, better on %d/%d sites"
+                 "mean $-%.1f\\%%$, sites differ on %d/%d"
                  % (mean_gain, n_differ, n), fontsize=9.5)
     ax.legend(loc="lower right", frameon=False, fontsize=8)
     save(fig, "fig_prop2.png")
@@ -310,7 +313,7 @@ def fig_crossover():
     ax.plot(L, prop, marker="o", ms=4, color=ACCENT, label="proposed (ours)")
 
     # annotate the widening gain at both ends
-    ax.annotate(r"$+%.0f\%%$" % gain[0], xy=(L[0], (prop[0] + cov[0]) / 2),
+    ax.annotate(r"$+%.1f\%%$" % gain[0], xy=(L[0], (prop[0] + cov[0]) / 2),
                 xytext=(L[0] + 0.4, (prop[0] + cov[0]) / 2 - 3), fontsize=8.5,
                 color=ACCENT)
     ax.annotate(r"$+%.1f\%%$" % gain[-1], xy=(L[-1], (prop[-1] + cov[-1]) / 2),

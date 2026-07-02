@@ -27,7 +27,8 @@ confirms the formula. For the realistic system (near-deterministic operating and
 charging), the DES wait is lower, so the finite-source model is a
 \emph{conservative upper bound} (it exceeds the real wait in $23/23$
 configurations). In contrast, the open $M/M/c$ queue overpredicts the DES wait
-by about $5.6\times$, because it ignores the closed population: only $M$ UAVs
+by about $6\times$ (a mean factor of $5.6$), because it ignores the closed
+population: only $M$ UAVs
 exist, so the arrival rate falls as more of them are already charging. Using the
 open queue therefore distorts the design decisions (we show below that it
 produces a spurious placement crossover), which is why we adopt the
@@ -86,8 +87,8 @@ swarm.
 We compare, per instance, the coverage-optimal placement (minimum recharge
 detour, contention-blind) against the traffic-optimal placement (which balances
 the queueing load). The traffic-optimal placement lowers the peak AoI in
-$20/20$ instances, by $14.8\%$ on average, and it selects \emph{different}
-station sites in $18/20$ instances (Fig.~\ref{fig:prop2}). This confirms
+$19/20$ instances and never increases it, by $14.8\%$ on average, and it selects
+\emph{different} station sites in $18/20$ instances (Fig.~\ref{fig:prop2}). This confirms
 Proposition~\ref{prop:inversion}: under contention the AoI-optimal placement
 inverts from coverage-driven to traffic-driven.
 
@@ -109,7 +110,8 @@ a nearest-neighbour patrol. Table~\ref{tab:ablation} reports the ablation at a
 $15$~km field: the proposed method attains the lowest peak AoI, the CETSP
 trajectory contributes about $3.1\%$, and the contention-aware placement
 contributes substantially more. A Wilcoxon signed-rank test gives
-$p{=}8.2\times10^{-5}$ against the strongest baseline, so the improvement is
+$p{=}8.2\times10^{-5}$ against the closest competitor, the no-CETSP ablation
+(and $p{=}1.9\times10^{-6}$ against the single-station baseline), so the improvement is
 statistically significant.
 
 \begin{table}[t]

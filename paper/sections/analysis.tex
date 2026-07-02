@@ -12,13 +12,13 @@ AoI of the homogeneous single-station cell derived in Section~\ref{sec:model},
 \label{eq:aoi-decomp}
 \Aoi(M) \;=\; \underbrace{t_{\mathrm{loop}}(M)}_{c_1(M)}
 \;+\; \underbrace{\Wq(M,c)}_{\text{contention}}
-\;+\; \underbrace{\tfrac{2\,\mathrm{dist}}{V} + \tau_{\mathrm{ch}}}_{c_0},
+\;+\; \underbrace{\tfrac{2\,\mathrm{dist}}{V} + \tau_{\mathrm{charge}}}_{c_0},
 \end{equation}
 where $M$ UAVs share one field and one station of $c$ ports, $t_{\mathrm{loop}}(M)$
 is the patrol (revisit) time per UAV, $\Wq(M,c)$ is the mean charging wait of the
 finite-source queue $M/M/c//M$ of Section~\ref{sec:model} (population $M$,
-per-source operating rate $\lambda=1/\mathrm{up\_time}$, port rate
-$\mu=1/\tau_{\mathrm{ch}}$), and $c_0$ collects the recharge round trip and the
+per-source operating rate $\lambda=1/T_{\mathrm{up}}$, port rate
+$\mu=1/\tau_{\mathrm{charge}}$), and $c_0$ collects the recharge round trip and the
 charging time, which do not depend on $M$.
 
 \subsection{Congestion threshold: AoI is non-monotone in swarm size}
@@ -138,7 +138,7 @@ balancing) assignment, in Section~\ref{sec:exp}.
 \subsection{Placement inversion under contention}
 
 For a single UAV the wait term in \eqref{eq:aoi-decomp} vanishes ($M=1\le c$), so
-$\Aoi=c_1(1)+2\,\mathrm{dist}/V+\tau_{\mathrm{ch}}$ depends on placement only
+$\Aoi=c_1(1)+2\,\mathrm{dist}/V+\tau_{\mathrm{charge}}$ depends on placement only
 through the recharge detour $\mathrm{dist}$. The AoI-optimal station therefore sits
 where the detour is smallest, i.e. near the trajectory centroid: placement is
 coverage-driven. The next result shows this rule is not merely loose but can be
