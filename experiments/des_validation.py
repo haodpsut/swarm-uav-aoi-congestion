@@ -119,10 +119,10 @@ def main():
         des_mm = sum(simulate(M, c, tau_fly, tau_charge, travel, "exp", "exp", seed=s) for s in seeds) / len(seeds)
         # DES with deterministic operating + service is the realistic system.
         des_real = sum(simulate(M, c, tau_fly, tau_charge, travel, "det", "det", seed=s) for s in seeds) / len(seeds)
-        r_mm = w_fs / des_mm if des_mm > 0.5 else float("nan")
-        r_real = w_fs / des_real if des_real > 0.5 else float("nan")
+        r_mm = f"{w_fs / des_mm:.2f}" if des_mm > 0.5 else "  -"   # 0/0 at ~no-load
+        r_real = f"{w_fs / des_real:.2f}" if des_real > 0.5 else "  -"
         print(f"{M:>3} {c:>2} {rho_fs:>5.2f} | {w_mmc:>8.1f} {w_fs:>8.1f} | "
-              f"{des_mm:>7.1f} {r_mm:>6.2f} | {des_real:>7.1f} {r_real:>7.2f}")
+              f"{des_mm:>7.1f} {r_mm:>6} | {des_real:>7.1f} {r_real:>7}")
         rows.append([M, c, rho_fs, w_mmc, w_fs, des_mm, des_real])
 
     # (1) Formula check: finite-source should MATCH DES under exp-operating+service.
