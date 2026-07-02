@@ -17,14 +17,16 @@ conda activate swarm-uav-aoi
 
 ## 2. Run the experiments (from the repo root)
 ```bash
-# make-or-break gate (sanity: U-shape binds under optimal assignment)
-python experiments/gate_ushape.py
+# DES validation of the QUEUE MODEL (critical): shows the open M/M/c over-
+# predicts wait ~6x, and the finite-source (machine-repair) model matches DES.
+python experiments/des_validation.py
 
-# Prop. 1, semi-analytical  -> results/prop1_*.csv
-python experiments/validate_prop1.py
-
-# Prop. 1, PHYSICAL model (rotary-wing energy + air-to-ground comms, SI)
+# Prop. 1, PHYSICAL model (finite-source queue + rotary-wing energy + comms)
 python experiments/validate_prop1_phys.py
+
+# (legacy, open-queue illustration only -- superseded by the two above)
+# python experiments/gate_ushape.py
+# python experiments/validate_prop1.py
 
 # Prop. 2, placement inversion (coverage- vs traffic-optimal), ~1-3 min
 python experiments/prop2_placement.py

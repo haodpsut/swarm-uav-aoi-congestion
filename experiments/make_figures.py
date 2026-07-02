@@ -54,7 +54,10 @@ def fig_curves():
 
 
 def fig_mstar():
-    rows = load(os.path.join(RES, "prop1_mstar.csv"))
+    path = os.path.join(RES, "prop1_phys_mstar.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
     cap = [float(r["capacity"]) for r in rows]
     ms = [int(r["M_star"]) for r in rows]
     plt.figure(figsize=(5.5, 4.0))
@@ -170,10 +173,37 @@ def fig_ablation():
     print("wrote", out)
 
 
+def fig_des():
+    path = os.path.join(RES, "des_validation.csv")
+    if not os.path.exists(path):
+        return
+    rows = [r for r in load(path) if float(r["des_exp_wq"]) > 0.5]
+    rows.sort(key=lambda r: float(r["rho"]))
+    rho = [float(r["rho"]) for r in rows]
+    mmc = [float(r["mmc_wq"]) for r in rows]
+    fs = [float(r["finite_wq"]) for r in rows]
+    de = [float(r["des_exp_wq"]) for r in rows]
+    dd = [float(r["des_det_wq"]) for r in rows]
+    plt.figure(figsize=(6.5, 4.2))
+    plt.scatter(rho, mmc, s=18, marker="x", label="open M/M/c (over-predicts ~6x)")
+    plt.scatter(rho, fs, s=18, marker="s", label="finite-source (our model)")
+    plt.scatter(rho, de, s=18, marker="o", label="DES (exponential service)")
+    plt.scatter(rho, dd, s=18, marker="^", label="DES (deterministic service, real)")
+    plt.xlabel("Station utilisation rho")
+    plt.ylabel("Mean queue wait (s)")
+    plt.title("Queue-model validation vs discrete-event simulation")
+    plt.legend(fontsize=8)
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    out = os.path.join(RES, "fig_des_validation.png")
+    plt.savefig(out, dpi=150)
+    print("wrote", out)
+
+
 if __name__ == "__main__":
-    fig_curves()
-    fig_mstar()
-    fig_prop1_phys()
+    fig_des()            # queue-model validation vs DES (closes the model-risk gap)
+    fig_mstar()          # provisioning M*(capacity), finite-source
+    fig_prop1_phys()     # Prop.1 U-shape family, finite-source (physical model)
     fig_prop2()
     fig_crossover()
     fig_ablation()

@@ -17,18 +17,20 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from field import patrol_geometry          # noqa: E402
-from scenario import (DEFAULTS, tau_charge_of, per_uav_cycle,  # noqa: E402
-                      peak_aoi_phys)
+from scenario import DEFAULTS, tau_charge_of, per_uav_cycle  # noqa: E402
+from queue_model import finite_source_wq   # noqa: E402
 
 
 def swarm_peak_aoi(M, c, sc, seed):
-    """Peak AoI over the swarm for M UAVs, c pooled ports, one central station."""
-    mu = 1.0 / tau_charge_of(sc["E_max"], sc["charge_power"])
+    """Peak AoI over the swarm for M UAVs, c pooled ports, one central station.
+
+    Uses the finite-source (machine-repair) queue -- the DES-validated model for
+    cycling UAVs (the open M/M/c over-predicts wait ~6x, see des_validation.py).
+    """
     tau_charge = tau_charge_of(sc["E_max"], sc["charge_power"])
     geom = patrol_geometry(sc["K"], sc["L"], M, seed)
     center = (sc["L"] / 2.0, sc["L"] / 2.0)
 
-    # Per-UAV physical cycle quantities.
     t_loops, tau_flys, dists = [], [], []
     for gz in geom:
         t_loop, tau_fly, _ = per_uav_cycle(
@@ -40,17 +42,11 @@ def swarm_peak_aoi(M, c, sc, seed):
 
     if not t_loops:
         return math.inf, 0.0
-    # Shared queue: aggregate M UAVs with the mean flight budget.
     tau_fly_mean = sum(tau_flys) / len(tau_flys)
-    # Peak AoI = worst UAV's (revisit period + its charging excursion).
-    aois = []
-    rho_share = None
-    for i in range(len(t_loops)):
-        aoi, det = peak_aoi_phys(M, c, mu, tau_fly_mean, t_loops[i],
-                                 tau_charge, dists[i], sc["V"])
-        aois.append(aoi)
-        rho_share = det.get("rho")
-    return max(aois), rho_share
+    w, _, _, rho = finite_source_wq(M, c, tau_fly_mean, tau_charge)
+    aoi = max(t_loops[i] + 2.0 * dists[i] / sc["V"] + w + tau_charge
+              for i in range(len(t_loops)))
+    return aoi, rho
 
 
 def main():
@@ -102,7 +98,13 @@ def main():
         w.writerow(["c", "M", "aoi_mean_s", "aoi_std_s", "rho", "unstable_frac"])
         for r in all_rows:
             w.writerow([r["c"], r["M"], r["aoi_mean"], r["aoi_std"], r["rho"], r["unstable"]])
-    print("\nSaved results/prop1_phys_curves.csv")
+    mu = 1.0 / tau_charge
+    with open(os.path.join(out, "prop1_phys_mstar.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["c", "capacity", "M_star", "aoi_at_mstar_s"])
+        for r in mstar_rows:
+            w.writerow([r["c"], r["c"] * mu, r["M_star"], r["aoi"]])
+    print("\nSaved results/prop1_phys_curves.csv and results/prop1_phys_mstar.csv")
 
 
 if __name__ == "__main__":

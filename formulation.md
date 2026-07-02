@@ -45,35 +45,43 @@ P(V) = P0 (1 + 3V^2 / U_tip^2)
 
 ---
 
-## 2. Charging as an M/M/c queue (the load-bearing coupling)
+## 2. Charging as a FINITE-SOURCE (machine-repair) queue
 
-A station `s` with `c_s` ports is a **c_s-server queue**. This is what only a *swarm* creates and what the base paper (single UAV) and Wei (c=1) do not have.
+> MODEL CORRECTION (DES-validated, 2026-07-02). An earlier draft used an open
+> M/M/c (Erlang-C) queue. A discrete-event simulation of the actual cycling UAVs
+> (`experiments/des_validation.py`) showed the open M/M/c **over-predicts the wait
+> by ~6x**, because the system is CLOSED: only M UAVs exist, so the arrival rate
+> falls as more of them are already at the station. The correct model is the
+> **finite-source / machine-repair queue M/M/c//N**, which tracks the DES far
+> better and is a **conservative upper bound** on the true (near-deterministic)
+> wait. All results use it.
 
-- **Arrivals:** UAVs routed to `s` arrive to recharge. Renewal approximation: each UAV returns to charge once per operating cycle, so the aggregate arrival rate is
-  ```
-  lambda_s = Σ_{m : a_m = s} 1 / T_cycle_m           (C-fixedpoint)
-  ```
-- **Service:** mean charge time `1/mu` per port (Exp for M/M/c closed form; deterministic charge time handled by M/D/c as a robustness check).
-- **Offered load / utilization:** `a_s = lambda_s / mu`, `rho_s = a_s / c_s = lambda_s / (c_s mu)`.
-- **Stability (hard constraint):** `rho_s < 1` for every open station.
-- **Expected queue wait (Erlang-C):**
-  ```
-  W_q(lambda_s, c_s, mu) = C(c_s, a_s) / (c_s mu − lambda_s)
+A station `s` serving the `N_s` UAVs assigned to it with `c_s` ports is a
+finite-source queue:
 
-  C(c, a) = [ a^c / (c! (1 − a/c)) ]
-            ------------------------------------------------
-            [ Σ_{n=0}^{c−1} a^n/n!  +  a^c / (c! (1 − a/c)) ]      (Erlang-C prob. of wait)
+- Each assigned UAV, while patrolling, needs to charge after an operating time of
+  mean `tau_fly` (rate `lam = 1/tau_fly`); ports serve at `mu = 1/tau_charge`.
+- Birth-death chain, state `n` = UAVs at the station (`0..N_s`):
   ```
+  up-rate   n -> n+1 : (N_s - n) * lam      (arrivals VANISH as n -> N_s; closed)
+  down-rate n -> n-1 : min(n, c_s) * mu
+  p_n = p_0 * prod_{k=0}^{n-1} (N_s - k) lam / (min(k+1, c_s) mu),  sum_n p_n = 1
+  ```
+- Mean queue length `Lq = sum_n max(0, n - c_s) p_n`; throughput
+  `lam_eff = sum_n (N_s - n) lam p_n`; **mean wait `W_q = Lq / lam_eff`** (Little).
+- No stability constraint is needed: a finite population cannot blow the queue up
+  (this replaces the old `rho_s < 1` constraint C3).
 
-### 2.1 Cycle time and the fixed point
+### 2.1 Revisit period and peak AoI
 ```
-T_cycle_m = T_collect_m                         (dwell over its sensor sub-field)
-          + T_fly_m                             (fly to assigned station)
-          + W_q(lambda_{a_m}, c_{a_m}, mu)      (QUEUE WAIT — couples the swarm)
-          + T_charge_m                          (= (E_max − e_arrive)/charge_rate)
-          + T_return_m                          (return to field)
+peak AoI_m = t_loop_m                          (one revisit period: patrol + collect)
+           + 2 * dist(m, station)/V            (round trip to charge)
+           + W_q(N_s, c_s, tau_fly, tau_charge) (FINITE-SOURCE wait: couples the swarm)
+           + tau_charge
 ```
-Because `lambda_s` depends on `{T_cycle_m}` (C-fixedpoint) and `T_cycle_m` depends on `W_q(lambda_s,·)`, the pair `(lambda, T_cycle)` is a **self-consistent fixed point**. This feedback (`M ↑ → lambda ↑ → W_q ↑ → T_cycle ↑`) is the mechanism behind Prop. 1.
+The closed-loop coupling (more UAVs on a station gives longer wait, with a ceiling
+set by the finite population) is the mechanism behind Prop. 1: AoI(M) =
+coverage(~1/M) + wait(M) + const still has an interior minimiser (U-shape).
 
 ---
 
@@ -140,25 +148,26 @@ Homogeneous setting, total charging capacity `K_cap = Σ_s c_s mu` fixed, `M` UA
 
 ---
 
-## 7. Honest finding — the pooling caveat (from the joint-solver comparison)
+## 7. Main comparison (finite-source queue, DES-validated)
 
-Pooling all ports into ONE station minimises queue wait (M/M/c pooling theorem),
-so a single pooled station is a very strong baseline. The distributed,
-contention-aware placement of §3 wins only once the field is large enough that
-travel cost dominates the pooling advantage. Measured crossover (M=12, C_tot=4):
+With the CORRECT finite-source queue, the distributed contention-aware placement
+beats the single pooled station at ALL tested field sizes, and the gain grows
+with field size (travel-driven). Measured (M=12, C_tot=4, 20 seeds):
 
 | Field L | proposed vs single pooled station |
 |---------|-----------------------------------|
-| 5 km    | -3.6% (single wins)               |
-| 8 km    | +1.4% (crossover)                 |
-| 14 km   | +7.5%                             |
-| 20 km   | +10.0%                            |
+| 5 km    | +3.8%                             |
+| 8 km    | +7.3%                             |
+| 14 km   | +10.7%                            |
+| 20 km   | +12.4%                            |
 
-So the paper's placement contribution is scoped to the **travel-limited regime**;
-we report the crossover honestly rather than claiming a universal win (cf. the
-paper04 "Pareto-optimal in a tier" reframe). Ablation at L=15 km: CETSP
-trajectory helps ~3.6%, contention-aware placement helps much more; Wilcoxon
-p<1e-5 vs the strongest baseline.
+Note: an earlier M/M/c draft showed a spurious "crossover" (single-pooled winning
+in small fields). That was an artifact of the over-pessimistic open queue; the
+finite-source model (which does not over-penalise split stations) removes it. The
+finite-source wait saturates rather than diverging, so distributed placement's
+travel saving is not swamped by a phantom queue penalty. Ablation at L=15 km:
+proposed 42.8 min vs no_cetsp 44.4 (CETSP helps +3.5%), coverage 52.7
+(contention-awareness helps far more), single pooled 48.1; Wilcoxon p=9.5e-6.
 
 ## 8. Roadmap
 - [x] S1 brainstorm + prior-art sweep (queue-coupling gap OCCUPIED → pivot to placement+capacity+structural results).

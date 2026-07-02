@@ -34,6 +34,41 @@ def erlang_c(c: int, a: float) -> float:
     return top / (s + top)
 
 
+def finite_source_wq(N: int, c: int, tau_fly: float, tau_charge: float):
+    """Finite-source (machine-repair) queue M/M/c//N -- the CORRECT model for M
+    cycling UAVs sharing c charging ports, validated against DES.
+
+    Each of N UAVs, while operating (patrolling), needs to charge after an
+    operating time with mean tau_fly (rate lam = 1/tau_fly); c ports serve at
+    rate mu = 1/tau_charge. Because it is a CLOSED population, the arrival rate
+    falls as more UAVs are already at the station, so the wait is far below the
+    open M/M/c (which over-predicts by 5-50x, per des_validation.py).
+
+    Birth-death chain, state n = UAVs at the station (0..N):
+      up-rate   n->n+1 : (N-n) * lam
+      down-rate n->n-1 : min(n,c) * mu
+    Returns (Wq, Lq, throughput, rho_eff) where Wq is the mean queue wait.
+    """
+    lam = 1.0 / tau_fly
+    mu = 1.0 / tau_charge
+    # Unnormalised p_n via product of birth/death ratios (log-space for stability).
+    log_p = [0.0] * (N + 1)
+    for n in range(1, N + 1):
+        ratio = ((N - (n - 1)) * lam) / (min(n, c) * mu)
+        log_p[n] = log_p[n - 1] + math.log(ratio)
+    m = max(log_p)
+    p = [math.exp(v - m) for v in log_p]
+    s = sum(p)
+    p = [x / s for x in p]
+
+    Lq = sum(max(0, n - c) * p[n] for n in range(N + 1))          # mean in queue
+    L = sum(n * p[n] for n in range(N + 1))                        # mean at station
+    lam_eff = sum((N - n) * lam * p[n] for n in range(N + 1))      # throughput
+    Wq = Lq / lam_eff if lam_eff > 0 else math.inf
+    rho_eff = (L - Lq) / c                                         # server utilisation
+    return Wq, Lq, lam_eff, rho_eff
+
+
 def wq(lmbda: float, c: int, mu: float) -> float:
     """Expected time spent waiting in queue (not counting service), M/M/c.
 

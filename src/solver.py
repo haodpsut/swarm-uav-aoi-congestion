@@ -20,7 +20,7 @@ import math
 from energy import propulsion_power, hover_power
 from comms import collect_time
 from field import partition_field, _group_tour_len, _centroid
-from queue_model import solve_fixed_point
+from queue_model import finite_source_wq
 from trajectory import optimize_trajectories
 
 
@@ -66,9 +66,9 @@ def peak_aoi(states, sites, ports, assign, mu, tau_charge, V, reach_budget=None)
         if ports[s] <= 0:
             return math.inf
         tau_fly_mean = sum(states[i]["tau_fly"] for i in idx) / len(idx)
-        lam, w, rho, stable = solve_fixed_point(len(idx), ports[s], mu, tau_fly_mean, tau_charge)
-        if not stable:
-            return math.inf
+        # Finite-source (machine-repair) wait: the correct closed-loop model for
+        # the UAVs cycling to this station (validated vs DES). Always stable.
+        w, _, _, _ = finite_source_wq(len(idx), ports[s], tau_fly_mean, tau_charge)
         for i in idx:
             d = math.dist(states[i]["centroid"], sites[s])
             if reach_budget is not None and d / V > reach_budget:
