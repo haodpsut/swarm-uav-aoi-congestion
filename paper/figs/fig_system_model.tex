@@ -1,0 +1,60 @@
+% System model: swarm-UAV fresh data collection with shared multi-port
+% charging stations forming a finite-source (closed) queue.
+% Included via \resizebox{\columnwidth}{!}{\input{figs/fig_system_model}}
+\begin{tikzpicture}[
+    >=Latex,
+    sensor/.style={circle,fill=black!55,minimum size=3pt,inner sep=0pt},
+    uav/.style={regular polygon,regular polygon sides=3,draw=blue!70!black,
+                fill=blue!12,minimum size=10pt,inner sep=0pt,line width=0.5pt},
+    station/.style={rectangle,draw=red!70!black,fill=red!8,minimum width=16pt,
+                    minimum height=12pt,line width=0.7pt},
+    port/.style={rectangle,fill=red!55,minimum width=3pt,minimum height=6pt,inner sep=0pt},
+    subfield/.style={draw=black!40,dashed,rounded corners=2pt},
+    lbl/.style={font=\footnotesize},
+    flow/.style={->,thick,blue!60!black},
+]
+
+% ---- monitored field with two sub-fields ----
+\node[lbl,anchor=south west] at (0,4.15) {Monitored field ($K$ sensors)};
+\draw[black!55] (0,0) rectangle (5.2,4);
+
+% sub-field A (left) with sensors + UAV
+\node[subfield,fit={(0.2,0.4)(2.4,3.6)}] (sfA) {};
+\foreach \p in {(0.6,0.9),(1.0,1.6),(0.7,2.4),(1.4,3.0),(1.9,1.2),(2.0,2.6),(1.3,2.0)}
+  \node[sensor] at \p {};
+\node[uav] (uA) at (1.2,2.1) {};
+\node[lbl] at (1.3,0.15) {sub-field, UAV $m$};
+
+% sub-field B (right)
+\node[subfield,fit={(2.7,0.4)(5.0,3.6)}] (sfB) {};
+\foreach \p in {(3.2,1.0),(3.7,1.8),(4.3,1.1),(4.6,2.4),(3.4,2.8),(4.1,3.1),(3.9,2.0)}
+  \node[sensor] at \p {};
+\node[uav] (uB) at (3.9,2.0) {};
+
+% ---- two charging stations with ports + a short queue ----
+\node[station] (s1) at (7.0,3.0) {};
+\node[port] at ($(s1)+(-0.18,0)$) {};
+\node[port] at ($(s1)+(0.18,0)$) {};
+\node[lbl,anchor=west] at ($(s1)+(0.45,0)$) {station $s_1$: $c_{s_1}{=}2$ ports};
+\node[uav,fill=blue!5] (q1) at ($(s1)+(-0.9,0)$) {};   % waiting UAV
+\node[lbl] at ($(s1)+(-0.9,-0.35)$) {queue};
+
+\node[station] (s2) at (7.0,1.1) {};
+\node[port] at ($(s2)+(-0.18,0)$) {};
+\node[port] at ($(s2)+(0.18,0)$) {};
+\node[lbl,anchor=west] at ($(s2)+(0.45,0)$) {station $s_2$: $c_{s_2}$ ports};
+
+% ---- cycle arrows: patrol -> fly to station -> queue+charge -> return ----
+\draw[flow] (uA) to[out=60,in=180] node[lbl,above,pos=0.6]{fly to charge} (q1);
+\draw[flow] (uB) to[out=-20,in=200] (s2);
+\draw[flow,dashed] (s1) to[out=150,in=30] node[lbl,above,pos=0.4]{return} (1.9,3.4);
+
+% ---- annotations ----
+\node[lbl,align=left,anchor=north west] at (5.7,0.55)
+  {Only $M$ UAVs exist $\Rightarrow$ each station\\
+   is a \emph{finite-source} (closed) queue:\\
+   $N_s$ UAVs share $c_s$ ports};
+\node[lbl,align=left,anchor=north west] at (0.0,-0.55)
+  {Peak $\Aoi$ $=$ revisit period $+$ round trip $+$ queue wait $\Wq$ $+$ charge};
+
+\end{tikzpicture}

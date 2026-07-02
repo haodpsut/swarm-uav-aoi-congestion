@@ -1,0 +1,42 @@
+% Block-coordinate joint solver flow.
+% Included via \resizebox{\columnwidth}{!}{\input{figs/fig_solver_flow}}
+\begin{tikzpicture}[
+    >=Latex,
+    block/.style={rectangle,rounded corners=2pt,draw=black!70,fill=black!4,
+                  minimum width=30mm,minimum height=9mm,align=center,font=\small},
+    gpu/.style={rectangle,rounded corners=2pt,draw=green!45!black,fill=green!8,
+                minimum width=30mm,minimum height=9mm,align=center,font=\small},
+    queue/.style={rectangle,rounded corners=2pt,draw=red!60!black,fill=red!6,
+                  minimum width=30mm,minimum height=9mm,align=center,font=\small},
+    io/.style={rectangle,draw=blue!60!black,fill=blue!6,minimum width=26mm,
+               minimum height=8mm,align=center,font=\small},
+    fl/.style={->,thick,black!70},
+    lbl/.style={font=\footnotesize},
+]
+
+\node[io] (in) {Candidate sites, budgets\\$S_{\max},\,C_{\mathrm{tot}}$};
+\node[block,below=6mm of in] (place) {Placement\\$x_s$ (outer search)};
+\node[block,below=6mm of place] (assign) {Assignment\\$a_m$ (load balance)};
+\node[block,below=6mm of assign] (ports) {Port allocation\\$c_s$ (water-filling)};
+\node[gpu,below=6mm of ports] (traj) {Trajectory: CETSP\\(GPU, differentiable)};
+\node[queue,below=6mm of traj] (q) {Finite-source queue\\$\Wq(N_s,c_s)$};
+\node[io,below=6mm of q] (out) {Peak $\Aoi$};
+
+\draw[fl] (in) -- (place);
+\draw[fl] (place) -- (assign);
+\draw[fl] (assign) -- (ports);
+\draw[fl] (ports) -- (traj);
+\draw[fl] (traj) -- (q);
+\draw[fl] (q) -- (out);
+
+% block-coordinate loop (right side, back up)
+\draw[fl,dashed,blue!55!black]
+  (q.east) -- ++(1.9,0) coordinate (turn)
+  |- (assign.east);
+\node[lbl,blue!55!black,right] at ($(turn)+(0,1.6)$) {alternate};
+
+% DES-validation annotation on the queue block
+\node[lbl,align=left,anchor=north west,red!55!black] at ($(q.south west)+(-0.1,-0.15)$)
+  {DES-validated: open M/M/c over-predicts $\sim6\times$};
+
+\end{tikzpicture}

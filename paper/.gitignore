@@ -1,0 +1,8 @@
+*.aux
+*.log
+*.out
+*.pdf
+_compile.log
+_main.log
+_preview*.png
+figs/_preview.pdf

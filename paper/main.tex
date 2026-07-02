@@ -1,0 +1,141 @@
+%=======================================================================
+% Congestion-Aware Joint Charging-Station Placement, Capacity, and
+% Swarm-UAV Trajectory Design for Age-Optimal Data Collection
+% Target: IEEE Internet of Things Journal (IoT-J)
+%=======================================================================
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric}
+
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+
+% --- convenience macros ---
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\Aoi}{\mathrm{AoI}}
+\newcommand{\Wq}{W_{\mathrm q}}
+
+\begin{document}
+
+\title{Congestion-Aware Joint Charging-Station Placement, Capacity, and
+Swarm-UAV Trajectory Design for Age-Optimal Data Collection}
+
+\author{Do~Phuc~Hao%
+\thanks{D.~P.~Hao is with the Center for Artificial Intelligence Research and
+Application (CAIRA), Da Nang Architecture University, Da Nang, Vietnam
+(e-mail: haodp.ai@gmail.com).}}
+
+\markboth{IEEE Internet of Things Journal, Draft}%
+{Hao: Congestion-Aware Joint Placement, Capacity, and Swarm-UAV Trajectory for Age-Optimal Data Collection}
+
+\maketitle
+
+\begin{abstract}
+% TODO (fill after results): 200-250 words.
+% Motivation: fresh data collection by UAV swarms; energy-limited UAVs must
+% recharge at a small number of shared charging stations. Gap: existing works
+% treat charging as a single fixed facility or an open queue. Contribution:
+% (i) a joint charging-station placement, port-capacity, swarm-trajectory and
+% assignment formulation under a DES-validated finite-source (machine-repair)
+% charging queue; (ii) two structural results: a congestion threshold making
+% AoI non-monotone in swarm size, and a placement inversion (traffic-driven vs
+% coverage-driven); (iii) a GPU trajectory optimiser and a block-coordinate
+% solver. Results placeholder.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Age of Information, unmanned aerial vehicles, UAV swarm, data collection,
+charging-station placement, finite-source queue, trajectory optimization,
+Internet of Things.
+\end{IEEEkeywords}
+
+%=======================================================================
+\section{Introduction}
+\label{sec:intro}
+% TODO: motivation, gap, contributions bullet list, paper organisation.
+% Contributions:
+% C1) First joint placement + port-capacity + swarm-trajectory + assignment
+%     formulation for peak-AoI fresh data collection with a CONTENDED,
+%     multi-server charging resource.
+% C2) A DES-validated finite-source (machine-repair) queue model; we show the
+%     open M/M/c over-predicts wait ~6x and distorts decisions.
+% C3) Proposition 1 (congestion threshold: AoI non-monotone in swarm size) and
+%     Proposition 2 (placement inversion: coverage-optimal is suboptimal).
+% C4) A GPU CETSP trajectory optimiser and a block-coordinate joint solver;
+%     evaluation vs single-UAV / single-station / coverage baselines.
+
+%=======================================================================
+\section{Related Work}
+\label{sec:related}
+\input{sections/related}   % <-- sub-agent writes this
+
+%=======================================================================
+\section{System Model and Problem Formulation}
+\label{sec:model}
+\input{sections/formulation}   % <-- sub-agent writes this
+
+\begin{figure}[t]
+  \centering
+  \resizebox{\columnwidth}{!}{\input{figs/fig_system_model}}
+  \caption{System model: a UAV swarm patrols sub-fields to keep sensor data
+  fresh, and recharges at a small number of shared, multi-port charging
+  stations. Because only $M$ UAVs exist, the charging stations form a
+  \emph{finite-source} (closed) queue.}
+  \label{fig:system}
+\end{figure}
+
+%=======================================================================
+\section{Structural Analysis}
+\label{sec:analysis}
+% TODO (sub-agent / later): Proposition 1 (congestion threshold, U-shape,
+% provisioning law) and Proposition 2 (placement inversion) with proofs.
+
+%=======================================================================
+\section{Joint Solver}
+\label{sec:solver}
+% TODO: block-coordinate solver; CETSP trajectory (GPU); finite-source queue;
+% water-filling port allocation; load-balanced assignment; placement search.
+
+\begin{figure}[t]
+  \centering
+  \resizebox{\columnwidth}{!}{\input{figs/fig_solver_flow}}
+  \caption{Block-coordinate solver. The trajectory block (GPU CETSP) and the
+  finite-source queue are alternated with port allocation, assignment, and an
+  outer placement search.}
+  \label{fig:solver}
+\end{figure}
+
+%=======================================================================
+\section{Experiments}
+\label{sec:exp}
+% TODO (fill from server results): setup, queue-model validation vs DES,
+% Prop.1 U-shape + provisioning, Prop.2 placement inversion, joint comparison
+% + ablation + Wilcoxon.
+
+% --- result figure placeholders (uncomment when PNGs/CSVs are in) ---
+% \begin{figure}[t]\centering
+%   \includegraphics[width=\columnwidth]{../results/fig_des_validation.png}
+%   \caption{Queue-model validation against discrete-event simulation.}
+%   \label{fig:des}
+% \end{figure}
+
+%=======================================================================
+\section{Conclusion}
+\label{sec:concl}
+% TODO.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}   % <-- sub-agent fills refs.bib
+
+\end{document}

@@ -1,0 +1,14 @@
+% Standalone preview to visually check the flow figures.
+% Compile: pdflatex _preview.tex
+\documentclass[border=6pt]{standalone}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\Aoi}{\mathrm{AoI}}
+\newcommand{\Wq}{W_{\mathrm q}}
+\begin{document}
+\input{fig_system_model}
+\par\vspace{1cm}
+\input{fig_solver_flow}
+\end{document}
