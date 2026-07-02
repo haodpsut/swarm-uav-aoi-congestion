@@ -140,10 +140,30 @@ Homogeneous setting, total charging capacity `K_cap = Σ_s c_s mu` fixed, `M` UA
 
 ---
 
-## 7. Roadmap
+## 7. Honest finding — the pooling caveat (from the joint-solver comparison)
+
+Pooling all ports into ONE station minimises queue wait (M/M/c pooling theorem),
+so a single pooled station is a very strong baseline. The distributed,
+contention-aware placement of §3 wins only once the field is large enough that
+travel cost dominates the pooling advantage. Measured crossover (M=12, C_tot=4):
+
+| Field L | proposed vs single pooled station |
+|---------|-----------------------------------|
+| 5 km    | -3.6% (single wins)               |
+| 8 km    | +1.4% (crossover)                 |
+| 14 km   | +7.5%                             |
+| 20 km   | +10.0%                            |
+
+So the paper's placement contribution is scoped to the **travel-limited regime**;
+we report the crossover honestly rather than claiming a universal win (cf. the
+paper04 "Pareto-optimal in a tier" reframe). Ablation at L=15 km: CETSP
+trajectory helps ~3.6%, contention-aware placement helps much more; Wilcoxon
+p<1e-5 vs the strongest baseline.
+
+## 8. Roadmap
 - [x] S1 brainstorm + prior-art sweep (queue-coupling gap OCCUPIED → pivot to placement+capacity+structural results).
-- [ ] S2 formulation (this file) — refine energy/collection to rate model, tighten Prop. proofs.
-- [ ] S3 smoke test (local) — implement §6 gate. `src/` analytical M/M/c + optimal assignment + placement baselines.
-- [ ] S4 push to git (haodpsut/swarm-uav-aoi-congestion), run on RTX 4090.
-- [ ] S6 pull results, TikZ figures (U-shape AoI(M), placement inversion map).
-- [ ] S7 write (target IEEE TMC / IoT-J / TVT).
+- [x] S2 formulation (this file).
+- [x] S3 smoke + validation: §6 gate GREEN; Prop.1 (semi + physical) U-shape + provisioning law; Prop.2 placement inversion; joint solver + CETSP trajectory + baselines + crossover.
+- [x] S4 push to git (haodpsut/swarm-uav-aoi-congestion); GPU CETSP runs on RTX 4090.
+- [ ] S6 scale runs on 4090; TikZ figures (U-shape AoI(M), provisioning law, crossover, placement map).
+- [ ] S7 write (target IEEE TMC / IoT-J / TVT), honest crossover framing.

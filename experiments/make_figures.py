@@ -124,8 +124,56 @@ def fig_prop2():
     print("wrote", out)
 
 
+def fig_crossover():
+    path = os.path.join(RES, "joint_crossover.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
+    L = [float(r["L_m"]) / 1000 for r in rows]
+    prop = [float(r["proposed_min"]) for r in rows]
+    single = [float(r["single_min"]) for r in rows]
+    cov = [float(r["coverage_min"]) for r in rows]
+    plt.figure(figsize=(6.5, 4.2))
+    plt.plot(L, prop, marker="o", label="proposed (distributed, traffic-optimal)")
+    plt.plot(L, single, marker="s", label="single pooled station (Wei-style)")
+    plt.plot(L, cov, marker="^", label="coverage-optimal")
+    plt.xlabel("Field side length (km)")
+    plt.ylabel("Peak AoI (min)")
+    plt.title("Crossover: distributed placement wins once travel dominates")
+    plt.legend(fontsize=8)
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    out = os.path.join(RES, "fig_crossover.png")
+    plt.savefig(out, dpi=150)
+    print("wrote", out)
+
+
+def fig_ablation():
+    path = os.path.join(RES, "joint_ablation.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
+    methods = [k for k in rows[0].keys() if k != "seed"]
+    means = []
+    for m in methods:
+        vals = [float(r[m]) / 60.0 for r in rows if math.isfinite(float(r[m]))]
+        means.append(sum(vals) / len(vals) if vals else float("nan"))
+    plt.figure(figsize=(7.0, 4.0))
+    plt.bar(range(len(methods)), means, color="steelblue")
+    plt.xticks(range(len(methods)), methods, rotation=20, fontsize=8, ha="right")
+    plt.ylabel("Peak AoI (min)")
+    plt.title("Ablation at L=15 km: each ingredient contributes")
+    plt.grid(alpha=0.3, axis="y")
+    plt.tight_layout()
+    out = os.path.join(RES, "fig_ablation.png")
+    plt.savefig(out, dpi=150)
+    print("wrote", out)
+
+
 if __name__ == "__main__":
     fig_curves()
     fig_mstar()
     fig_prop1_phys()
     fig_prop2()
+    fig_crossover()
+    fig_ablation()

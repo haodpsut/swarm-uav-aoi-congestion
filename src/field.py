@@ -103,6 +103,16 @@ def _centroid(pts):
     return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
 
 
+def partition_field(K: int, L: float, M: int, seed: int):
+    """Return (points, groups): the sensor set and its k-means partition into M
+    sub-fields (list of coord-lists). Same field per seed. Used by the GPU
+    trajectory optimizer, which needs raw sensor coordinates per UAV."""
+    rng = random.Random(seed)
+    pts = [(rng.uniform(0, L), rng.uniform(0, L)) for _ in range(K)]
+    groups = _kmeans(pts, M, rng)
+    return pts, [g for g in groups if g]
+
+
 def patrol_geometry(K: int, L: float, M: int, seed: int):
     """Per-UAV sub-field geometry for the physical model (SI metres).
 

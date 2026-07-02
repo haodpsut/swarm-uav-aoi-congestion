@@ -4,11 +4,11 @@ channels:
 dependencies:
   - python=3.11
   - numpy
+  - scipy            # Wilcoxon signed-rank test in joint_solver.py
   - matplotlib
-  # --- Current phase (Prop.1 validation) is CPU-only and uses only the above. ---
-  # --- The following are added at the SOLVER phase (SCA trajectory + LP + GPU): ---
-  # - scipy            # convex subproblems
-  # - pip:
-  #     - pulp         # LP for assignment / placement relaxations
-  # GPU (RTX 4090) PyTorch is introduced only when the batched trajectory solver
-  # lands; the analytical queue validation below does not need it.
+  - pip
+  - pip:
+      # On the Linux GPU server, the default torch wheel is the CUDA build, so
+      # the CETSP trajectory optimiser (src/trajectory.py) runs on the RTX 4090
+      # automatically (it falls back to CPU if CUDA is absent).
+      - torch

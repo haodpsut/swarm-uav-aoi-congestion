@@ -29,8 +29,17 @@ python experiments/validate_prop1_phys.py
 # Prop. 2, placement inversion (coverage- vs traffic-optimal), ~1-3 min
 python experiments/prop2_placement.py
 
+# Joint solver vs baselines (GPU CETSP trajectory) + crossover + ablation.
+# This is the GPU workload: the CETSP optimiser uses the RTX 4090 automatically.
+python experiments/joint_solver.py
+
 # render all figures from the CSVs -> results/*.png
 python experiments/make_figures.py
+```
+
+Verify the GPU is actually used:
+```bash
+python -c "import torch; print('CUDA', torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else '')"
 ```
 
 ## 3. Push results back
