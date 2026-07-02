@@ -9,8 +9,10 @@ a trajectory block, a finite-source queue evaluation, a port-allocation block,
 an assignment block, and an outer placement search. Fig.~\ref{fig:solver}
 sketches the flow. The blocks share the peak-AoI objective \eqref{eq:peak_m},
 so a change accepted by one block is scored by the same criterion the others
-use, and the loop drives the peak AoI down monotonically until no block can
-improve it. We describe each block, then the overall algorithm.
+use: the assignment search drives the peak AoI down monotonically to a local
+optimum, while the placement and port searches are enumerated exhaustively and
+retain the best configuration found. We describe each block, then the overall
+algorithm.
 
 \subsection{Trajectory block (GPU CETSP)}
 \label{subsec:traj_block}
@@ -53,7 +55,7 @@ independent of placement and is solved once at the start.
 \label{subsec:port_block}
 Given an assignment, each open station $s$ is the finite-source queue of
 Section~\ref{sec:model}. Its mean wait $\Wq(N_s,c_s)$ follows the machine-repair
-fixed point \eqref{eq:pn} to \eqref{eq:wq} from the number of assigned UAVs $N_s$,
+balance equations \eqref{eq:pn} to \eqref{eq:wq} from the number of assigned UAVs $N_s$,
 the ports $c_s$, the operating time \eqref{eq:uptime}, and the charge time
 $\tau_{\mathrm{charge}}$; this evaluation is what turns a candidate configuration
 into a peak AoI through \eqref{eq:peak_m}. Ports are then allocated across the
@@ -69,9 +71,10 @@ budgets $S_{\max}$ considered here.
 \label{subsec:assign_block}
 With placement and ports fixed, UAVs are assigned to open stations to balance the
 queueing load. Starting from the nearest-station assignment, we run a greedy
-load-balancing local search: we repeatedly reassign the single UAV whose move
-gives the largest reduction in peak AoI \eqref{eq:peak_m}, and stop when no
-single reassignment improves it. Because the peak AoI is set by the worst
+load-balancing local search: scanning the UAVs in turn, we apply the first
+single-UAV reassignment that strictly reduces the peak AoI \eqref{eq:peak_m},
+restart the scan after each accepted move, and stop when no single reassignment
+improves it. Because the peak AoI is set by the worst
 station, driving it down repeatedly pulls UAVs off the most contended station
 onto lighter ones, so the search approximates the min-max (load-balancing)
 assignment $\argmin_{a}\max_s \Wq(N_s,c_s)$ without enumerating all
@@ -113,10 +116,10 @@ finite-source queue.
   \FOR{each port split $\mathbf{c}$ with $\sum_s c_s = C_{\mathrm{tot}}$}
     \STATE $\mathbf{a}\gets$ nearest-station assignment
     \REPEAT
-      \STATE among all single-UAV reassignments, pick the one that most reduces
-        the peak AoI \eqref{eq:peak_m}, evaluating $\Wq$ by \eqref{eq:wq}
-      \STATE apply it if it improves the peak AoI
-    \UNTIL{no single reassignment improves the peak AoI}
+      \STATE scan single-UAV reassignments; apply the first one that strictly
+        reduces the peak AoI \eqref{eq:peak_m} (evaluating $\Wq$ by \eqref{eq:wq})
+        and restart the scan
+    \UNTIL{no single reassignment reduces the peak AoI}
     \STATE $\bar{A}\gets$ peak AoI of $(\mathbf{x},\mathbf{c},\mathbf{a})$
     \IF{$\bar{A} < \bar{A}^\star$}
       \STATE $\bar{A}^\star\gets\bar{A}$; store $(\mathbf{x},\mathbf{c},\mathbf{a})$
@@ -132,11 +135,11 @@ GPU optimization independent of the placement search. The outer loops evaluate
 $\binom{S}{S_{\max}}$ placements times the number of port splits, and each
 evaluation runs the greedy assignment, whose local search terminates because
 every accepted move strictly lowers the peak AoI (a quantity bounded below by
-zero) and there are finitely many assignments. Each block leaves the peak AoI no
-higher than it found it: the port and assignment blocks accept a change only when
-it lowers \eqref{eq:peak_m}, and the placement search keeps the best subset seen.
-The peak AoI is therefore non-increasing across the alternation and the procedure
-converges to a coordinate-wise local optimum. We do not claim global optimality:
-the trajectory order is fixed and the assignment search is greedy, so the result
-is the best configuration reachable by improving one block at a time from the
-initialization.
+zero) and there are finitely many assignments. For a fixed placement and port
+split, the returned assignment is a local optimum of \eqref{eq:peak_m} under
+single-UAV moves; because the placement and port searches are exhaustive over the
+candidate grid and the integer splits, and the best configuration is retained,
+the solver returns the lowest peak AoI it evaluates. We do not claim global
+optimality: the trajectory order is fixed and the assignment search is greedy, so
+the result is the best configuration reachable by this search from the
+nearest-station initialization, not necessarily the global optimum of (P0).

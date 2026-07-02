@@ -27,9 +27,10 @@ S.~Kaul, R.~Yates, and M.~Gruteser, ``Real-time status: How often should one
 
 \bibitem{base2024}
 \BIBentryALTinterwordspacing
-J.~Liu, F.~Yang, X.~Wang, L.~Qu \emph{et~al.}, ``Joint optimization of charging
-  station placement and {UAV} trajectory for fresh data collection,''
-  \emph{IEEE Internet of Things Journal}, 2024. [Online]. Available:
+J.~Liu, F.~Yang, X.~Wang, L.~Qu, M.~Jin, and H.~Dai, ``Joint optimization of
+  charging station placement and {UAV} trajectory for fresh data collection,''
+  \emph{IEEE Internet of Things Journal}, vol.~11, no.~14, pp.
+  25\,057--25\,073, 2024. [Online]. Available:
   \url{https://ieeexplore.ieee.org/document/10506755}
 \BIBentrySTDinterwordspacing
 
@@ -44,39 +45,42 @@ Y.~Wei, Y.~Lu, P.~Zhao, S.~Leng, and K.~Yang, ``Minimizing age of information
 
 \bibitem{sun2025laser}
 \BIBentryALTinterwordspacing
-G.~Sun, L.~Zhang, J.~Li \emph{et~al.}, ``Age of information optimization in
-  laser-charged {UAV}-assisted {IoT} networks: A multi-agent deep reinforcement
-  learning method,'' arXiv:2507.08429, 2025. [Online]. Available:
-  \url{https://arxiv.org/abs/2507.08429}
+G.~Sun, L.~Zhang, J.~Li, J.~Wu, J.~Wang, Z.~Sun, C.~Zhao, and V.~C.~M. Leung,
+  ``Age of information optimization in laser-charged {UAV}-assisted {IoT}
+  networks: A multi-agent deep reinforcement learning method,'' \emph{IEEE
+  Transactions on Network Science and Engineering}, vol.~13, pp. 1436--1457,
+  2026, arXiv:2507.08429. [Online]. Available:
+  \url{https://ieeexplore.ieee.org/document/11113352}
 \BIBentrySTDinterwordspacing
 
 \bibitem{oubbati2024ugv}
 \BIBentryALTinterwordspacing
-A.~Messaoudi, O.~S. Oubbati, A.~Rachedi \emph{et~al.}, ``{UGV} charging
-  stations for {UAV}-assisted {AoI}-aware data collection,'' \emph{IEEE
-  Transactions on Cognitive Communications and Networking}, 2024. [Online].
-  Available: \url{https://ieeexplore.ieee.org/document/10510424}
+K.~Messaoudi, A.~Baz, O.~S. Oubbati, A.~Rachedi, T.~Bendouma, and
+  M.~Atiquzzaman, ``{UGV} charging stations for {UAV}-assisted {AoI}-aware data
+  collection,'' \emph{IEEE Transactions on Cognitive Communications and
+  Networking}, vol.~10, no.~6, pp. 2325--2343, 2024. [Online]. Available:
+  \url{https://ieeexplore.ieee.org/document/10510424}
 \BIBentrySTDinterwordspacing
 
 \bibitem{zhao2025aoi}
-P.~Zhao, Y.~Lu \emph{et~al.}, ``{AoI}-and-energy tradeoff scheduling for
-  multi-{UAV}-enabled data acquisition in wireless sensor networks,'' \emph{Ad
-  Hoc Networks}, 2025.
+H.~Zhao, Y.~Lu, Y.~Hong, C.~Luo, X.~Fan, and Z.~Chen, ``{AoI}-and-energy
+  tradeoff scheduling for multi-{UAV}-enabled data acquisition in wireless
+  sensor networks,'' \emph{Ad Hoc Networks}, vol. 178, p. 103985, 2025.
 
 \bibitem{eldeeb2023swarm}
 \BIBentryALTinterwordspacing
 E.~Eldeeb, M.~Shehab, and H.~Alves, ``Age minimization in massive {IoT} via
   {UAV} swarm: A multi-agent reinforcement learning approach,'' in \emph{Proc.
-  IEEE Int. Symp. Personal, Indoor and Mobile Radio Commun. (PIMRC)}, 2023,
-  arXiv:2309.14757. [Online]. Available:
+  IEEE Int. Symp. Personal, Indoor and Mobile Radio Commun. (PIMRC)}, 2023, pp.
+  1--6, arXiv:2309.14757. [Online]. Available:
   \url{https://ieeexplore.ieee.org/document/10293964}
 \BIBentrySTDinterwordspacing
 
 \bibitem{ev2022sharing}
 \BIBentryALTinterwordspacing
-``Performance analysis of charging infrastructure sharing in {UAV} and
-  {EV}-involved networks,'' 2022, arXiv:2208.06782. [Online]. Available:
-  \url{https://arxiv.org/abs/2208.06782}
+Y.~Qin, M.~A. Kishk, and M.-S. Alouini, ``Performance analysis of charging
+  infrastructure sharing in {UAV} and {EV}-involved networks,'' 2022,
+  arXiv:2208.06782. [Online]. Available: \url{https://arxiv.org/abs/2208.06782}
 \BIBentrySTDinterwordspacing
 
 \bibitem{yates2021aoi}
@@ -155,10 +159,13 @@ B.~Behdani and J.~C. Smith, ``An integer-programming-based approach to the
   Computing}, vol.~26, no.~3, pp. 415--432, 2014.
 
 \bibitem{cetsp}
+\BIBentryALTinterwordspacing
 W.~K. Mennell, ``Heuristics for solving three routing problems: Close-enough
   traveling salesman problem, close-enough vehicle routing problem, and
   sequence-dependent team orienteering problem,'' Ph.D. dissertation,
-  University of Maryland, College Park, 2009.
+  University of Maryland, College Park, 2009. [Online]. Available:
+  \url{https://drum.lib.umd.edu/handle/1903/9822}
+\BIBentrySTDinterwordspacing
 
 \bibitem{liu2021uav}
 J.~Liu, P.~Tong, X.~Wang, B.~Bai, and H.~Dai, ``{UAV}-aided data collection for

@@ -27,7 +27,7 @@ and which UAV recharges where.
 
 \subsection{Limitations of prior work}
 Existing studies address parts of this problem but not the whole. The closest
-work jointly optimises charging-station placement and trajectory, but for a
+work jointly optimizes charging-station placement and trajectory, but for a
 \emph{single} UAV, so there is no contention \cite{base2024}. Multi-UAV studies
 that model charging either assume a single fixed facility \cite{wei2024}, use
 mid-flight laser charging with fixed emitters and no queue \cite{sun2025laser},
@@ -58,14 +58,14 @@ non-monotone in the swarm size, with a provisioning law linking the optimal
 swarm size to the charging capacity, and a \emph{placement inversion} showing
 that the coverage-optimal placement is AoI-suboptimal under contention.
 \item We design a block-coordinate solver with a GPU close-enough-TSP trajectory
-optimiser (Section~\ref{sec:solver}) and evaluate it against single-UAV,
+optimizer (Section~\ref{sec:solver}) and evaluate it against single-UAV,
 single-station, coverage-optimal, and round-robin baselines
 (Section~\ref{sec:exp}). The proposed method reduces peak AoI significantly, and
 we report the results honestly, including the regime where a single pooled
 station is already strong.
 \end{itemize}
 
-The remainder of the paper is organised as follows.
+The remainder of the paper is organized as follows.
 Section~\ref{sec:related} reviews related work,
 Section~\ref{sec:model} presents the model and problem,
 Section~\ref{sec:analysis} the structural analysis,

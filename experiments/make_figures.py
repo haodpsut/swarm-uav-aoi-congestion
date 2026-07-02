@@ -192,7 +192,7 @@ def fig_prop1_phys():
     ax.annotate("coverage-limited\n(too few UAVs)", xy=(2, 33), xytext=(2.5, 55),
                 fontsize=8, color=OI["grey"], ha="left",
                 arrowprops=dict(arrowstyle="->", color=OI["grey"], lw=1.0))
-    ax.annotate("congestion-limited\n(charger queue)", xy=(18, 60), xytext=(9.5, 95),
+    ax.annotate("congestion-limited\n(charger queue)", xy=(18, 60), xytext=(8.6, 118),
                 fontsize=8, color=OI["grey"], ha="left",
                 arrowprops=dict(arrowstyle="->", color=OI["grey"], lw=1.0))
 

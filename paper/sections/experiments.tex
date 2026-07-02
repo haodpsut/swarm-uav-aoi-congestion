@@ -9,14 +9,14 @@ air-to-ground link uses a line-of-sight free-space rate. Candidate stations lie
 on a $3{\times}3$ grid; unless stated otherwise the budget is $S_{\max}{=}2$
 open stations and $C_{\mathrm{tot}}{=}4$ ports. Every reported value is a mean
 over $20$ to $30$ random sensor fields (fixed seeds), with the standard
-deviation shown where relevant. All trajectory optimisation runs on an
+deviation shown where relevant. All trajectory optimization runs on an
 NVIDIA RTX~4090.
 
 \subsection{Queue-model validation against a discrete-event simulation}
 The whole analysis rests on the charging-queue model, so we first validate it.
 We built a discrete-event simulation (DES) of the actual cycling UAVs, with a
 first-in-first-served station and $c$ ports, in which each UAV alternates between
-patrolling for a randomised operating time and travelling to the station to
+patrolling for a randomized operating time and traveling to the station to
 recharge. The simulation supports both exponential and near-deterministic
 operating and service times, and we run each configuration over eight seeds and
 a long horizon after a warm-up, then measure the true mean queue wait.
@@ -49,7 +49,7 @@ Fig.~\ref{fig:prop1} plots the peak AoI against swarm size $M$ for several port
 budgets. Each curve is U-shaped: increasing $M$ first lowers AoI (denser
 coverage) and then raises it (charging congestion), confirming the congestion
 threshold of Proposition~\ref{prop:ushape}. The optimal swarm size $M^\star$
-grows with the charging capacity, as summarised in Table~\ref{tab:mstar}, which
+grows with the charging capacity, as summarized in Table~\ref{tab:mstar}, which
 is exactly the provisioning law: more ports support a larger cost-effective
 swarm.
 
@@ -106,7 +106,7 @@ We compare the proposed joint solver (CETSP trajectory with traffic-optimal
 placement) against: a single pooled station (all ports at one central station,
 the strong Wei-style baseline \cite{wei2024}), a coverage-optimal placement, a
 round-robin assignment, and an ablation that replaces the CETSP trajectory with
-a nearest-neighbour patrol. Table~\ref{tab:ablation} reports the ablation at a
+a nearest-neighbor patrol. Table~\ref{tab:ablation} reports the ablation at a
 $15$~km field: the proposed method attains the lowest peak AoI, the CETSP
 trajectory contributes about $3.1\%$, and the contention-aware placement
 contributes substantially more. A Wilcoxon signed-rank test gives
@@ -123,7 +123,7 @@ statistically significant.
     Method & Peak AoI (min) \\
     \midrule
     Proposed (CETSP + traffic-optimal)       & \textbf{41.4} \\
-    No CETSP (nearest-neighbour patrol)       & 42.8 \\
+    No CETSP (nearest-neighbor patrol)       & 42.8 \\
     Single pooled station \cite{wei2024}      & 46.8 \\
     Coverage-optimal placement                & 50.8 \\
     Round-robin assignment                    & 57.0 \\
@@ -146,7 +146,7 @@ and the gain grows with the field (from $4.1\%$ at $5$~km to $12.6\%$ at
 $20$~km) because travel cost dominates as the field grows. We stress an honest
 point: an earlier version using the open $M/M/c$ queue produced a spurious
 crossover in which the single pooled station appeared to win in small fields.
-That artifact came from the open queue overpenalising split stations. With the
+That artifact came from the open queue overpenalizing split stations. With the
 DES-validated finite-source model, whose wait saturates rather than diverging,
 the artifact disappears and the distributed placement is preferred throughout.
 
@@ -169,14 +169,14 @@ together. When freshness targets tighten, adding ports (raising $M^\star$) is
 often more effective than adding UAVs to an already congested system.
 
 Second, charging stations should be placed to balance the queueing load, not
-only to minimise flight detour. The coverage-optimal placement concentrates the
+only to minimize flight detour. The coverage-optimal placement concentrates the
 recharge traffic and inflates the wait; spreading the stations lowers the peak
 AoI even at the cost of longer trips, and the benefit grows with the field size
 because travel then dominates. A single pooled station remains a sensible choice
 only in small fields where travel is cheap, which the field-size sweep makes
 explicit.
 
-Third, the queueing model matters as much as the optimiser. Treating the
+Third, the queueing model matters as much as the optimizer. Treating the
 charging system as an open $M/M/c$ queue overstates the wait by about $6\times$
 and, as shown above, can flip a design decision (the spurious small-field
 crossover). The finite-source model removes this bias and, being a conservative

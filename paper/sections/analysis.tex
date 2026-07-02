@@ -57,33 +57,59 @@ Let $\{n_t\}$ denote the birth-death chain of Section~\ref{sec:model} on states
 $n\in\{0,\dots,M\}$ (UAVs at the station), with up-rates $(M-n)\lambda$ and
 down-rates $\min(n,c)\mu$ \cite{grossharris}. Increasing the population from $M$
 to $M+1$ adds one source: at every state the up-rate weakly increases (from
-$(M-n)\lambda$ to $(M+1-n)\lambda$) while the down-rate is unchanged. A standard
-coupling of the two chains keeps the $(M+1)$-chain pathwise at least as high as
-the $M$-chain, so the number in system, and hence the number waiting
-$\max(0,n-c)$, is stochastically larger for population $M+1$. Taking expectations,
-the mean queue length $L_{\mathrm q}(M)$ is non-decreasing in $M$; by Little's law
-on the throughput, $\Wq(M,c)=L_{\mathrm q}(M)/\lambda_{\mathrm{eff}}(M)$ inherits
-monotonicity, and the inequality is strict once $M>c$ because states with $n>c$
-then carry positive probability. For \eqref{eq:wq-bound}, at most $M$ UAVs are
-present, at most $c$ are in service, so the number waiting is at most $M-c$ and
-$L_{\mathrm q}(M)\le M-c$; the throughput obeys
-$\lambda_{\mathrm{eff}}(M)=\mu\,\mathbb{E}[\min(n,c)]\le c\mu$, but the wait is
-maximised when all servers stay busy, giving $\Wq\le (M-c)/(c\mu)$.
+$(M-n)\lambda$ to $(M{+}1-n)\lambda$) while the down-rate is unchanged. A standard
+monotone coupling of the two chains keeps the $(M{+}1)$-chain pathwise at least as
+high as the $M$-chain, so the stationary number in system is stochastically
+increasing in $M$.
+
+We convert this into a statement about the wait through the arriving-UAV view,
+rather than through the queue length alone: because the effective throughput
+$\lambda_{\mathrm{eff}}(M)$ also grows with $M$, monotonicity of the ratio
+$\Wq=L_{\mathrm q}/\lambda_{\mathrm{eff}}$ does not follow from monotonicity of
+$L_{\mathrm q}$ by itself. By the arrival theorem for finite-source
+(machine-repair) queues \cite{grossharris}, a UAV that requests a charge in the
+$M$-population system finds the station distributed as the \emph{stationary}
+distribution of the $(M{-}1)$-population system. A UAV that finds $n$ present is
+served after $(n-c+1)^{+}$ successive departures, each exponential of rate $c\mu$
+while the $c$ servers stay busy, so its conditional mean wait is
+$(n-c+1)^{+}/(c\mu)$, which is non-decreasing in $n$. Averaging a non-decreasing
+function against a distribution that is stochastically increasing in $M$,
+$\Wq(M,c)$ is non-decreasing in $M$ (and equals the Little's-law form
+$L_{\mathrm q}/\lambda_{\mathrm{eff}}$ evaluated in Section~\ref{sec:model}). The
+increase is strict once $M>c$, because states $n>c$ then carry positive
+probability in the arriving-UAV distribution and contribute a strictly positive
+wait. For \eqref{eq:wq-bound}, an arriving UAV finds at most $M-1$ others present,
+so $n\le M-1$ and its conditional wait is at most
+$(M-1-c+1)/(c\mu)=(M-c)/(c\mu)$; taking the expectation gives
+$\Wq(M,c)\le (M-c)/(c\mu)$.
 \end{IEEEproof}
 
 \noindent
-Two consequences of Lemma~\ref{lem:wq} drive the result. Below $c$ the wait is
+Two features of Lemma~\ref{lem:wq} drive the result. Below $c$ the wait is
 essentially zero (no UAV ever queues), and above $c$ it climbs, ultimately at the
-linear rate $\Theta(M/(c\mu))$ of \eqref{eq:wq-bound}. Its forward differences
-$\Delta\Wq(M)\triangleq\Wq(M{+}1,c)-\Wq(M,c)$ are therefore non-negative, and are
-non-decreasing as the cell moves from the underloaded region ($\Delta\Wq\approx0$)
-into saturation, i.e. $\Wq(\cdot,c)$ is discretely convex.
+linear rate $\Theta(M/(c\mu))$ of \eqref{eq:wq-bound}: its forward differences
+$\Delta\Wq(M)\triangleq\Wq(M{+}1,c)-\Wq(M,c)$ are non-negative and rise from
+$\Delta\Wq\approx0$ in the underloaded region toward the saturation slope
+$1/(c\mu)$. We take this saturating shape as an explicit assumption.
+
+\begin{assumption}[Saturating charging increments]
+\label{ass:wq-convex}
+For each fixed $c$, the increment $\Delta\Wq(M,c)$ is non-decreasing in $M$ (so
+$\Wq(\cdot,c)$ is discretely convex), and $\Delta\Wq(M,c)$ is non-increasing in
+$c$.
+\end{assumption}
+
+\noindent
+Both parts reflect the same mechanism: added contention (larger $M$) steepens the
+wait, while added ports (larger $c$) flatten it and defer saturation. They are
+verified numerically across the tested field and capacity configurations in
+Section~\ref{sec:exp}.
 
 \begin{proposition}[Congestion threshold and provisioning law]
 \label{prop:ushape}
 Under Assumption~\ref{ass:coverage} and Lemma~\ref{lem:wq}, the peak AoI
 $\Aoi(M)$ in \eqref{eq:aoi-decomp} is quasi-convex in the swarm size $M$ and
-admits a unique interior minimiser
+admits a unique interior minimizer
 \begin{equation}
 M^\star \;=\; \argmin_{M\in\{1,2,\dots\}} \Aoi(M),
 \end{equation}
@@ -101,8 +127,9 @@ Since $c_0$ is constant in \eqref{eq:aoi-decomp}, work with the forward differen
 \end{equation}
 where $\Delta c_1(M)=c_1(M{+}1)-c_1(M)$. By Assumption~\ref{ass:coverage},
 $c_1$ is strictly decreasing and convex, so $\Delta c_1(M)<0$ and $\Delta c_1(M)$
-is non-decreasing (it rises toward $0$ as $M\to\infty$). By Lemma~\ref{lem:wq},
-$\Delta\Wq(M)\ge0$ and is non-decreasing. Hence the right-hand side of
+is non-decreasing (it rises toward $0$ as $M\to\infty$). By Lemma~\ref{lem:wq}
+$\Delta\Wq(M)\ge0$, and by Assumption~\ref{ass:wq-convex} it is non-decreasing.
+Hence the right-hand side of
 \eqref{eq:delta-aoi} is a sum of two non-decreasing terms, so $\Delta\Aoi(M)$ is
 non-decreasing in $M$: the sequence $\Aoi(M)$ is discretely convex.
 
@@ -114,12 +141,14 @@ $\Delta c_1(M)=\Theta(1/M)-\Theta(1/(M{+}1))\to0^{-}$ while, by
 eventually: AoI is rising. A non-decreasing difference sequence that is negative
 for small $M$ and positive for large $M$ changes sign exactly once, from negative
 to positive. The last index with $\Delta\Aoi(M)<0$ is the unique interior
-minimiser $M^\star$, which establishes the U-shape.
+minimizer $M^\star$, which establishes the U-shape.
 
-For the provisioning law, fix $M$ and increase $c$. By Lemma~\ref{lem:wq} applied
-across capacities, $\Wq(M,c)$ is decreasing in $c$ (more ports serve the same
-population), and so are its increments $\Delta\Wq(M;c)$ for every $M$: enlarging
-the station both lowers the wait and defers the onset of the steep saturation
+For the provisioning law, fix $M$ and increase $c$. The same monotone coupling,
+now applied to the down-rates $\min(n,c)\mu$ (which increase with $c$), makes the
+stationary occupancy stochastically smaller, so $\Wq(M,c)$ is decreasing in $c$
+(more ports serve the same population); by Assumption~\ref{ass:wq-convex} its
+increments $\Delta\Wq(M;c)$ are non-increasing in $c$ as well. Enlarging the
+station thus both lowers the wait and defers the onset of the steep saturation
 region to a larger population. The coverage difference $\Delta c_1(M)$ is
 unchanged. Hence for $c'>c$ we have $\Delta\Aoi(M;c')\le\Delta\Aoi(M;c)$ for all
 $M$, so the single sign change of $\Delta\Aoi(\cdot;c')$ occurs at an index at
@@ -175,11 +204,24 @@ the extra detour $\delta$. Subtracting,
 \Aoi_{\mathrm A}(M)-\Aoi_{\mathrm B}(M)
 = \Big[\Wq(M,c)-\Wq\!\left(\tfrac{M}{2},c\right)\Big] - \delta .
 \end{equation}
-By Lemma~\ref{lem:wq}, $\Wq(M,c)$ is non-decreasing in the population and grows at
-least linearly once $M>c$, with $\Wq(M,c)\ge (M-c)/(c\mu)\cdot\mathbb{1}\{M>c\}$
-behaviour, while $\Wq(M/2,c)$ either stays at $0$ (when $M/2\le c$) or grows at
-half the rate. Hence the bracketed difference is $\Theta(M/(c\mu))$ and diverges,
-whereas $\delta$ is a fixed constant. Therefore there is a finite threshold
+Two bounds make the bracket diverge. For the near station, the throughput cannot
+exceed the service ceiling, $\lambda_{\mathrm{eff}}\le c\mu$; combined with the
+finite-source cycle identity
+$\lambda_{\mathrm{eff}}=M/(T_{\mathrm{up}}+\Wq+\tau_{\mathrm{charge}})$ (each of
+the $M$ UAVs alternates operating, waiting, and charging), this gives the linear
+lower bound
+\begin{equation}
+\Wq(M,c)\;\ge\;\frac{M}{c\mu}-T_{\mathrm{up}}-\tau_{\mathrm{charge}} .
+\end{equation}
+For the split station, the Lemma upper bound \eqref{eq:wq-bound} gives
+$\Wq(M/2,c)\le (M/2-c)/(c\mu)\le M/(2c\mu)$. Subtracting,
+\begin{equation}
+\Wq(M,c)-\Wq\!\left(\tfrac{M}{2},c\right)
+\;\ge\;\frac{M}{2c\mu}-T_{\mathrm{up}}-\tau_{\mathrm{charge}},
+\end{equation}
+which grows without bound in $M$ (the constants $T_{\mathrm{up}}$ and
+$\tau_{\mathrm{charge}}$ do not depend on $M$), whereas $\delta$ is fixed.
+Therefore there is a finite threshold
 \begin{equation}
 M_0 = \min\Big\{ M : \Wq(M,c)-\Wq\!\left(\tfrac{M}{2},c\right) > \delta \Big\}
 \end{equation}
@@ -194,6 +236,6 @@ Proposition~\ref{prop:inversion} formalises the inversion: as the swarm grows, t
 optimal placement stops chasing the shortest detour and starts spreading stations
 to balance queueing load, so the objective flips from coverage-driven to
 traffic-driven. The single-UAV placement rule of the base model is thus not a
-conservative approximation but the wrong optimiser for a contended swarm. This
+conservative approximation but the wrong optimizer for a contended swarm. This
 crossover, including the emergence of the load-balanced placement as the field and
 swarm scale, is demonstrated empirically in Section~\ref{sec:exp}.
