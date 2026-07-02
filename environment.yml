@@ -4,11 +4,11 @@ channels:
 dependencies:
   - python=3.11
   - numpy
-  - scipy
-  - pandas
   - matplotlib
-  - networkx
-  - tqdm
-  - pip
-  - pip:
-      - pulp            # LP for assignment / placement relaxations
+  # --- Current phase (Prop.1 validation) is CPU-only and uses only the above. ---
+  # --- The following are added at the SOLVER phase (SCA trajectory + LP + GPU): ---
+  # - scipy            # convex subproblems
+  # - pip:
+  #     - pulp         # LP for assignment / placement relaxations
+  # GPU (RTX 4090) PyTorch is introduced only when the batched trajectory solver
+  # lands; the analytical queue validation below does not need it.
