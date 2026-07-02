@@ -1,0 +1,14 @@
+name: swarm-uav-aoi
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - networkx
+  - tqdm
+  - pip
+  - pip:
+      - pulp            # LP for assignment / placement relaxations
