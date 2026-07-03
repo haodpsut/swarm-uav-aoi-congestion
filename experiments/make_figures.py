@@ -115,6 +115,7 @@ def fig_des():
     rho = np.array([float(r["rho"]) for r in rows])
     mmc = np.array([float(r["mmc_wq"]) for r in rows])
     fs = np.array([float(r["finite_wq"]) for r in rows])
+    md = np.array([float(r["md_wq"]) for r in rows]) if "md_wq" in rows[0] else None
     de = np.array([float(r["des_mm_wq"]) for r in rows])
     dd = np.array([float(r["des_real_wq"]) for r in rows])
 
@@ -129,7 +130,10 @@ def fig_des():
     ax.plot(rho, mmc, marker="x", ms=5, ls="--", color=OI["verm"],
             label="open M/M/c (assumes $\\infty$ sources)")
     ax.plot(rho, fs, marker="s", ms=4, ls="-", color=OI["blue"],
-            label="finite-source (our model)")
+            label="finite-source $M/M/c//N$")
+    if md is not None:
+        ax.plot(rho, md, marker="d", ms=3.5, ls="-.", color=OI["purple"],
+                label="$M/D/c//N$ approx.")
     ax.plot(rho, de, marker="o", ms=4, ls="none", color=OI["sky"],
             mfc="none", label="DES, exp op.+svc.")
     ax.plot(rho, dd, marker="^", ms=4, ls="none", color=OI["green"],
@@ -459,8 +463,30 @@ def fig_sensitivity():
     save(fig, "fig_sensitivity.png")
 
 
+def fig_scale():
+    path = os.path.join(RES, "scale.csv")
+    if not os.path.exists(path):
+        return
+    rows = sorted(load(path), key=lambda r: int(r["M"]))
+    M = [int(r["M"]) for r in rows]
+    prop = [float(r["proposed_min"]) for r in rows]
+    single = [float(r["single_min"]) for r in rows]
+    cov = [float(r["coverage_min"]) for r in rows]
+    fig, ax = plt.subplots(figsize=(3.5, 3.0))
+    ax.plot(M, cov, marker="^", color=OI["verm"], label="coverage-optimal")
+    ax.plot(M, single, marker="s", color=OI["green"], label="single pooled station")
+    ax.plot(M, prop, marker="o", color=ACCENT, label="proposed (ours)")
+    ax.set_xlabel("Swarm size $M$ ($K{=}8M$ sensors)")
+    ax.set_ylabel("Peak AoI (min)")
+    ax.set_title("Scaling to a large swarm (capacity grows with $M$)")
+    style_axes(ax)
+    ax.legend(frameon=False, fontsize=8)
+    save(fig, "fig_scale.png")
+
+
 if __name__ == "__main__":
     fig_des()            # queue-model validation vs DES
+    fig_scale()          # large-swarm scaling
     fig_prop1_phys()     # U-shape family (congestion threshold)
     fig_mstar()          # provisioning M*(capacity)
     fig_prop2()          # coverage vs traffic placement (per seed)

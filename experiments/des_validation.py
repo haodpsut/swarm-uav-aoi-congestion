@@ -23,7 +23,8 @@ import random
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from queue_model import wq as erlang_wq, solve_fixed_point, finite_source_wq  # noqa: E402
+from queue_model import (wq as erlang_wq, solve_fixed_point,  # noqa: E402
+                         finite_source_wq, finite_source_wq_md)
 
 
 def simulate(M, c, tau_fly, tau_charge, travel, service="det", operating="det",
@@ -104,8 +105,8 @@ def main():
 
     print("Mean queue wait Wq [s]. DES columns: 'MM' = exp operating + exp service "
           "(== finite-source assumptions); 'real' = deterministic (the true system).\n")
-    print(f"{'M':>3} {'c':>2} {'rho':>5} | {'MMc':>8} {'FiniteS':>8} | "
-          f"{'DES_MM':>7} {'FS/MM':>6} | {'DESreal':>7} {'FS/real':>7}")
+    print(f"{'M':>3} {'c':>2} {'rho':>5} | {'MMc':>8} {'FiniteS':>8} {'M/D':>7} | "
+          f"{'DES_MM':>7} {'FS/MM':>6} | {'DESreal':>7} {'FS/real':>7} {'MD/real':>7}")
     rows = []
     for M, c in configs:
         lam, w_mmc, rho, stable = solve_fixed_point(M, c, mu, tau_fly, tau_charge)
@@ -114,33 +115,38 @@ def main():
         # up-time = patrol budget + round-trip travel (matches the DES cycle).
         up_time = tau_fly + 2.0 * travel
         w_fs, Lq, lam_eff, rho_fs = finite_source_wq(M, c, up_time, tau_charge)
+        # M/D/c//N approximation (deterministic service, cs2=0) tightens M/M.
+        w_md, _ = finite_source_wq_md(M, c, up_time, tau_charge, cs2=0.0)
 
         # DES with exp-operating + exp-service reproduces finite-source assumptions.
         des_mm = sum(simulate(M, c, tau_fly, tau_charge, travel, "exp", "exp", seed=s) for s in seeds) / len(seeds)
         # DES with deterministic operating + service is the realistic system.
         des_real = sum(simulate(M, c, tau_fly, tau_charge, travel, "det", "det", seed=s) for s in seeds) / len(seeds)
         r_mm = f"{w_fs / des_mm:.2f}" if des_mm > 0.5 else "  -"   # 0/0 at ~no-load
+        r_md = f"{w_md / des_real:.2f}" if des_real > 0.5 else "  -"
         r_real = f"{w_fs / des_real:.2f}" if des_real > 0.5 else "  -"
-        print(f"{M:>3} {c:>2} {rho_fs:>5.2f} | {w_mmc:>8.1f} {w_fs:>8.1f} | "
-              f"{des_mm:>7.1f} {r_mm:>6} | {des_real:>7.1f} {r_real:>7}")
-        rows.append([M, c, rho_fs, w_mmc, w_fs, des_mm, des_real])
+        print(f"{M:>3} {c:>2} {rho_fs:>5.2f} | {w_mmc:>8.1f} {w_fs:>8.1f} {w_md:>7.1f} | "
+              f"{des_mm:>7.1f} {r_mm:>6} | {des_real:>7.1f} {r_real:>7} {r_md:>7}")
+        rows.append([M, c, rho_fs, w_mmc, w_fs, w_md, des_mm, des_real])
 
     # (1) Formula check: finite-source should MATCH DES under exp-operating+service.
-    mm_pairs = [(r[4], r[5]) for r in rows if r[5] > 1.0]
+    mm_pairs = [(r[4], r[6]) for r in rows if r[6] > 1.0]
     if mm_pairs:
         err = sum(abs(wf - de) / de for wf, de in mm_pairs) / len(mm_pairs)
         print(f"\n[formula check] finite-source vs DES(exp op+svc): mean rel. error "
               f"= {100*err:.1f}% (small -> the M/M/c//N formula is correct).")
-    # (2) Realism: finite-source is a CONSERVATIVE upper bound on the real system.
-    real_pairs = [(r[4], r[6]) for r in rows if r[6] > 1.0]
+    # (2) Realism: finite-source (M/M) vs the M/D approximation vs DES(real).
+    real_pairs = [(r[4], r[5], r[7]) for r in rows if r[7] > 1.0]
     if real_pairs:
-        cons = sum(1 for wf, dr in real_pairs if wf >= dr - 1e-6)
-        fac = sum(wf / dr for wf, dr in real_pairs) / len(real_pairs)
-        print(f"[realism] finite-source >= DES(real) in {cons}/{len(real_pairs)} "
-              f"configs (conservative), mean factor {fac:.1f}x. Real waits are lower "
-              f"because operating+charging are near-deterministic, not exponential.")
+        cons = sum(1 for wmm, wmd, dr in real_pairs if wmm >= dr - 1e-6)
+        fac_mm = sum(wmm / dr for wmm, wmd, dr in real_pairs) / len(real_pairs)
+        fac_md = sum(wmd / dr for wmm, wmd, dr in real_pairs) / len(real_pairs)
+        print(f"[realism] vs DES(real): M/M finite-source over-predicts {fac_mm:.1f}x "
+              f"(conservative, {cons}/{len(real_pairs)}); the M/D approximation "
+              f"tightens this to {fac_md:.1f}x. Residual is the near-deterministic "
+              f"OPERATING process, which the service-only correction does not model.")
     # (3) Why M/M/c is wrong.
-    mmc_pairs = [(r[3], r[5]) for r in rows if r[5] > 1.0]
+    mmc_pairs = [(r[3], r[6]) for r in rows if r[6] > 1.0]
     if mmc_pairs:
         fac = sum(wm / de for wm, de in mmc_pairs) / len(mmc_pairs)
         print(f"[open M/M/c] over-predicts DES(exp) by {fac:.1f}x -> the WRONG model "
@@ -150,7 +156,7 @@ def main():
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "des_validation.csv"), "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["M", "c", "rho", "mmc_wq", "finite_wq", "des_mm_wq", "des_real_wq"])
+        w.writerow(["M", "c", "rho", "mmc_wq", "finite_wq", "md_wq", "des_mm_wq", "des_real_wq"])
         w.writerows(rows)
     print("\nSaved results/des_validation.csv")
 

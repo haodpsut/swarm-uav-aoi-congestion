@@ -81,7 +81,16 @@ that is central to our setting and does not address the placement of fixed,
 multi-port stations. Finally, \cite{ev2022sharing} does model UAV charging
 stations as a contended queue and provides a waiting-time analysis, but it
 optimizes neither AoI nor trajectory nor station placement, so the queueing
-model is not coupled to any freshness or mobility decision. When we make
+model is not coupled to any freshness or mobility decision. Beyond aerial
+platforms, a broad literature schedules the charging of vehicle and sensor
+fleets: auction-based time-slot allocation coordinates recharging across a
+multi-drone network in \cite{shin2019auction}, decentralized protocols shift
+electric-vehicle charging in time to flatten aggregate demand in
+\cite{gan2013ev}, and a mobile wireless charger is routed to replenish a sensor
+fleet in \cite{xie2012immortal}. These dynamic-fleet-charging methods decide
+when and where each vehicle charges, yet they neither jointly place and size the
+shared stations nor couple the induced charging wait into an Age-of-Information
+objective for a UAV swarm, which is the focus of our formulation. When we make
 contention explicit, we model a station as a finite-source (closed) service
 system rather than an open queue. This places our analysis in the lineage of the
 machine-repair, or machine-interference, problem surveyed in \cite{haque2007machine}
@@ -101,8 +110,8 @@ peak-AoI objective. Our work closes this gap by jointly optimizing station
 placement, port capacity, swarm trajectory, and source-to-UAV assignment under
 a charging model that is a contended, multi-server, and finite-source (closed)
 queue, validated against discrete-event simulation. The finite-source aspect
-is not a cosmetic refinement: because the number of UAVs competing for a
-station is small and closed, modeling the queue as an open M/M/c system
+is essential rather than incidental: because the number of UAVs competing for a
+station is small and closed, modeling the queue as an open $M/M/c$ system
 overpredicts waiting time and thereby distorts both placement and capacity
 decisions, an effect we quantify and correct with the finite-source model
 detailed in Section~\ref{sec:model}. This coupled formulation also yields two

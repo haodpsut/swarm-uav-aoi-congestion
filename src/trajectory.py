@@ -22,6 +22,8 @@ import math
 
 import torch
 
+from field import _two_opt, _nn_order
+
 
 def get_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -65,7 +67,7 @@ def _n_way_for(group, r_c):
 
 
 def optimize_trajectories(groups, r_c, V, iters=400, lr=8.0, lambda_cov=50.0,
-                          device=None, seed=0):
+                          device=None, seed=0, reorder_rounds=3):
     """Batched CETSP trajectory optimisation for all UAV sub-fields.
 
     groups : list of M sensor-coord lists (one per UAV).
@@ -99,27 +101,46 @@ def optimize_trajectories(groups, r_c, V, iters=400, lr=8.0, lambda_cov=50.0,
     wp = wp0.clone().requires_grad_(True)
     opt = torch.optim.Adam([wp], lr=lr)
 
-    for _ in range(iters):
-        opt.zero_grad()
-        # Closed tour length per UAV: sum of consecutive waypoint distances.
-        nxt = torch.roll(wp, shifts=-1, dims=1)
-        seg = torch.linalg.norm(nxt - wp, dim=2)          # [M, n_way]
-        tour_len = seg.sum(dim=1)                          # [M]
-        # Coverage: each sensor's distance to nearest waypoint must be <= r_c.
-        # dist2 [M, max_s, n_way]
-        diff = sensors.unsqueeze(2) - wp.unsqueeze(1)
-        dist = torch.linalg.norm(diff, dim=3)              # [M, max_s, n_way]
-        mind = dist.min(dim=2).values                      # [M, max_s]
-        viol = torch.clamp(mind - r_c, min=0.0) ** 2
-        cov_pen = (viol * smask).sum(dim=1)                # [M]
-        loss = (tour_len + lambda_cov * cov_pen).sum()
-        loss.backward()
-        opt.step()
+    def adam_block(n):
+        for _ in range(n):
+            opt.zero_grad()
+            # Closed tour length per UAV: sum of consecutive waypoint distances.
+            nxt = torch.roll(wp, shifts=-1, dims=1)
+            seg = torch.linalg.norm(nxt - wp, dim=2)          # [M, n_way]
+            tour_len = seg.sum(dim=1)                          # [M]
+            # Coverage: each sensor's distance to nearest waypoint must be <= r_c.
+            diff = sensors.unsqueeze(2) - wp.unsqueeze(1)
+            dist = torch.linalg.norm(diff, dim=3)              # [M, max_s, n_way]
+            mind = dist.min(dim=2).values                      # [M, max_s]
+            viol = torch.clamp(mind - r_c, min=0.0) ** 2
+            cov_pen = (viol * smask).sum(dim=1)                # [M]
+            loss = (tour_len + lambda_cov * cov_pen).sum()
+            loss.backward()
+            opt.step()
+
+    # Optimize positions to convergence for the current order, then alternate a
+    # discrete 2-opt re-ordering of the visiting sequence with a short position
+    # polish, so the tour ORDER is optimized jointly with the hover-point
+    # positions rather than frozen at initialization. A 2-opt pass on fixed points
+    # can only shorten the tour, and the subsequent polish only lowers the loss,
+    # so this refinement never worsens the result.
+    adam_block(iters)
+    for _ in range(max(0, reorder_rounds)):
+        with torch.no_grad():
+            wp_np = wp.detach().cpu().numpy()
+            for u in range(M):
+                pts = [list(map(float, wp_np[u, j])) for j in range(n_way)]
+                order = _two_opt(pts, _nn_order(pts))          # NN + 2-opt on current points
+                for j, idx in enumerate(order):
+                    wp.data[u, j] = torch.tensor(pts[idx], device=device)
+        # optimizer state is stale after the permutation; restart it and polish
+        opt = torch.optim.Adam([wp], lr=lr)
+        adam_block(max(1, iters // 3))
 
     with torch.no_grad():
         nxt = torch.roll(wp, shifts=-1, dims=1)
         tour_len = torch.linalg.norm(nxt - wp, dim=2).sum(dim=1)
-        # Report coverage violation for honesty (should be ~0).
+        # sanity check: coverage violation should be ~0
         diff = sensors.unsqueeze(2) - wp.unsqueeze(1)
         mind = torch.linalg.norm(diff, dim=3).min(dim=2).values
         max_viol = (torch.clamp(mind - r_c, min=0.0) * smask).max().item()

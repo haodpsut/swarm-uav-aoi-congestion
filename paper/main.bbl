@@ -199,6 +199,22 @@ J.~Xu, Y.~Zeng, and R.~Zhang, ``{UAV}-enabled wireless power transfer:
   Trajectory design and energy optimization,'' \emph{IEEE Transactions on
   Wireless Communications}, vol.~17, no.~8, pp. 5092--5106, 2018.
 
+\bibitem{shin2019auction}
+M.~Shin, J.~Kim, and M.~Levorato, ``Auction-based charging scheduling with deep
+  learning framework for multi-drone networks,'' \emph{IEEE Transactions on
+  Vehicular Technology}, vol.~68, no.~5, pp. 4235--4248, 2019.
+
+\bibitem{gan2013ev}
+L.~Gan, U.~Topcu, and S.~H. Low, ``Optimal decentralized protocol for electric
+  vehicle charging,'' \emph{IEEE Transactions on Power Systems}, vol.~28,
+  no.~2, pp. 940--951, 2013.
+
+\bibitem{xie2012immortal}
+L.~Xie, Y.~Shi, Y.~T. Hou, and H.~D. Sherali, ``Making sensor networks
+  immortal: An energy-renewal approach with wireless power transfer,''
+  \emph{IEEE/ACM Transactions on Networking}, vol.~20, no.~6, pp. 1748--1761,
+  2012.
+
 \bibitem{haque2007machine}
 L.~Haque and M.~J. Armstrong, ``A survey of the machine interference problem,''
   \emph{European Journal of Operational Research}, vol. 179, no.~2, pp.

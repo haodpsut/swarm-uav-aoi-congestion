@@ -74,6 +74,26 @@ def finite_source_wq(N: int, c: int, up_time: float, tau_charge: float):
     return Wq, Lq, lam_eff, rho_eff
 
 
+def finite_source_wq_md(N: int, c: int, up_time: float, tau_charge: float,
+                        cs2: float = 0.0):
+    """Approximate finite-source queue with (near-)DETERMINISTIC service:
+    an M/D/c//N approximation of the exponential-service M/M/c//N wait.
+
+    Uses the standard service-variability (Allen-Cunneen) correction: the mean
+    wait scales with (1 + cs2)/2, where cs2 is the squared coefficient of
+    variation of the service time. For exponential service cs2=1 (recovers M/M);
+    for deterministic charging cs2=0, halving the M/M wait. This tightens the
+    conservative M/M bound toward the near-deterministic reality; the residual
+    gap to a full discrete-event simulation is due to the near-deterministic
+    OPERATING (arrival) process, which this first-order correction does not model.
+    Returns (Wq, base_Wq_mm).
+    """
+    w_mm, Lq, lam_eff, rho = finite_source_wq(N, c, up_time, tau_charge)
+    if not math.isfinite(w_mm):
+        return w_mm, w_mm
+    return 0.5 * (1.0 + cs2) * w_mm, w_mm
+
+
 def wq(lmbda: float, c: int, mu: float) -> float:
     """Expected time spent waiting in queue (not counting service), M/M/c.
 

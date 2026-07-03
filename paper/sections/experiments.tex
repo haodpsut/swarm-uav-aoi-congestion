@@ -32,7 +32,16 @@ population: only $M$ UAVs
 exist, so the arrival rate falls as more of them are already charging. Using the
 open queue therefore distorts the design decisions (we show below that it
 produces a spurious placement crossover), which is why we adopt the
-finite-source model throughout.
+finite-source model throughout. The finite-source $M/M/c//N$ model assumes
+exponential service and is thus a conservative bound: it exceeds the real wait by
+about $4.5\times$. Replacing the exponential service by a deterministic-service
+$M/D/c//N$ approximation, obtained with the standard service-variability
+correction (the wait scales with $(1+c_s^2)/2$, where $c_s$ is the squared
+coefficient of variation of the service time, so $c_s^2{=}0$ halves the wait),
+tightens this to about $2.3\times$ (Fig.~\ref{fig:des}). The residual gap is due
+to the near-deterministic \emph{operating} process, which a service-only
+correction does not capture; since both models are upper bounds, the reported
+AoI values remain safe rather than optimistic.
 
 \begin{figure}[t]
   \centering
@@ -143,12 +152,12 @@ statistically significant.
 Fig.~\ref{fig:crossover} sweeps the field size. The proposed distributed,
 contention-aware placement beats the single pooled station at every field size,
 and the gain grows with the field (from $4.1\%$ at $5$~km to $12.6\%$ at
-$20$~km) because travel cost dominates as the field grows. We stress an honest
-point: an earlier version using the open $M/M/c$ queue produced a spurious
-crossover in which the single pooled station appeared to win in small fields.
-That artifact came from the open queue overpenalizing split stations. With the
+$20$~km) because travel cost dominates as the field grows. The choice of queue
+model is decisive here. Had the charging system been modeled as an open $M/M/c$
+queue, a spurious crossover would appear in which the single pooled station wins
+in small fields, because the open queue overpenalizes split stations. The
 DES-validated finite-source model, whose wait saturates rather than diverging,
-the artifact disappears and the distributed placement is preferred throughout.
+removes this artifact, and the distributed placement is preferred throughout.
 
 \begin{figure}[t]
   \centering
@@ -156,6 +165,26 @@ the artifact disappears and the distributed placement is preferred throughout.
   \caption{Field-size sweep. The proposed distributed placement beats the single
   pooled station at all sizes, with a widening margin as travel cost grows.}
   \label{fig:crossover}
+\end{figure}
+
+\subsection{Scaling to a large swarm}
+A swarm is only meaningful at larger scale, so we scale the fleet to $M=60$ UAVs
+over a $20$~km field with $K=8M$ sensors, and we grow the charging capacity with
+the swarm ($C_{\mathrm{tot}}=\lceil M/3\rceil$ ports) as the provisioning law of
+Proposition~\ref{prop:ushape} requires. Fig.~\ref{fig:scale} shows that the peak
+AoI stays controlled as the swarm grows, because the sensors and the charging
+capacity scale together, and that the proposed contention-aware placement keeps
+its advantage over the single pooled station and the coverage-optimal placement
+across the whole range. The design therefore applies to genuine swarms, not only
+to small fleets.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\columnwidth]{../results/fig_scale.pdf}
+  \caption{Scaling to a large swarm ($M$ up to $60$, $K=8M$ sensors, capacity
+  $C_{\mathrm{tot}}=\lceil M/3\rceil$ growing with the swarm). The proposed
+  placement keeps its advantage over the baselines at scale.}
+  \label{fig:scale}
 \end{figure}
 
 \subsection{Solver optimality}
@@ -167,8 +196,8 @@ identical per-UAV states, so the gap measures only the combinatorial heuristic.
 Table~\ref{tab:optgap} reports the result over $15$ seeds. The greedy placement
 and assignment are \emph{exactly} optimal for $M\le 6$ (they match the enumerated
 optimum on every seed), and remain within $0.11\%$ on average and below $1\%$ in
-the worst case at $M=8$. The heuristic is therefore essentially lossless in the
-regime where an exact comparison is tractable, which supports its use at the
+the worst case at $M=8$. The heuristic therefore matches the optimum wherever an
+exact comparison is tractable, which supports its use at the
 larger swarm sizes where enumeration is infeasible.
 
 \begin{table}[t]
@@ -207,7 +236,7 @@ non-uniform deployments.
 \subsection{Discussion and design guidelines}
 The results translate into concrete guidance for deploying a UAV swarm for fresh
 data collection. First, the swarm should not be sized by coverage alone. Because
-the peak AoI is non-monotone in the swarm size, there is a sweet spot
+the peak AoI is non-monotone in the swarm size, there is an optimal swarm size
 $M^\star$ beyond which extra UAVs only add charging congestion and worsen
 freshness; Table~\ref{tab:mstar} shows that $M^\star$ is set by the installed
 charging capacity, so the swarm size and the number of ports must be provisioned

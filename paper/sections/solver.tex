@@ -22,11 +22,15 @@ assigned sensor. The shortest patrol is therefore the shortest closed tour of
 hover points whose $r_c$-disks cover the UAV's sub-field, a Close-Enough
 Traveling Salesman Problem (CETSP)~\cite{cetsp}. We solve it by differentiable
 optimization. For UAV $m$, let $\mathbf{p}_{m,1},\dots,\mathbf{p}_{m,n_m}$ be
-its hover points in a fixed cyclic order (initialized by an angular sort of
-$k$-means centroids of the sub-field, which keeps the closed-tour length
-differentiable in the coordinates). Only the coordinates slide; the visiting
-order is frozen. The objective is the total closed-tour length plus a coverage
-penalty,
+its hover points, initialized at the $k$-means centroids of the sub-field. Within
+a cyclic order the closed-tour length is differentiable in the coordinates, so we
+minimize it by gradient descent. To also optimize the visiting order, and not
+freeze it at initialization, we alternate the continuous and combinatorial parts:
+we run a block of gradient steps on the coordinates, then reorder the current
+hover points by a $2$-opt improvement of the tour, then repeat. This is a
+coordinate descent between the continuous positions and the discrete sequence,
+so the order adjusts as the positions move. The objective is the total
+closed-tour length plus a coverage penalty,
 \begin{equation}
 \begin{split}
   \mathcal{L}
@@ -42,10 +46,10 @@ where indices are cyclic ($\mathbf{p}_{m,n_m{+}1}\equiv\mathbf{p}_{m,1}$),
 $\mathcal{K}_m$ is the sensor set assigned to UAV $m$, $d_{m,k}^{\min}$ is the
 distance from sensor $k$ to its nearest hover point, $[\cdot]_+=\max(0,\cdot)$,
 and $\lambda_{\mathrm{cov}}$ weights coverage against length. We minimize
-\eqref{eq:cetsp_loss} by Adam over the hover-point coordinates. All UAVs of a
-scenario are stacked into one padded, masked batch and optimized in parallel on
-a GPU, so the whole swarm (and, by stacking seeds, whole sweeps) is optimized in
-a single pass. The block returns each UAV's optimized tour length, hence its
+\eqref{eq:cetsp_loss} by Adam over the hover-point coordinates, interleaved with
+the $2$-opt reordering above. All UAVs of a scenario are stacked into one padded,
+masked batch and the gradient steps run in parallel on a GPU, so the whole swarm
+(and, by stacking seeds, whole sweeps) is optimized together. The block returns each UAV's optimized tour length, hence its
 flight time $t_{\mathrm{fly}}^{\mathrm{loop}}$ and, through \eqref{eq:taufly},
 its revisit period $t_{\mathrm{loop}}$ and flight budget $\tau_{\mathrm{fly}}$.
 Because the sub-fields are fixed by the field partition, this block is
