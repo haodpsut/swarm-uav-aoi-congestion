@@ -158,6 +158,52 @@ the artifact disappears and the distributed placement is preferred throughout.
   \label{fig:crossover}
 \end{figure}
 
+\subsection{Solver optimality}
+The placement and assignment blocks are greedy, so we ask how far they are from
+the true optimum. On small instances the exact optimum is computable by
+enumerating every open-site subset, every port split, and every
+UAV-to-station assignment; we run the greedy solver and the enumeration on
+identical per-UAV states, so the gap measures only the combinatorial heuristic.
+Table~\ref{tab:optgap} reports the result over $15$ seeds. The greedy placement
+and assignment are \emph{exactly} optimal for $M\le 6$ (they match the enumerated
+optimum on every seed), and remain within $0.11\%$ on average and below $1\%$ in
+the worst case at $M=8$. The heuristic is therefore essentially lossless in the
+regime where an exact comparison is tractable, which supports its use at the
+larger swarm sizes where enumeration is infeasible.
+
+\begin{table}[t]
+  \centering
+  \caption{Optimality gap of the greedy solver versus the exact optimum.}
+  \label{tab:optgap}
+  \begin{tabular}{lcccccc}
+    \toprule
+    Swarm size $M$        & 3 & 4 & 5 & 6 & 7 & 8 \\
+    \midrule
+    Mean gap (\%)         & 0 & 0 & 0 & 0 & 0.03 & 0.11 \\
+    Optimal seeds         & 15/15 & 15/15 & 15/15 & 15/15 & 13/15 & 10/15 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Robustness}
+Fig.~\ref{fig:sensitivity} sweeps the main scenario parameters at $L=14$~km. The
+gain of the proposed placement over the single pooled station is stable across
+the collection radius ($11.3$ to $12.1\%$ for $r_c$ from $100$ to $400$~m) and
+the charge time ($9.2$ to $13.6\%$). It is also larger, not smaller, on a
+non-uniform field: when the sensors form clusters the gain rises to $19.2\%$,
+because concentrated recharge traffic makes load balancing more valuable. The
+advantage is therefore robust and, if anything, strengthens in realistic
+non-uniform deployments.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{../results/fig_sensitivity.pdf}
+  \caption{Robustness of the proposed method's gain over the single pooled
+  station to the collection radius $r_c$, the charge time $\tau_{\mathrm{charge}}$,
+  and a uniform versus clustered sensor field ($L=14$~km, $M=12$).}
+  \label{fig:sensitivity}
+\end{figure}
+
 \subsection{Discussion and design guidelines}
 The results translate into concrete guidance for deploying a UAV swarm for fresh
 data collection. First, the swarm should not be sized by coverage alone. Because
