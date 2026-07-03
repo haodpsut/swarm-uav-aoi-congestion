@@ -408,6 +408,57 @@ def fig_ablation():
     save(fig, "fig_ablation.png")
 
 
+def fig_optgap():
+    path = os.path.join(RES, "optimality_gap.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
+    M = [int(r["M"]) for r in rows]
+    gmean = [float(r["gap_mean_pct"]) for r in rows]
+    gmax = [float(r["gap_max_pct"]) for r in rows]
+    fig, ax = plt.subplots(figsize=(3.4, 2.8))
+    ax.plot(M, gmean, marker="o", color=ACCENT, label="mean gap")
+    ax.plot(M, gmax, marker="s", ls="--", color=OI["orange"], label="max gap")
+    ax.axhline(0, color=OI["grey"], lw=0.8)
+    ax.set_xlabel("Swarm size $M$")
+    ax.set_ylabel("Optimality gap (%)")
+    ax.set_ylim(bottom=-0.5)
+    ax.set_title("Greedy solver vs exact optimum")
+    style_axes(ax)
+    ax.legend(frameon=False, fontsize=8)
+    save(fig, "fig_optgap.png")
+
+
+def fig_sensitivity():
+    path = os.path.join(RES, "sensitivity.csv")
+    if not os.path.exists(path):
+        return
+    rows = load(path)
+    labels, gains = [], []
+    for r in rows:
+        sw, val = r["sweep"], r["value"]
+        if sw == "r_c":
+            labels.append(r"$r_c{=}%d$" % int(float(val)))
+        elif sw == "tau_charge_min":
+            labels.append(r"$\tau_{\mathrm{c}}{=}%.0f$" % float(val))
+        elif sw.startswith("distribution:"):
+            labels.append(sw.split(":")[1])
+        else:
+            labels.append(sw)
+        gains.append(float(r["gain_pct"]))
+    fig, ax = plt.subplots(figsize=(6.6, 3.0))
+    x = range(len(labels))
+    ax.bar(x, gains, color=ACCENT)
+    for i, g in enumerate(gains):
+        ax.text(i, g + 0.3, "%.1f" % g, ha="center", va="bottom", fontsize=8)
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=8)
+    ax.set_ylabel("Gain over single (%)")
+    ax.set_title("Robustness: proposed vs single pooled station (L=14 km)")
+    style_axes(ax, grid_axis="y")
+    save(fig, "fig_sensitivity.png")
+
+
 if __name__ == "__main__":
     fig_des()            # queue-model validation vs DES
     fig_prop1_phys()     # U-shape family (congestion threshold)
@@ -415,3 +466,5 @@ if __name__ == "__main__":
     fig_prop2()          # coverage vs traffic placement (per seed)
     fig_crossover()      # distributed wins as travel dominates
     fig_ablation()       # ingredient contributions
+    fig_optgap()         # optimality gap vs exact optimum
+    fig_sensitivity()    # robustness sweeps (r_c, tau_charge, clustered)

@@ -28,7 +28,8 @@ from trajectory import optimize_trajectories
 
 def uav_states(sc, M, seed, trajectory="cetsp", r_c=200.0):
     """Per-UAV: centroid, revisit period t_loop [s], flight budget tau_fly [s]."""
-    pts, groups = partition_field(sc["K"], sc["L"], M, seed)
+    pts, groups = partition_field(sc["K"], sc["L"], M, seed,
+                                  clustered=sc.get("clustered", False))
     if trajectory == "cetsp":
         t_fly_loops, _ = optimize_trajectories(groups, r_c, sc["V"], seed=seed)
     else:  # NN+2-opt proxy
@@ -157,7 +158,7 @@ def strategy_coverage(states, cands, S_max, C_tot, mu, tau_charge, V, reach_budg
 
 # ---------- full methods (proposed + baselines) ----------
 
-def solve(sc, M, seed, method, cands=None, S_max=2, C_tot=4):
+def solve(sc, M, seed, method, cands=None, S_max=2, C_tot=4, r_c=200.0):
     """Return peak AoI [s] for the chosen method.
 
     methods:
@@ -175,7 +176,7 @@ def solve(sc, M, seed, method, cands=None, S_max=2, C_tot=4):
     reach = (sc["E_reserve"] * sc["E_max"] / propulsion_power(V)) if sc.get("reachability", False) else None
 
     traj = "nn" if method == "no_cetsp" else "cetsp"
-    states = uav_states(sc, M, seed, trajectory=traj)
+    states = uav_states(sc, M, seed, trajectory=traj, r_c=r_c)
 
     if method in ("proposed", "no_cetsp"):
         return strategy_traffic(states, cands, S_max, C_tot, mu, tau_charge, V, reach)["aoi"]

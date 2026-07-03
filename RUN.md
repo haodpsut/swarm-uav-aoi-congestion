@@ -35,7 +35,13 @@ python experiments/prop2_placement.py
 # This is the GPU workload: the CETSP optimiser uses the RTX 4090 automatically.
 python experiments/joint_solver.py
 
-# render all figures from the CSVs -> results/*.png
+# Optimality gap: greedy solver vs exact optimum on small instances (CPU).
+python experiments/optimality_gap.py
+
+# Sensitivity/robustness: r_c, tau_charge, uniform vs clustered field (GPU CETSP).
+python experiments/sensitivity.py
+
+# render all figures from the CSVs -> results/*.pdf and *.png
 python experiments/make_figures.py
 ```
 

@@ -103,12 +103,27 @@ def _centroid(pts):
     return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
 
 
-def partition_field(K: int, L: float, M: int, seed: int):
+def partition_field(K: int, L: float, M: int, seed: int, clustered: bool = False):
     """Return (points, groups): the sensor set and its k-means partition into M
     sub-fields (list of coord-lists). Same field per seed. Used by the GPU
-    trajectory optimizer, which needs raw sensor coordinates per UAV."""
+    trajectory optimizer, which needs raw sensor coordinates per UAV.
+
+    clustered=True places sensors in a few Gaussian hotspots instead of
+    uniformly (a non-uniform robustness scenario for the experiments)."""
     rng = random.Random(seed)
-    pts = [(rng.uniform(0, L), rng.uniform(0, L)) for _ in range(K)]
+    if clustered:
+        n_c = 4
+        centers = [(rng.uniform(0.15 * L, 0.85 * L),
+                    rng.uniform(0.15 * L, 0.85 * L)) for _ in range(n_c)]
+        sd = 0.08 * L
+        pts = []
+        for _ in range(K):
+            cx, cy = centers[rng.randrange(n_c)]
+            x = min(L, max(0.0, rng.gauss(cx, sd)))
+            y = min(L, max(0.0, rng.gauss(cy, sd)))
+            pts.append((x, y))
+    else:
+        pts = [(rng.uniform(0, L), rng.uniform(0, L)) for _ in range(K)]
     groups = _kmeans(pts, M, rng)
     return pts, [g for g in groups if g]
 
