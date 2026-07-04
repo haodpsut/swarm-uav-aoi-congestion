@@ -2,169 +2,88 @@
 
 \usepackage[a4paper,margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
-\usepackage{xcolor}
-\usepackage{mdframed}
-\usepackage{enumitem}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 \usepackage{parskip}
 
-\newmdenv[
-  linecolor=black!25, linewidth=0.6pt,
-  backgroundcolor=black!4,
-  innertopmargin=6pt, innerbottommargin=6pt,
-  innerleftmargin=8pt, innerrightmargin=8pt,
-  skipabove=6pt, skipbelow=6pt,
-]{rcomment}
-
-\newcommand{\comment}[1]{\begin{rcomment}\textit{Reviewer:} \textit{#1}\end{rcomment}}
-\newcommand{\response}{\textbf{Response.}\ }
-\newcommand{\changes}{\textbf{Changes.}\ }
-
-\title{\vspace{-2em}Response to Reviewer Comments}
-\date{}
-
 \begin{document}
 
-\begin{center}
-  {\large\bfseries Response to Reviewer Comments}\\[4pt]
-  \textbf{Manuscript:} Congestion-Aware Joint Charging-Station Placement,
-  Capacity, and Swarm-UAV Trajectory Design for Age-Optimal Data Collection\\[2pt]
-  \textbf{Authors:} Phuc Hao Do, Tran Duc Le, Truong Duy Dinh, Van Dai Pham
-\end{center}
+\thispagestyle{empty}
 
-\vspace{4pt}
+\begin{flushright}
+July 2026
+\end{flushright}
 
-Dear Editor and Reviewer,
+\noindent
+The Editor-in-Chief\\
+\textit{IEEE Internet of Things Journal}
 
-We thank the reviewer for the careful and constructive reading. The comments
-identified real weaknesses, and addressing them has clearly strengthened the
-paper. Below we respond to each comment point by point and indicate where the
-manuscript was changed. Reviewer comments are shown in shaded boxes; our
-responses and the locations of the changes follow.
+\vspace{1.2em}
 
-\section*{Comment 1: Trajectory, frozen visiting order}
-\comment{The CETSP trajectory freezes the cyclic visiting order (angular sort of
-$k$-means centroids), which removes combinatorial routing optimization from the
-continuous solver. Integrate a dynamic sequence optimization, or give a rigorous
-bound on the suboptimality of the frozen order.}
+\noindent
+Dear Editor,
 
-\response We agree that freezing the order was a genuine limitation, and we no
-longer freeze it. The trajectory block now alternates the continuous position
-updates (Adam) with a discrete $2$-opt re-ordering of the visiting sequence: we
-run a block of gradient steps, reorder the current hover points by $2$-opt, and
-repeat. This is a coordinate descent between the continuous positions and the
-discrete sequence, so the order is optimized jointly with the positions. A
-$2$-opt pass on fixed points can only shorten the tour and the subsequent
-position polish only lowers the objective, so the refinement never worsens the
-result and, in our tests, improves it.
+\vspace{0.6em}
 
-\changes Section~V-A (Trajectory block) was rewritten to describe the
-position/order alternation, and the implementation now interleaves $2$-opt
-reordering. We additionally report an exact optimality-gap study (see the end of
-this letter).
+We are pleased to submit our manuscript entitled ``Congestion-Aware Joint
+Charging-Station Placement, Capacity, and Swarm-UAV Trajectory Design for
+Age-Optimal Data Collection'' for consideration for publication in the
+\textit{IEEE Internet of Things Journal}.
 
-\section*{Comment 2: Swarm size ($M=12$ to $20$ is not a swarm)}
-\comment{The manuscript claims a ``swarm'' but caps the experiments at $M=12$ to
-$20$, which is a minor fleet. A swarm should be evaluated at $M>50$.}
+Unmanned aerial vehicles are increasingly used to collect time-sensitive data
+from Internet of Things sensors, where the relevant quality metric is the Age of
+Information. Practical deployments use a swarm of energy-limited UAVs that must
+recharge at a small number of shared charging stations. This creates a problem
+that a single UAV never faces: the charging stations become a contended resource,
+and the resulting waiting time inflates the Age of Information. Deciding where to
+place the stations, how many charging ports to install, how the swarm should fly,
+and which UAV recharges where is a coupled design problem that, to our knowledge,
+has not been addressed as a whole.
 
-\response We added a dedicated large-swarm scaling study. We scale the fleet to
-$M=60$ UAVs over a $20$~km field with $K=8M$ sensors, and we grow the charging
-capacity with the swarm ($C_{\mathrm{tot}}=\lceil M/3\rceil$ ports), consistent
-with our provisioning law (Proposition~1): a large swarm is only worthwhile if
-its charging capacity grows with it. The proposed contention-aware placement
-keeps its advantage over the single pooled station and the coverage-optimal
-placement across the whole range (gain $10.2$ to $12.7\%$), and the peak AoI
-stays controlled ($50.6$~min at $M=20$ to $47.6$~min at $M=60$).
+The manuscript makes the following contributions:
 
-\changes New Section~VI subsection ``Scaling to a large swarm'' and a new figure;
-a new experiment script generates the data.
-
-\section*{Comment 3: Queue bound, tighten $M/M/c//N$ with $M/D/c//N$}
-\comment{The finite-source $M/M/c//N$ model is a loose conservative (exponential)
-upper bound relative to the near-deterministic reality. Develop and benchmark an
-$M/D/c//N$ approximation to tighten the bound.}
-
-\response We added a deterministic-service $M/D/c//N$ approximation using the
-standard service-variability (Allen-Cunneen) correction, in which the mean wait
-scales with $(1+c_s^2)/2$, so deterministic service ($c_s^2=0$) halves the $M/M$
-wait. Benchmarked against the discrete-event simulation, this tightens the
-over-prediction of the real wait from about $4.5\times$ ($M/M$) to about
-$2.3\times$ ($M/D$). We also explain the residual: it is due to the
-near-deterministic operating (inter-request) process, which a service-only
-correction does not model. Both models are upper bounds, so the reported AoI
-remains safe rather than optimistic.
-
-\changes A new queue routine implements the $M/D/c//N$ approximation; the
-$M/D/c//N$ series was added to the DES-validation figure (Fig.~3) and is
-discussed in Section~VI-B. The conclusion was updated to reflect that this
-refinement is now included.
-
-\section*{Comment 4: Related work, dynamic fleet charging}
-\comment{The paper discusses fleet charging but lacks citations on dynamic fleet
-charging.}
-
-\response We added a dedicated discussion of dynamic fleet charging with three
-references: auction-based charging scheduling for a multi-drone network,
-decentralized electric-vehicle charging coordination, and mobile wireless-charger
-routing for a sensor fleet. We state precisely what they lack relative to our
-work: they schedule when and where each vehicle charges, but do not jointly place
-and size the shared stations, nor couple the induced charging wait into an
-Age-of-Information objective for a UAV swarm.
-
-\changes Section~II (Related Work), ``Energy-limited UAVs and charging'';
-three references added (now $36$ references total).
-
-\section*{Comment 5: Writing, machine-generated phrasing}
-\comment{Several phrases read as machine-generated (for example ``honest
-reporting'', ``sweet spot'', ``not a cosmetic refinement'', and frequent use of
-``honestly''). The sentence ``We stress an honest point: an earlier version
-\dots'' suggests a revision of a prior draft.}
-
-\response We revised the prose throughout to remove these phrases. In particular,
-``sweet spot'' is now ``optimal swarm size'', ``not a cosmetic refinement'' is
-now ``essential rather than incidental'', and the words ``honest'' and
-``honestly'' were removed. The ``an earlier version'' sentence was rewritten as a
-hypothetical model comparison (``Had the charging system been modeled as an open
-$M/M/c$ queue, a spurious crossover would appear \dots''), which states the
-modeling point without referring to any prior draft.
-
-\changes Sections~I, II, and~VI.
-
-\section*{Comment 6: Equation (12d) exceeds the column width}
-\response The constraint (12d) was shortened to a compact form,
-``$\mathrm{AoI}_k(t)$ evolves as in (1)'', which fits within the column.
-
-\changes Section~IV, problem (P0).
-
-\section*{Comment 7: References are not clean (``Available'' links)}
-\response We removed the ``[Online]. Available: \dots'' URLs from all published
-references, which now show only the DOI. The single preprint reference shows a
-clean ``arXiv:XXXX'' identifier without a link.
-
-\changes The reference list and the bibliography source.
-
-\section*{Additional strengthening beyond the specific comments}
-\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
-\item An \emph{optimality-gap} study benchmarks the greedy block-coordinate
-  solver against the exact optimum (enumerating all placements, port splits, and
-  assignments) on small instances: the solver matches the optimum for $M\le 6$
-  and stays within $0.11\%$ on average (below $1\%$ worst case) at $M=8$. This
-  neutralizes the concern that the greedy solver has no optimality guarantee
-  (Section~VI, Table~IV).
-\item A \emph{robustness} study shows the advantage is stable across the
-  collection radius and the charge time, and grows on a non-uniform (clustered)
-  sensor field (Section~VI, Fig.~9).
+\begin{itemize}
+\item We formulate the first joint charging-station placement, port-capacity,
+  swarm-trajectory, and assignment problem for peak-Age-of-Information data
+  collection with a contended, multi-server charging resource.
+\item We show that the charging system must be modeled as a finite-source
+  (machine-repair) queue rather than an open $M/M/c$ queue, and we validate this
+  against a discrete-event simulation: the open queue overpredicts the waiting
+  time by roughly six times and would distort the design.
+\item We prove two structural results: a congestion threshold that makes the Age
+  of Information non-monotone in the swarm size, with a provisioning law linking
+  the optimal swarm size to the charging capacity, and a placement inversion in
+  which the optimal placement becomes traffic-driven rather than coverage-driven.
+\item We design a block-coordinate solver with a GPU close-enough
+  traveling-salesman trajectory optimizer, and we evaluate it against
+  single-UAV, single-station, coverage-optimal, and round-robin baselines,
+  including a large-swarm scaling study, a robustness study, and an
+  optimality-gap study against the exact optimum.
 \end{itemize}
 
-All results are reproducible; the code and data are available at
+We believe the topic is well aligned with the scope of the
+\textit{IEEE Internet of Things Journal} and will interest its readership working
+on UAV-assisted data collection, Age of Information, and energy-aware Internet of
+Things systems.
+
+We confirm that this manuscript is original, has not been published previously,
+and is not under consideration for publication elsewhere. All authors have
+approved the manuscript and its submission. We are not aware of any conflict of
+interest. To support reproducibility, the source code and data that generate all
+of our results are publicly available at
 \url{https://github.com/haodpsut/swarm-uav-aoi-congestion}.
 
-\vspace{6pt}
-We believe the revision addresses every point raised, and we thank the reviewer
-again for comments that materially improved the manuscript.
+Thank you for considering our manuscript. We look forward to your response.
 
-\vspace{6pt}
-Sincerely,\\
-The Authors
+\vspace{1.2em}
+
+\noindent
+Sincerely,
+
+\vspace{0.4em}
+
+\noindent
+Truong Duy Dinh (corresponding author),\\
+on behalf of Phuc Hao Do, Tran Duc Le, Truong Duy Dinh, and Van Dai Pham\\
+E-mail: \href{mailto:duydt@ptit.edu.vn}{duydt@ptit.edu.vn}
 
 \end{document}

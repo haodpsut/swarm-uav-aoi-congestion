@@ -1,12 +1,12 @@
-# Response to Reviewer Comments
+# Summary of Changes (addressing colleague feedback from Tran Duc Le)
 
 **Manuscript:** Congestion-Aware Joint Charging-Station Placement, Capacity, and Swarm-UAV Trajectory Design for Age-Optimal Data Collection
 **Authors:** Phuc Hao Do, Tran Duc Le, Truong Duy Dinh, Van Dai Pham
 
-We thank the reviewer for the careful and constructive reading. The comments
+We thank Tran Duc Le for the careful and constructive reading. The comments
 identified real weaknesses, and addressing them has clearly strengthened the
 paper. Below we respond to each comment point by point and indicate where the
-manuscript was changed. Reviewer comments are in *italics*; our responses and the
+manuscript was changed. Feedback points are in *italics*; our responses and the
 locations of the changes follow.
 
 ---
