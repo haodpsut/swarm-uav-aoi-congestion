@@ -117,11 +117,11 @@ the strong Wei-style baseline \cite{wei2024}), a coverage-optimal placement, a
 round-robin assignment, and an ablation that replaces the CETSP trajectory with
 a nearest-neighbor patrol. Table~\ref{tab:ablation} reports the ablation at a
 $15$~km field: the proposed method attains the lowest peak AoI, the CETSP
-trajectory contributes about $3.1\%$, and the contention-aware placement
-contributes substantially more. A Wilcoxon signed-rank test gives
-$p{=}8.2\times10^{-5}$ against the closest competitor, the no-CETSP ablation
-(and $p{=}1.9\times10^{-6}$ against the single-station baseline), so the improvement is
-statistically significant.
+trajectory contributes about $3.9\%$, and the contention-aware placement
+contributes substantially more (about $18\%$ over the coverage-optimal
+placement). A Wilcoxon signed-rank test gives $p{=}1.9\times10^{-6}$ against the
+closest competitor, the no-CETSP ablation, so the improvement is statistically
+significant.
 
 \begin{table}[t]
   \centering
@@ -131,11 +131,11 @@ statistically significant.
     \toprule
     Method & Peak AoI (min) \\
     \midrule
-    Proposed (CETSP + traffic-optimal)       & \textbf{41.4} \\
+    Proposed (CETSP + traffic-optimal)       & \textbf{41.1} \\
     No CETSP (nearest-neighbor patrol)       & 42.8 \\
-    Single pooled station \cite{wei2024}      & 46.8 \\
-    Coverage-optimal placement                & 50.8 \\
-    Round-robin assignment                    & 57.0 \\
+    Single pooled station \cite{wei2024}      & 46.2 \\
+    Coverage-optimal placement                & 50.4 \\
+    Round-robin assignment                    & 56.7 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -151,7 +151,7 @@ statistically significant.
 
 Fig.~\ref{fig:crossover} sweeps the field size. The proposed distributed,
 contention-aware placement beats the single pooled station at every field size,
-and the gain grows with the field (from $4.1\%$ at $5$~km to $12.6\%$ at
+and the gain grows with the field (from $4.1\%$ at $5$~km to $12.2\%$ at
 $20$~km) because travel cost dominates as the field grows. The choice of queue
 model is decisive here. Had the charging system been modeled as an open $M/M/c$
 queue, a spurious crossover would appear in which the single pooled station wins
@@ -172,11 +172,12 @@ A swarm is only meaningful at larger scale, so we scale the fleet to $M=60$ UAVs
 over a $20$~km field with $K=8M$ sensors, and we grow the charging capacity with
 the swarm ($C_{\mathrm{tot}}=\lceil M/3\rceil$ ports) as the provisioning law of
 Proposition~\ref{prop:ushape} requires. Fig.~\ref{fig:scale} shows that the peak
-AoI stays controlled as the swarm grows, because the sensors and the charging
-capacity scale together, and that the proposed contention-aware placement keeps
-its advantage over the single pooled station and the coverage-optimal placement
-across the whole range. The design therefore applies to genuine swarms, not only
-to small fleets.
+AoI stays controlled as the swarm grows (from $50.6$~min at $M=20$ to $47.6$~min
+at $M=60$), because the sensors and the charging capacity scale together, and
+that the proposed contention-aware placement keeps its advantage over the single
+pooled station and the coverage-optimal placement across the whole range, by
+$10.2$ to $12.7\%$. The design therefore applies to genuine swarms, not only to
+small fleets.
 
 \begin{figure}[t]
   \centering
@@ -217,9 +218,9 @@ larger swarm sizes where enumeration is infeasible.
 \subsection{Robustness}
 Fig.~\ref{fig:sensitivity} sweeps the main scenario parameters at $L=14$~km. The
 gain of the proposed placement over the single pooled station is stable across
-the collection radius ($11.3$ to $12.1\%$ for $r_c$ from $100$ to $400$~m) and
-the charge time ($9.2$ to $13.6\%$). It is also larger, not smaller, on a
-non-uniform field: when the sensors form clusters the gain rises to $19.2\%$,
+the collection radius ($11.2$ to $11.4\%$ for $r_c$ from $100$ to $400$~m) and
+the charge time ($8.5$ to $13.5\%$). It is also larger, not smaller, on a
+non-uniform field: when the sensors form clusters the gain rises to $19.0\%$,
 because concentrated recharge traffic makes load balancing more valuable. The
 advantage is therefore robust and, if anything, strengthens in realistic
 non-uniform deployments.
