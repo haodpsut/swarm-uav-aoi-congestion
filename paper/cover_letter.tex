@@ -1,9 +1,10 @@
 \documentclass[11pt]{article}
 
-\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[a4paper,margin=0.9in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 \usepackage{parskip}
+\setlength{\parskip}{0.5em}
 
 \begin{document}
 
@@ -13,77 +14,60 @@
 July 2026
 \end{flushright}
 
-\noindent
-The Editor-in-Chief\\
-\textit{IEEE Internet of Things Journal}
+\vspace{-1em}
 
-\vspace{1.2em}
+\noindent
+The Editor-in-Chief, \textit{IEEE Internet of Things Journal}
+
+\vspace{0.6em}
 
 \noindent
 Dear Editor,
-
-\vspace{0.6em}
 
 We are pleased to submit our manuscript entitled ``Congestion-Aware Joint
 Charging-Station Placement, Capacity, and Swarm-UAV Trajectory Design for
 Age-Optimal Data Collection'' for consideration for publication in the
 \textit{IEEE Internet of Things Journal}.
 
-Unmanned aerial vehicles are increasingly used to collect time-sensitive data
-from Internet of Things sensors, where the relevant quality metric is the Age of
-Information. Practical deployments use a swarm of energy-limited UAVs that must
-recharge at a small number of shared charging stations. This creates a problem
-that a single UAV never faces: the charging stations become a contended resource,
-and the resulting waiting time inflates the Age of Information. Deciding where to
-place the stations, how many charging ports to install, how the swarm should fly,
-and which UAV recharges where is a coupled design problem that, to our knowledge,
-has not been addressed as a whole.
+Unmanned aerial vehicles increasingly collect time-sensitive Internet of Things
+data, where the quality metric is the Age of Information. Practical deployments
+use a swarm of energy-limited UAVs that recharge at a few shared charging
+stations, which then become a contended resource whose waiting time inflates the
+Age of Information. Jointly deciding where to place the stations, how many
+charging ports to install, how the swarm should fly, and which UAV recharges
+where is a coupled problem that, to our knowledge, has not been addressed as a
+whole.
 
-The manuscript makes the following contributions:
+Our contributions are: (i) the first joint formulation of charging-station
+placement, port capacity, swarm trajectory, and assignment for peak-Age-of-Information
+data collection with a contended, multi-server charging resource; (ii) a
+finite-source (machine-repair) queue model, validated against a discrete-event
+simulation, which shows that the commonly assumed open $M/M/c$ queue overpredicts
+the waiting time by roughly six times and would distort the design; (iii) two
+proved structural results, a congestion threshold that makes the Age of
+Information non-monotone in the swarm size with a provisioning law, and a
+placement inversion from coverage-driven to traffic-driven; and (iv) a
+block-coordinate solver with a GPU close-enough traveling-salesman trajectory
+optimizer, evaluated against several baselines with large-swarm scaling,
+robustness, and optimality-gap studies.
 
-\begin{itemize}
-\item We formulate the first joint charging-station placement, port-capacity,
-  swarm-trajectory, and assignment problem for peak-Age-of-Information data
-  collection with a contended, multi-server charging resource.
-\item We show that the charging system must be modeled as a finite-source
-  (machine-repair) queue rather than an open $M/M/c$ queue, and we validate this
-  against a discrete-event simulation: the open queue overpredicts the waiting
-  time by roughly six times and would distort the design.
-\item We prove two structural results: a congestion threshold that makes the Age
-  of Information non-monotone in the swarm size, with a provisioning law linking
-  the optimal swarm size to the charging capacity, and a placement inversion in
-  which the optimal placement becomes traffic-driven rather than coverage-driven.
-\item We design a block-coordinate solver with a GPU close-enough
-  traveling-salesman trajectory optimizer, and we evaluate it against
-  single-UAV, single-station, coverage-optimal, and round-robin baselines,
-  including a large-swarm scaling study, a robustness study, and an
-  optimality-gap study against the exact optimum.
-\end{itemize}
+The topic aligns with the scope of the journal and will interest its readership
+working on UAV-assisted data collection, Age of Information, and energy-aware
+Internet of Things systems.
 
-We believe the topic is well aligned with the scope of the
-\textit{IEEE Internet of Things Journal} and will interest its readership working
-on UAV-assisted data collection, Age of Information, and energy-aware Internet of
-Things systems.
+We confirm that the manuscript is original, has not been published previously,
+and is not under consideration elsewhere; all authors approved the submission and
+declare no conflict of interest. To support reproducibility, the source code and
+data are available at \url{https://github.com/haodpsut/swarm-uav-aoi-congestion}.
 
-We confirm that this manuscript is original, has not been published previously,
-and is not under consideration for publication elsewhere. All authors have
-approved the manuscript and its submission. We are not aware of any conflict of
-interest. To support reproducibility, the source code and data that generate all
-of our results are publicly available at
-\url{https://github.com/haodpsut/swarm-uav-aoi-congestion}.
-
-Thank you for considering our manuscript. We look forward to your response.
-
-\vspace{1.2em}
-
-\noindent
-Sincerely,
+Thank you for considering our manuscript.
 
 \vspace{0.4em}
 
 \noindent
-Truong Duy Dinh (corresponding author),\\
-on behalf of Phuc Hao Do, Tran Duc Le, Truong Duy Dinh, and Van Dai Pham\\
-E-mail: \href{mailto:duydt@ptit.edu.vn}{duydt@ptit.edu.vn}
+Sincerely,\\
+Truong Duy Dinh (corresponding author), on behalf of\\
+Phuc Hao Do, Tran Duc Le, Truong Duy Dinh, and Van Dai Pham\\
+\href{mailto:duydt@ptit.edu.vn}{duydt@ptit.edu.vn}
 
 \end{document}

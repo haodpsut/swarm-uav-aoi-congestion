@@ -7,10 +7,16 @@ $15\%$ reserve. The charge time per port is $\tau_{\mathrm{charge}}{=}8$~min. Th
 propulsion power follows the rotary-wing model \cite{zeng2019energy}, and the
 air-to-ground link uses a line-of-sight free-space rate. Candidate stations lie
 on a $3{\times}3$ grid; unless stated otherwise the budget is $S_{\max}{=}2$
-open stations and $C_{\mathrm{tot}}{=}4$ ports. Every reported value is a mean
-over $20$ to $30$ random sensor fields (fixed seeds), with the standard
-deviation shown where relevant. All trajectory optimization runs on an
-NVIDIA RTX~4090.
+open stations and $C_{\mathrm{tot}}{=}4$ ports. In the joint comparison we use a
+swarm of $M{=}12$ UAVs, which is not an arbitrary cap but the AoI-optimal swarm
+size $M^\star$ for this charging capacity, as the provisioning law establishes
+(Table~\ref{tab:mstar}); running the comparison at $M^\star$ is the fair
+operating point, since a larger swarm at fixed capacity is past the congestion
+threshold of Proposition~\ref{prop:ushape}. The scaling study in
+Section~\ref{subsec:scale} covers genuinely large swarms, up to $M{=}60$, by
+growing the charging capacity with the swarm. Every reported value is a mean over
+$20$ to $30$ random sensor fields (fixed seeds), with the standard deviation
+shown where relevant. All trajectory optimization runs on an NVIDIA RTX~4090.
 
 \subsection{Queue-model validation against a discrete-event simulation}
 The whole analysis rests on the charging-queue model, so we first validate it.
@@ -168,6 +174,7 @@ removes this artifact, and the distributed placement is preferred throughout.
 \end{figure}
 
 \subsection{Scaling to a large swarm}
+\label{subsec:scale}
 A swarm is only meaningful at larger scale, so we scale the fleet to $M=60$ UAVs
 over a $20$~km field with $K=8M$ sensors, and we grow the charging capacity with
 the swarm ($C_{\mathrm{tot}}=\lceil M/3\rceil$ ports) as the provisioning law of
