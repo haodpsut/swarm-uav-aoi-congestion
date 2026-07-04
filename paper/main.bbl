@@ -26,41 +26,29 @@ S.~Kaul, R.~Yates, and M.~Gruteser, ``Real-time status: How often should one
   update?'' in \emph{Proc. IEEE INFOCOM}, 2012, pp. 2731--2735.
 
 \bibitem{base2024}
-\BIBentryALTinterwordspacing
 J.~Liu, F.~Yang, X.~Wang, L.~Qu, M.~Jin, and H.~Dai, ``Joint optimization of
   charging station placement and {UAV} trajectory for fresh data collection,''
   \emph{IEEE Internet of Things Journal}, vol.~11, no.~14, pp.
-  25\,057--25\,073, 2024. [Online]. Available:
-  \url{https://ieeexplore.ieee.org/document/10506755}
-\BIBentrySTDinterwordspacing
+  25\,057--25\,073, 2024.
 
 \bibitem{wei2024}
-\BIBentryALTinterwordspacing
 Y.~Wei, Y.~Lu, P.~Zhao, S.~Leng, and K.~Yang, ``Minimizing age of information
   in {UAV}-assisted data collection with limited charging facilities,''
   \emph{IEEE Wireless Communications Letters}, vol.~13, no.~5, pp. 1463--1467,
-  2024. [Online]. Available:
-  \url{https://ieeexplore.ieee.org/document/10463610}
-\BIBentrySTDinterwordspacing
+  2024.
 
 \bibitem{sun2025laser}
-\BIBentryALTinterwordspacing
 G.~Sun, L.~Zhang, J.~Li, J.~Wu, J.~Wang, Z.~Sun, C.~Zhao, and V.~C.~M. Leung,
   ``Age of information optimization in laser-charged {UAV}-assisted {IoT}
   networks: A multi-agent deep reinforcement learning method,'' \emph{IEEE
   Transactions on Network Science and Engineering}, vol.~13, pp. 1436--1457,
-  2026, arXiv:2507.08429. [Online]. Available:
-  \url{https://ieeexplore.ieee.org/document/11113352}
-\BIBentrySTDinterwordspacing
+  2026, arXiv:2507.08429.
 
 \bibitem{oubbati2024ugv}
-\BIBentryALTinterwordspacing
 K.~Messaoudi, A.~Baz, O.~S. Oubbati, A.~Rachedi, T.~Bendouma, and
   M.~Atiquzzaman, ``{UGV} charging stations for {UAV}-assisted {AoI}-aware data
   collection,'' \emph{IEEE Transactions on Cognitive Communications and
-  Networking}, vol.~10, no.~6, pp. 2325--2343, 2024. [Online]. Available:
-  \url{https://ieeexplore.ieee.org/document/10510424}
-\BIBentrySTDinterwordspacing
+  Networking}, vol.~10, no.~6, pp. 2325--2343, 2024.
 
 \bibitem{zhao2025aoi}
 H.~Zhao, Y.~Lu, Y.~Hong, C.~Luo, X.~Fan, and Z.~Chen, ``{AoI}-and-energy
@@ -68,20 +56,15 @@ H.~Zhao, Y.~Lu, Y.~Hong, C.~Luo, X.~Fan, and Z.~Chen, ``{AoI}-and-energy
   sensor networks,'' \emph{Ad Hoc Networks}, vol. 178, p. 103985, 2025.
 
 \bibitem{eldeeb2023swarm}
-\BIBentryALTinterwordspacing
 E.~Eldeeb, M.~Shehab, and H.~Alves, ``Age minimization in massive {IoT} via
   {UAV} swarm: A multi-agent reinforcement learning approach,'' in \emph{Proc.
   IEEE Int. Symp. Personal, Indoor and Mobile Radio Commun. (PIMRC)}, 2023, pp.
-  1--6, arXiv:2309.14757. [Online]. Available:
-  \url{https://ieeexplore.ieee.org/document/10293964}
-\BIBentrySTDinterwordspacing
+  1--6, arXiv:2309.14757.
 
 \bibitem{ev2022sharing}
-\BIBentryALTinterwordspacing
 Y.~Qin, M.~A. Kishk, and M.-S. Alouini, ``Performance analysis of charging
   infrastructure sharing in {UAV} and {EV}-involved networks,'' 2022,
-  arXiv:2208.06782. [Online]. Available: \url{https://arxiv.org/abs/2208.06782}
-\BIBentrySTDinterwordspacing
+  arXiv:2208.06782.
 
 \bibitem{yates2021aoi}
 R.~D. Yates, Y.~Sun, D.~R. Brown, S.~K. Kaul, E.~Modiano, and S.~Ulukus, ``Age
@@ -159,13 +142,10 @@ B.~Behdani and J.~C. Smith, ``An integer-programming-based approach to the
   Computing}, vol.~26, no.~3, pp. 415--432, 2014.
 
 \bibitem{cetsp}
-\BIBentryALTinterwordspacing
 W.~K. Mennell, ``Heuristics for solving three routing problems: Close-enough
   traveling salesman problem, close-enough vehicle routing problem, and
   sequence-dependent team orienteering problem,'' Ph.D. dissertation,
-  University of Maryland, College Park, 2009. [Online]. Available:
-  \url{https://drum.lib.umd.edu/handle/1903/9822}
-\BIBentrySTDinterwordspacing
+  University of Maryland, College Park, 2009.
 
 \bibitem{liu2021uav}
 J.~Liu, P.~Tong, X.~Wang, B.~Bai, and H.~Dai, ``{UAV}-aided data collection for
