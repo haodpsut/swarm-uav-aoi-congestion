@@ -11,6 +11,9 @@ nen chay lai phai cho **cung bam SHA-256**.
 | `aoi_metric_gap.py` | `results/aoi_metric_gap.csv` | `7f170f9086f1edcd` | Diem 1: cho TRUNG BINH so voi cac phan vi cao, tu DES |
 | `reach_margin.py` | `results/reach_margin.csv` | `c552f85959c92c3f` | Diem 4: bien kha dat tram cua cau hinh cuoi |
 | `prop1_uniqueness.py` | `results/prop1_uniqueness.csv` | `a61faf058ea19373` | Diem 2: M* co duy nhat khong, va gia thiet loi roi rac co bi du lieu bac khong |
+| `single_uav_baseline.py` | `results/single_uav_baseline.csv` | `16e33f9ea644779f` | Doc ngoai: duong co so MOT UAV, bai hua o phan dong gop ma khong he bao cao |
+| `ablation_effect.py` | `results/ablation_effect.csv` | `4391e84a4e61a7c3` | Doc ngoai: hieu ung + CI bootstrap, thay cho mot p-value dang nam o SAN |
+| `paoi_vs_timeavg.py` | `results/paoi_vs_timeavg.csv` | `32ce4113e69c8e5a` | Doc ngoai: DINH moi chu ky so voi TRUNG BINH THEO THOI GIAN cua cung chu ky |
 | `des_validation.py` | `results/des_summary.csv` | `1a8e8cba0b86974e` | nen: mo hinh hang doi so voi DES (da co tu ban dau) |
 
 ## Pham vi cua loi hua tai tao

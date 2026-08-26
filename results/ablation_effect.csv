@@ -1,0 +1,2 @@
+pairs,wins,effect_mean_pct,effect_median_pct,effect_min_pct,effect_max_pct,ci_lo_pct,ci_hi_pct,sign_test_floor,bootstrap_B,bootstrap_seed
+20,20,3.8860710880003175,3.9466195461797366,2.0438826381060298,5.4233539265591695,3.58202847394124,4.172519840007974,1.9073486328125e-06,20000,12345

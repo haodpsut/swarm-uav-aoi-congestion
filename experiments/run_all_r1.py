@@ -33,6 +33,12 @@ JOBS = [
      "Diem 4: bien kha dat tram cua cau hinh cuoi"),
     ("prop1_uniqueness.py",  "prop1_uniqueness.csv",
      "Diem 2: M* co duy nhat khong, va gia thiet loi roi rac co bi du lieu bac khong"),
+    ("single_uav_baseline.py", "single_uav_baseline.csv",
+     "Doc ngoai: duong co so MOT UAV, bai hua o phan dong gop ma khong he bao cao"),
+    ("ablation_effect.py",   "ablation_effect.csv",
+     "Doc ngoai: hieu ung + CI bootstrap, thay cho mot p-value dang nam o SAN"),
+    ("paoi_vs_timeavg.py",   "paoi_vs_timeavg.csv",
+     "Doc ngoai: DINH moi chu ky so voi TRUNG BINH THEO THOI GIAN cua cung chu ky"),
     ("des_validation.py",    "des_summary.csv",
      "nen: mo hinh hang doi so voi DES (da co tu ban dau)"),
 ]

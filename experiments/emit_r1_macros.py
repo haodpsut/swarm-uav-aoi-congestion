@@ -143,6 +143,47 @@ def main():
           r"\newcommand{\rScaleCovLo}{%.1f}" % min(gc),
           r"\newcommand{\rScaleCovHi}{%.1f}" % max(gc)]
 
+    # ---- Bang ablation: ca NAM dong deu go tay, dua ve macro -----------------
+    # Cong mot-cho-o bat duoc khi \rOneUavSwarmAoi ra dung 41.1, tuc bang dang lap lai
+    # mot dai luong da co macro. Bang nao con go tay thi som muon lech.
+    r = rd("joint_ablation.csv")
+    for key, mac in (("proposed", "AblProposed"), ("no_cetsp", "AblNoCetsp"),
+                     ("single_station", "AblSingleStation"),
+                     ("coverage", "AblCoverage"), ("roundrobin", "AblRoundRobin")):
+        L.append(r"\newcommand{\r%s}{%.1f}"
+                 % (mac, st.mean(float(x[key]) for x in r) / 60.0))
+
+    # ---- Doc ngoai 26/08: duong co so MOT UAV, bai hua ma khong giao ---------
+    r = rd("single_uav_baseline.csv")
+    one = [float(x["single_uav_min"]) for x in r]
+    sw = [float(x["swarm_min"]) for x in r]
+    gn = [float(x["gain_pct"]) for x in r]
+    L += [r"\newcommand{\rOneUavAoi}{%.1f}" % st.mean(one),
+          r"\newcommand{\rOneUavSwarmAoi}{%.1f}" % st.mean(sw),
+          r"\newcommand{\rOneUavGain}{%.1f}" % st.mean(gn),
+          r"\newcommand{\rOneUavGainLo}{%.1f}" % min(gn),
+          r"\newcommand{\rOneUavSeeds}{%d}" % len(r),
+          r"\newcommand{\rOneUavLosses}{%d}" % sum(1 for x in gn if x < 0)]
+
+    # ---- Doc ngoai 26/08: hieu ung thay cho p-value o san --------------------
+    r = rd("ablation_effect.csv")[0]
+    L += [r"\newcommand{\rAblPairs}{%d}" % int(r["pairs"]),
+          r"\newcommand{\rAblWins}{%d}" % int(r["wins"]),
+          r"\newcommand{\rAblEffect}{%.1f}" % float(r["effect_mean_pct"]),
+          r"\newcommand{\rAblCiLo}{%.1f}" % float(r["ci_lo_pct"]),
+          r"\newcommand{\rAblCiHi}{%.1f}" % float(r["ci_hi_pct"]),
+          r"\newcommand{\rAblMin}{%.1f}" % float(r["effect_min_pct"]),
+          r"\newcommand{\rAblMax}{%.1f}" % float(r["effect_max_pct"])]
+
+    # ---- Doc ngoai 26/08: DINH so voi TRUNG BINH THEO THOI GIAN ---------------
+    r = rd("paoi_vs_timeavg.csv")
+    rt = [float(x["ratio"]) for x in r]
+    L += [r"\newcommand{\rPaoiRatioLo}{%.2f}" % min(rt),
+          r"\newcommand{\rPaoiRatioHi}{%.2f}" % max(rt),
+          r"\newcommand{\rPaoiRatioMed}{%.2f}" % st.median(rt),
+          r"\newcommand{\rPaoiConfigs}{%d}" % len(r),
+          r"\newcommand{\rPaoiCvHi}{%.3f}" % max(float(x["cv"]) for x in r)]
+
     # ---- Diem 4: bien kha dat tram ------------------------------------------
     r = rd("reach_margin.csv")
     mn = [float(x["margin_min"]) for x in r]
