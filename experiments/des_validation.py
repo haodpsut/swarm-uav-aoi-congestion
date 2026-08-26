@@ -28,6 +28,7 @@ from queue_model import (wq as erlang_wq, solve_fixed_point,  # noqa: E402
 
 
 def simulate(M, c, tau_fly, tau_charge, travel, service="det", operating="det",
+             return_waits=False,
              jitter=0.15, horizon_cycles=400, seed=0, warmup=40):
     """Event-driven single-station queue with M cycling UAVs and c ports.
 
@@ -89,6 +90,12 @@ def simulate(M, c, tau_fly, tau_charge, travel, service="det", operating="det",
                 visit_count += 1
                 heapq.heappush(heap, (t + charge_time(), 1, qu))
 
+    # ⭐ THEM cho vong sua R1, diem 1 cua phan bien: bai dinh nghia muc tieu la peak
+    # AoI WORST-CASE (Eq 2) nhung toi uu bang Wq TRUNG BINH (Eq 11). De tra loi "duoi
+    # gia thiet nao thi thay duoc", phai co PHAN PHOI cua thoi gian cho, khong chi
+    # trung binh. Mac dinh giu nguyen hanh vi cu de khong pha cac phep goi da co.
+    if return_waits:
+        return (sum(waits) / len(waits) if waits else 0.0), waits
     return sum(waits) / len(waits) if waits else 0.0
 
 
@@ -129,10 +136,18 @@ def main():
               f"{des_mm:>7.1f} {r_mm:>6} | {des_real:>7.1f} {r_real:>7} {r_md:>7}")
         rows.append([M, c, rho_fs, w_mmc, w_fs, w_md, des_mm, des_real])
 
+    # ⛔ MOT CHO O. Truoc day bon con so duoi day chi TON TAI tren man hinh, roi duoc
+    # go tay vao .tex. Khong tep nao giu chung, nen neu nguong loc (`> 1.0`) doi thi ban
+    # thao khong the biet. Nay chung duoc ghi ra results/des_summary.csv va ban thao chi
+    # duoc goi macro sinh tu do.
+    summary = {}
+
     # (1) Formula check: finite-source should MATCH DES under exp-operating+service.
     mm_pairs = [(r[4], r[6]) for r in rows if r[6] > 1.0]
     if mm_pairs:
         err = sum(abs(wf - de) / de for wf, de in mm_pairs) / len(mm_pairs)
+        summary["formula_rel_err_pct"] = 100 * err
+        summary["formula_n"] = len(mm_pairs)
         print(f"\n[formula check] finite-source vs DES(exp op+svc): mean rel. error "
               f"= {100*err:.1f}% (small -> the M/M/c//N formula is correct).")
     # (2) Realism: finite-source (M/M) vs the M/D approximation vs DES(real).
@@ -141,6 +156,8 @@ def main():
         cons = sum(1 for wmm, wmd, dr in real_pairs if wmm >= dr - 1e-6)
         fac_mm = sum(wmm / dr for wmm, wmd, dr in real_pairs) / len(real_pairs)
         fac_md = sum(wmd / dr for wmm, wmd, dr in real_pairs) / len(real_pairs)
+        summary.update(finite_over_real=fac_mm, md_over_real=fac_md,
+                       conservative_hits=cons, real_n=len(real_pairs))
         print(f"[realism] vs DES(real): M/M finite-source over-predicts {fac_mm:.1f}x "
               f"(conservative, {cons}/{len(real_pairs)}); the M/D approximation "
               f"tightens this to {fac_md:.1f}x. Residual is the near-deterministic "
@@ -149,6 +166,7 @@ def main():
     mmc_pairs = [(r[3], r[6]) for r in rows if r[6] > 1.0]
     if mmc_pairs:
         fac = sum(wm / de for wm, de in mmc_pairs) / len(mmc_pairs)
+        summary["open_over_des"] = fac
         print(f"[open M/M/c] over-predicts DES(exp) by {fac:.1f}x -> the WRONG model "
               f"(its bias distorted decisions, e.g. a spurious placement crossover).")
 
@@ -158,7 +176,12 @@ def main():
         w = csv.writer(f)
         w.writerow(["M", "c", "rho", "mmc_wq", "finite_wq", "md_wq", "des_mm_wq", "des_real_wq"])
         w.writerows(rows)
-    print("\nSaved results/des_validation.csv")
+    with open(os.path.join(out, "des_summary.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["quantity", "value"])
+        for k in sorted(summary):
+            w.writerow([k, summary[k]])
+    print("\nSaved results/des_validation.csv + results/des_summary.csv")
 
 
 if __name__ == "__main__":
