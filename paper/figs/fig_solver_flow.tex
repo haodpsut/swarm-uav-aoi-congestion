@@ -1,42 +1,60 @@
-% Block-coordinate joint solver flow.
-% Included via \resizebox{\columnwidth}{!}{\input{figs/fig_solver_flow}}
-\begin{tikzpicture}[
-    >=Latex,
-    block/.style={rectangle,rounded corners=2pt,draw=black!70,fill=black!4,
-                  minimum width=30mm,minimum height=9mm,align=center,font=\small},
-    gpu/.style={rectangle,rounded corners=2pt,draw=green!45!black,fill=green!8,
-                minimum width=30mm,minimum height=9mm,align=center,font=\small},
-    queue/.style={rectangle,rounded corners=2pt,draw=red!60!black,fill=red!6,
-                  minimum width=30mm,minimum height=9mm,align=center,font=\small},
-    io/.style={rectangle,draw=blue!60!black,fill=blue!6,minimum width=26mm,
-               minimum height=8mm,align=center,font=\small},
-    fl/.style={->,thick,black!70},
-    lbl/.style={font=\footnotesize},
-]
+% =====================================================================
+%  Fig. 2 - FRAMEWORK: block-coordinate joint solver
+%  Ve theo transaction-figure-kit/flow, archetype fig4-optimization-framework:
+%  styles blk / prop / flow / fb / alab / zone / zlab tu txstyle.tex, MOT mau accent
+%  chi danh cho khoi De xuat, bo cuc NGANG. Preview: figs/_preview.tex
+% =====================================================================
+%
+% ⛔ NOI DUNG: ban truoc SAI THU TU so voi Algorithm 1 in ngay canh no. Ma nguon
+% (src/solver.py, strategy_traffic) lam: quy dao giai MOT LAN truoc moi vong lap, roi
+%   for placement (vet can) { for port split (vet can) { gan tham lam } }
+% va hang doi khong phai mot chang: no la HAM MUC TIEU cham diem tung buoc gan.
+% Cau truc do chinh la phan biet vet-can / tham-lam ma phan bien doi o diem 7c.
+%
+% ⛔ BO CUC PHAI NGANG. Moi hinh cua kit co ti le 1,2 den 3,75; ban dung 0,56 cua toi
+% khi \resizebox vao cot se PHONG TO 1,29 lan va cao 6,3 in, tuc an gan het chieu cao
+% cot. Khung hep la rang buoc cua LOP TAI LIEU, khong phai so thich.
+%
+% ⛔ MUI TEN PHAI NOI NODE VOI NODE, dung noi vao BIEN cua vung nhom: vung `zone` an
+% them 4mm moi phia nen khoang ho bi nuot, va bon nhan da de len chu ("CETS",
+% "st peak AoI"). Day la ca thu hai trong ngay cua lop loi "toa do dung cho DUNG mot
+% bo cuc": xem feedback-doi-lop-tai-lieu-lam-vo-hinh.
+\begin{tikzpicture}[x=1cm, y=1cm]
 
-\node[io] (in) {Candidate sites, budgets\\$S_{\max},\,C_{\mathrm{tot}}$};
-\node[block,below=6mm of in] (place) {Placement\\$x_s$ (outer search)};
-\node[block,below=6mm of place] (assign) {Assignment\\$a_m$ (load balance)};
-\node[block,below=6mm of assign] (ports) {Port allocation\\$c_s$ (water-filling)};
-\node[gpu,below=6mm of ports] (traj) {Trajectory: CETSP\\(GPU, differentiable)};
-\node[queue,below=6mm of traj] (q) {Finite-source queue\\$\Wq(N_s,c_s)$};
-\node[io,below=6mm of q] (out) {Peak $\Aoi$};
+% ---- khoi De xuat 1: quy dao, giai MOT LAN, ngoai moi vong lap ----
+\node[prop, minimum width=24mm] (traj) at (0,0.95) {Trajectory: CETSP\\(GPU, solved once)};
 
-\draw[fl] (in) -- (place);
-\draw[fl] (place) -- (assign);
-\draw[fl] (assign) -- (ports);
-\draw[fl] (ports) -- (traj);
-\draw[fl] (traj) -- (q);
-\draw[fl] (q) -- (out);
+% ---- vong ngoai: vet can tren luoi ung vien ----
+\node[blk, minimum width=22mm] (place) at (4.4, 0.95) {Placement $x_s$};
+\node[blk, minimum width=22mm] (ports) at (4.4,-0.95) {Port split $c_s$};
 
-% block-coordinate loop (right side, back up)
-\draw[fl,dashed,blue!55!black]
-  (q.east) -- ++(1.9,0) coordinate (turn)
-  |- (assign.east);
-\node[lbl,blue!55!black,right] at ($(turn)+(0,1.6)$) {alternate};
+% ---- vong trong: gan tham lam, cham diem bang hang doi ----
+\node[blk,  minimum width=24mm] (assign) at (8.8, 0.95) {Assignment $a_m$};
+\node[prop, minimum width=24mm] (queue)  at (8.8,-0.95) {Finite-source queue\\$\Wq(N_s,c_s)$};
 
-% DES-validation annotation on the queue block
-\node[lbl,align=left,anchor=north west,red!55!black] at ($(q.south west)+(-0.1,-0.15)$)
-  {DES-validated: open M/M/c over-predicts $\sim6\times$};
+% ---- ra ----
+\node[blk, minimum width=22mm] (out) at (13.1,0.95) {Best peak AoI\\$\bar{A}$};
+
+% ---- vung nhom: trong long ngoai ----
+\begin{scope}[on background layer]
+  \node[zone, fit=(assign)(queue)] (zin) {};
+  \node[zone, fit=(place)(ports)(zin)] (zout) {};
+\end{scope}
+\node[zlab, anchor=west] at ([yshift=2.6mm]zout.north west) {OUTER LOOP: EXHAUSTIVE};
+\node[zlab, anchor=west] at ([yshift=2.6mm]zin.north west) {INNER: GREEDY};
+
+% ---- luong: NODE toi NODE, va MOI DOAN SONG SONG TRUC ----
+% traj / place / assign / out cung nam o y=+0,95; ports / queue cung o y=-0,95, nen
+% ba doan ngang deu thang hang va hai doan doc deu thang dung. Khong con doan xien.
+% (Ban truoc de traj va out o y=0 nen hai nhan tloop va keep best nam tren duong cheo.)
+\node[alab, left=1.5mm of traj, align=right] {sub-fields,\\budgets $S_{\max},C_{\mathrm{tot}}$};
+\draw[flow] (traj.east) -- node[alab, above, fill=white]{$t_{\mathrm{loop},m}$} (place.west);
+\draw[flow] (place.south) -- node[alab, right, fill=white]{enumerate} (ports.north);
+\draw[flow] (ports.east) -- node[alab, above, fill=white]{per candidate} (queue.west);
+% hang doi CHAM DIEM tung buoc gan -> hoi tiep, net dut theo quy uoc kit
+% hai chieu, dung y nhu "alternate (BCD)" cua fig4 trong kit: gan va hang doi thay
+% phien nhau, moi buoc gan lai duoc hang doi cham diem lai
+\draw[fb, <->] (queue.north) -- node[alab, right, fill=white]{score each move} (assign.south);
+\draw[flow] (assign.east) -- node[alab, above, fill=white]{keep best} (out.west);
 
 \end{tikzpicture}

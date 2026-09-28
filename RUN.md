@@ -73,3 +73,35 @@ tell me and I will investigate before we build on top of it.
 ## Notes
 - Seeds are fixed (`range(30)`), so runs are deterministic and reproducible.
 - Everything reads/writes only inside the repo; nothing needs network or GPU here.
+
+## Vong sua R2 (28/09/2026): tam script do moi
+
+Moi phep do duoi day tra loi mot nhan xet cu the cua phan bien, va moi script deu co
+phan TU KIEM in ra cuoi (gom doi chung duong, va doi chung am o cho co the).
+
+| script | tra loi diem nao | dau ra |
+|---|---|---|
+| `runtime_profile.py` | R6-4, R6-7(e): thoi gian chay va sieu tham so | `runtime_profile.csv`, `runtime_env.csv` |
+| `stats_family.py` | R6-7(d): ho so sanh, hieu chinh Holm, hat giong xau nhat | `stats_family.csv` |
+| `port_scarce.py` | R3-2: khan hiem cong o quy mo lon | `port_scarce.csv` |
+| `per_method_mstar.py` | R2-3: moi phuong phap tu chon co doi | `per_method_mstar*.csv` |
+| `separation_check.py` | R1-3, R6-5, R3 vong 2: rang buoc gian cach (12i) | `separation_check.csv` |
+| `constraint_audit.py` | R5-3: muc vi pham lon nhat cua tung rang buoc | `constraint_audit.csv` |
+| `common_des.py` | R5-7: MOT DES chung cham thiet ke cuoi cua moi phuong phap | `common_des*.csv` |
+| `reach_envelope.py` | R5-3, R4-4: bao van hanh cua rang buoc kha dat tram | `reach_envelope.csv` |
+
+Chay tat ca (sau `run_all_r1.py`):
+
+```bash
+for s in runtime_profile stats_family port_scarce per_method_mstar \
+         separation_check constraint_audit common_des reach_envelope; do
+  python experiments/$s.py || echo "HONG: $s"
+done
+python experiments/emit_r1_macros.py     # sinh r1_macros.tex + 3 bang
+python experiments/make_figures.py       # ve lai 9 hinh o be rong MOT COT
+```
+
+⛔ **Moi con so trong bai den tu MOT may.** Cac ket qua trong kho nay duoc chay tren mot
+node co RTX 4090, torch 2.6.0+cu124. Chay lai tren may khac se lech o chu so co nghia
+thu ba o nhung script di qua bo toi uu quy dao GPU; do la ly do `R1_MANIFEST.md` ghi bam
+theo tung tep.

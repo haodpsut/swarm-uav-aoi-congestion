@@ -8,6 +8,11 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+% R3-3 (vong 1): phan bien xin doi Require/Ensure thanh Input/Output trong ma gia.
+% Goi algorithmic dat nhan bang hai macro nay, nen doi o day la doi moi khoi mot luc,
+% thay vi sua tung dong va bo sot.
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
@@ -16,6 +21,10 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric}
+% Bo style hinh chuan cua nha: transaction-figure-kit/flow/txstyle.tex.
+% MOT mau accent cho khoi De xuat, nen xam rat nhat, net 0,5-0,8pt deu, luong lien /
+% hoi tiep dut, nhom = vung net dut + nhan zlab. Doi bai thi doi DUNG mot ma HEX.
+\input{figs/txstyle.tex}
 
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 
@@ -27,6 +36,14 @@
 \DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\Aoi}{\mathrm{AoI}}
 \newcommand{\Wq}{W_{\mathrm q}}
+
+% ⛔ Nap o PREAMBLE, khong nap giua than bai: sections/formulation.tex dung cac macro
+%    nay va no duoc \input TRUOC. Nap sau thi LaTeX bao 'Undefined control sequence'.
+%    Sinh lai: python experiments/emit_r1_macros.py (trong kho artifact)
+% ⛔ Duong dan PHAI la ../results, giong het duong dan cua cac hinh. Ban truoc dung
+%    results/... nen no tro vao MOT BAN SAO thu hai trong v2-revision/results va
+%    ban thao im lang nap ban CU (24 macro thay vi 42). Mot con so mot cho o.
+\input{../results/tables/r1_macros}
 
 \begin{document}
 
@@ -66,8 +83,7 @@ which then become a contended resource. We study the joint design of
 charging-station placement, port capacity, swarm trajectory, and
 UAV-to-station assignment to minimize the network peak Age of Information (AoI).
 A key observation is that the charging system is a closed population of only $M$
-UAVs, so it must be modeled as a finite-source (machine-repair) queue rather than
-an open $M/M/c$ queue. A discrete-event simulation confirms the finite-source
+UAVs, so it must be modeled as a finite-source (machine-repair) queue rather than an open-arrival queue. A discrete-event simulation confirms the finite-source
 model within about $4\%$, whereas the open queue overpredicts the waiting time by
 roughly $6\times$ and distorts the design decisions. We prove two structural
 results: a congestion threshold that makes the peak AoI non-monotone in the swarm
@@ -75,9 +91,9 @@ size, with a provisioning law linking the optimal swarm size to the charging
 capacity, and a placement inversion showing that the coverage-optimal placement
 is AoI-suboptimal under contention. We then develop a block-coordinate solver
 with a GPU close-enough traveling-salesman trajectory optimizer. Across
-multi-seed experiments, the proposed method reduces the peak AoI by up to
-$12.2\%$ over a strong single-station baseline, with each component isolated by
-an ablation and confirmed by a Wilcoxon signed-rank test ($p<10^{-4}$). We also
+multi-seed experiments, the proposed method reduces the peak AoI by up to $\rSingleGainMax\%$ over a strong
+single-station baseline, with each component isolated by
+an ablation and confirmed by a Wilcoxon signed-rank test. We also
 delineate the regime in which a single pooled station is already competitive.
 \end{abstract}
 
@@ -122,14 +138,22 @@ Internet of Things.
 \label{sec:solver}
 \input{sections/solver}
 
-\begin{figure}[t]
+% ⛔ figure* (TRAI HAI COT), khong phai figure. Hinh ve theo archetype NGANG cua
+% transaction-figure-kit (ti le 3,5) va cac hinh cua kit rong 5-7 in, tuc chung duoc
+% thiet ke cho khung hai cot. Nhet vao MOT cot thi \resizebox thu con he so 0,48 va
+% chu trong hinh chi con 3,9pt; trai hai cot cho he so 0,99, tuc dung co that.
+\begin{figure*}[t]
   \centering
-  \resizebox{\columnwidth}{!}{\input{figs/fig_solver_flow}}
-  \caption{Block-coordinate solver. The trajectory block (GPU CETSP) and the
-  finite-source queue are alternated with port allocation, assignment, and an
-  outer placement search.}
+  \resizebox{\textwidth}{!}{\input{figs/fig_solver_flow}}
+  \caption{Block-coordinate solver. The trajectory is solved once, before the
+  placement search, so the sub-fields and patrol tours are fixed for every candidate;
+  Section~\ref{sec:joint-cost} measures what that costs. The placement and port-split
+  loops are enumerated exhaustively over the candidate grid, whereas the UAV-to-station
+  assignment inside them is a greedy local search whose every move is scored by the
+  finite-source queue. The queue is therefore the objective of the inner search, not a
+  stage of a pipeline. Blue marks the two blocks this paper contributes.}
   \label{fig:solver}
-\end{figure}
+\end{figure*}
 
 %=======================================================================
 \section{Experiments}
@@ -140,6 +164,17 @@ Internet of Things.
 \section{Conclusion}
 \label{sec:concl}
 \input{sections/conclusion}
+
+\section*{Acknowledgment}
+The authors used Anthropic's Claude (Opus~5) as an assistant during the preparation of this
+manuscript. Its use covered three areas: drafting and editing prose in the revised
+Introduction, Related Work, System Model, and Experiments sections; writing the analysis and
+experiment-orchestration scripts released with the artifact; and proposing several of the
+measurements reported in Section~\ref{sec:exp}, including the matched-port-budget comparison,
+the ranking-stability check under the alternative queueing model, and the single-UAV baseline.
+All experimental results were produced by executing that released code, and every number
+reported here was checked against the run records by the authors, who take full responsibility
+for the content of this paper.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}   % <-- sub-agent fills refs.bib

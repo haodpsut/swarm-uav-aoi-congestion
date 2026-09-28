@@ -1,5 +1,5 @@
 \subsection{Age of Information foundations}
-The Age of Information (AoI) was introduced in \cite{kaul2012aoi} as a
+AoI was introduced in \cite{kaul2012aoi} as a
 destination-centric measure of data freshness, capturing the time elapsed
 since the generation of the most recently received update. The concept has
 since matured into a substantial body of theory, surveyed comprehensively in
@@ -97,24 +97,77 @@ machine-repair, or machine-interference, problem surveyed in \cite{haque2007mach
 and treated within the classical queueing framework of \cite{grossharris}, from
 which we adapt the finite-source multi-server results used in Section~\ref{sec:model}.
 
+\subsection{Charging-station placement and recharge-aware swarm operation}
+\label{sec:rel-placement}
+
+One body of work places or sizes UAV recharging infrastructure, another optimizes AoI
+for swarms that recharge, and the two are largely disjoint. We discuss the closest
+works individually; Table~\ref{tab:related} compares them.
+
+Won~\cite{won2020ubat} shows that siting battery-swap stations is NP-hard and solves
+it jointly with UAV trajectories, but each station is a single swap point with no
+parallel servers, no waiting, and delivery performance as the objective.
+Santin \emph{et al.}~\cite{santin2021matheur} locate a minimal number of recharge
+stations while routing a heterogeneous fleet for complete coverage, again without
+server capacity or queueing and with coverage time as the objective. Chen \emph{et
+al.}~\cite{chen2024ev} come closest on the infrastructure side, optimizing both
+\emph{siting and sizing} together with routing, task allocation and recharge
+scheduling; but the objective is cost and task time, contention is handled by a
+schedule rather than a queueing model, and freshness plays no role.
+
+On the freshness side, Eldeeb \emph{et al.}~\cite{eldeeb2022recharge} minimize AoI and
+energy for multiple UAV relays and account for flights to recharging depots, but the
+depots are given, not placed or sized. Shi \emph{et al.}~\cite{shi2025aoi}
+and Lee \emph{et al.}~\cite{lee2024madrl} likewise minimize AoI for swarms that
+recharge at stations, using multi-agent reinforcement learning; in both, the station
+set is fixed and its capacity is not a decision variable. Zhang \emph{et al.}~\cite{zhang2023deploy} alone makes charger \emph{scarcity}
+explicit, with a limited number of piles per station, yet the pile count is an input,
+the objective is travel time, and the contention it induces has no waiting-time model.
+
+The pattern is consistent: placement and sizing are studied without freshness, and
+freshness with the infrastructure taken as given. Missing in all of them is what this
+paper adds, an \emph{explicit waiting model} for a small closed population sharing a
+few parallel ports, which is what couples placement and capacity to the AoI.
+
+\begin{table}[t]
+  \centering
+  \caption{Closest related work. Every listed work considers \emph{multiple} UAVs that
+  \emph{self-recharge} at \emph{fixed} ground stations and optimizes \emph{trajectories},
+  so those four dimensions are omitted as non-discriminating; the table compares the
+  dimensions on which the works differ. \checkmark{} means modelled \emph{and} optimized,
+  ``fix'' means present but an input, ``--'' absent.}
+  \label{tab:related}
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{llcccc}
+    \toprule
+    Work & Objective & Place- & Port & Explicit & Assign- \\
+         &           & ment   & sizing & waiting & ment \\
+    \midrule
+    \cite{won2020ubat}        & delivery perf.  & \checkmark & --         & --         & --         \\
+    \cite{santin2021matheur}  & coverage time   & \checkmark & --         & --         & --         \\
+    \cite{eldeeb2022recharge} & AoI + energy    & fix        & --         & --         & --         \\
+    \cite{zhang2023deploy}    & travel time     & fix        & fix        & --         & --         \\
+    \cite{chen2024ev}         & cost, task time & \checkmark & \checkmark & --         & \checkmark \\
+    \cite{lee2024madrl}       & AoI             & fix        & --         & --         & --         \\
+    \cite{shi2025aoi}         & AoI             & fix        & --         & --         & --         \\
+    \midrule
+    \textbf{This work}        & \textbf{peak AoI} & \checkmark & \checkmark & \checkmark & \checkmark \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsection{Positioning and gap}
 Read together, these works each supply a subset of the ingredients our problem
-requires but never their combination. Swarm operation with AoI appears in
-\cite{eldeeb2023swarm} yet without charging; placement with AoI appears in
-\cite{base2024} yet only for a single UAV; charge waiting is captured in
-\cite{wei2024} yet at a single fixed server without placement; and a contended
-charging queue is analyzed in \cite{ev2022sharing} yet without AoI,
-trajectory, or placement. No prior formulation simultaneously carries all four
-of station placement, swarm operation, multi-server charging contention, and a
-peak-AoI objective. Our work closes this gap by jointly optimizing station
-placement, port capacity, swarm trajectory, and source-to-UAV assignment under
-a charging model that is a contended, multi-server, and finite-source (closed)
-queue, validated against discrete-event simulation. The finite-source aspect
-is essential rather than incidental: because the number of UAVs competing for a
-station is small and closed, modeling the queue as an open $M/M/c$ system
-overpredicts waiting time and thereby distorts both placement and capacity
-decisions, an effect we quantify and correct with the finite-source model
-detailed in Section~\ref{sec:model}. This coupled formulation also yields two
+requires but never their combination. The same split appears outside Table~\ref{tab:related}: swarm AoI without charging
+\cite{eldeeb2023swarm}, placement with AoI but a single UAV \cite{base2024}, charge
+waiting at one fixed server without placement \cite{wei2024}, and a contended charging
+queue without AoI, trajectory or placement \cite{ev2022sharing}. We close this gap by jointly optimizing placement, port
+capacity, swarm trajectory, and assignment under a contended, multi-server,
+finite-source (closed) charging queue validated against discrete-event simulation.
+The finite-source aspect is essential, not incidental: with a small closed
+population competing for a station, an open $M/M/c$ model overpredicts the wait and
+distorts both placement and capacity decisions, an effect we quantify and correct in
+Section~\ref{sec:model}. This coupled formulation also yields two
 structural findings that a decoupled treatment cannot expose: a congestion
 threshold, beyond which peak AoI is non-monotone in swarm size, and a
 placement inversion, whereby coverage-optimal station placement becomes

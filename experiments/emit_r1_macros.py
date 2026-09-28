@@ -79,6 +79,202 @@ def main():
           r"\newcommand{\rOptTopMax}{%.2f}" % float(top["gap_max_pct"]),
           r"\newcommand{\rOptTopHits}{%d}" % int(top["optimal_hits"])]
 
+    # ---- R2 vong 2: quet kich thuoc vung, truoc day GO TAY ------------------
+    # Phan bien 2 vong 2: "align the figures quoted in the abstract with those in the body".
+    # Hai con so 4.1% va 12.2% o muc quet kich thuoc vung von go tay trong van xuoi, nen
+    # khong co gi buoc chung khop du lieu. Nay sinh tu joint_crossover.csv.
+    r = rd("joint_crossover.csv")
+    lo = min(r, key=lambda x: float(x["L_m"]))
+    hi = max(r, key=lambda x: float(x["L_m"]))
+    gmin = min(r, key=lambda x: float(x["gain_pct"]))
+    gmax = max(r, key=lambda x: float(x["gain_pct"]))
+    L += [r"\newcommand{\rCrossLoKm}{%g}" % (float(lo["L_m"]) / 1000.0),
+          r"\newcommand{\rCrossHiKm}{%g}" % (float(hi["L_m"]) / 1000.0),
+          r"\newcommand{\rCrossLo}{%.1f}" % float(lo["gain_pct"]),
+          r"\newcommand{\rCrossHi}{%.1f}" % float(hi["gain_pct"]),
+          r"\newcommand{\rCrossMin}{%.1f}" % float(gmin["gain_pct"]),
+          r"\newcommand{\rCrossMax}{%.1f}" % float(gmax["gain_pct"]),
+          r"\newcommand{\rCrossN}{%d}" % len(r)]
+
+    # ---- R2 vong 2: con so LON NHAT co the dua vao tom tat ------------------
+    # Tom tat noi "up to X% over a strong single-station baseline". Con so ay phai la
+    # can tren cua MOI phep so voi tram gop don duoc bao trong bai, neu khong thi than
+    # bai vuot tom tat va phan bien bat duoc ngay. Lay max cua hai quet.
+    rs = rd("scale.csv")
+    gs = [100 * (float(x["single_min"]) - float(x["proposed_min"])) / float(x["single_min"])
+          for x in rs] if rs and "single_min" in rs[0] else []
+    tron = [float(x["gain_pct"]) for x in r] + gs
+    L += [r"\newcommand{\rSingleGainMax}{%.1f}" % max(tron),
+          r"\newcommand{\rSingleGainMin}{%.1f}" % min(tron)]
+
+    # ---- R6-4 va R6-7e vong 2: thoi gian chay va moi truong ----------------
+    # "Optimization hyperparameters ... and runtime are still not reported."
+    # Sinh tu runtime_profile.csv + runtime_env.csv, khong go tay con so nao, ke ca
+    # ten GPU va phien ban torch: mot bang cau hinh go tay se phan ky ngay lan doi moi
+    # truong dau tien, va do dung la thu phan bien dang kiem.
+    try:
+        rt = rd("runtime_profile.csv")
+        env = {x["truong"]: x["gia_tri"] for x in rd("runtime_env.csv")}
+    except Exception:
+        rt, env = [], {}
+    if rt:
+        for M in sorted({int(x["M"]) for x in rt}):
+            sub = [x for x in rt if int(x["M"]) == M]
+            g = st.mean([float(x["t_trajectory_gpu"]) for x in sub])
+            c = st.mean([float(x["t_combinatorial_cpu"]) for x in sub])
+            e = st.mean([float(x["t_end_to_end"]) for x in sub])
+            tag = "Lo" if M == min({int(x["M"]) for x in rt}) else "Hi"
+            L += [r"\newcommand{\rRt%sM}{%d}" % (tag, M),
+                  r"\newcommand{\rRt%sTraj}{%.2f}" % (tag, g),
+                  r"\newcommand{\rRt%sComb}{%.2f}" % (tag, c),
+                  r"\newcommand{\rRt%sTotal}{%.2f}" % (tag, e),
+                  r"\newcommand{\rRt%sGpuShare}{%.0f}" % (tag, 100.0 * g / e)]
+        L += [r"\newcommand{\rRtSeeds}{%d}" % len({x["seed"] for x in rt})]
+    if env:
+        L += [r"\newcommand{\rEnvGpu}{%s}" % env.get("gpu", "?"),
+              r"\newcommand{\rEnvTorch}{%s}" % env.get("torch", "?"),
+              r"\newcommand{\rEnvCuda}{%s}" % env.get("cuda", "?"),
+              r"\newcommand{\rEnvPython}{%s}" % env.get("python", "?"),
+              r"\newcommand{\rEnvCores}{%s}" % env.get("nhan_cpu", "?"),
+              r"\newcommand{\rHpLr}{%s}" % env.get("lr", "?"),
+              r"\newcommand{\rHpIters}{%s}" % env.get("iters", "?"),
+              r"\newcommand{\rHpReorder}{%s}" % env.get("reorder_rounds", "?"),
+              r"\newcommand{\rHpLambdaCov}{%s}" % env.get("lambda_cov", "?"),
+              r"\newcommand{\rHpSteps}{%s}" % env.get("adam_steps_tong", "?")]
+
+    # ---- (12i) gian cach: R1-3, R6-5 vong 1 va R3 vong 2 -------------------
+    # Bo giai KHONG ep rang buoc nay. Do hau nghiem de bao PHEP NOI LONG ton bao nhieu.
+    try:
+        r = rd("separation_check.csv")
+    except Exception:
+        r = []
+    if r:
+        tong = sum(int(x["n_pairs"]) for x in r)
+        L += [r"\newcommand{\rSepMin}{%.0f}" % min(float(x["min_m"]) for x in r),
+              r"\newcommand{\rSepMed}{%.0f}" % st.median([float(x["med_m"]) for x in r]),
+              r"\newcommand{\rSepSeeds}{%d}" % len(r),
+              r"\newcommand{\rSepPairs}{%d}" % tong,
+              r"\newcommand{\rSepBelowHundred}{%d}" % sum(int(x["n_below_100m"]) for x in r),
+              r"\newcommand{\rSepBelowTwoHundred}{%d}" % sum(int(x["n_below_200m"]) for x in r)]
+
+    # ---- R3-2 vong 1: khan hiem cong o quy mo lon --------------------------
+    try:
+        r = rd("port_scarce.csv")
+    except Exception:
+        r = []
+    if r:
+        c0 = min(int(x["C_tot"]) for x in r)
+        sub = sorted([x for x in r if int(x["C_tot"]) == c0], key=lambda x: int(x["M"]))
+        L += [r"\newcommand{\rScarceCap}{%d}" % c0,
+              r"\newcommand{\rScarceMLo}{%s}" % sub[0]["M"],
+              r"\newcommand{\rScarceMHi}{%s}" % sub[-1]["M"],
+              r"\newcommand{\rScarceAoiLo}{%.1f}" % float(sub[0]["proposed_min"]),
+              r"\newcommand{\rScarceAoiHi}{%.1f}" % float(sub[-1]["proposed_min"]),
+              r"\newcommand{\rScarceFactor}{%.2f}"
+              % (float(sub[-1]["proposed_min"]) / float(sub[0]["proposed_min"])),
+              r"\newcommand{\rScarceRatioLo}{%.1f}" % float(sub[0]["uav_per_port"]),
+              r"\newcommand{\rScarceRatioHi}{%.1f}" % float(sub[-1]["uav_per_port"])]
+
+    # ---- R2-3 vong 1: moi phuong phap tu chon co doi -----------------------
+    try:
+        r = rd("per_method_mstar_summary.csv")
+    except Exception:
+        r = []
+    if r:
+        d = {x["method"]: x for x in r}
+        k12 = [c for c in r[0] if c.startswith("aoi_at_M")][0]
+        g12 = [c for c in r[0] if c.startswith("gain_vs_proposed_at_M")][0]
+        L += [r"\newcommand{\rMstarOwn}{%s}" % d["proposed"]["mstar"],
+              r"\newcommand{\rMstarAllSame}{%s}"
+              % ("yes" if len({x["mstar"] for x in r}) == 1 else "no"),
+              r"\newcommand{\rMstarPropAtStar}{%.1f}" % float(d["proposed"]["aoi_at_mstar_min"]),
+              r"\newcommand{\rMstarPropAtBai}{%.1f}" % float(d["proposed"][k12]),
+              r"\newcommand{\rMstarPropCost}{%.1f}"
+              % (100.0 * (float(d["proposed"][k12]) - float(d["proposed"]["aoi_at_mstar_min"]))
+                 / float(d["proposed"][k12]))]
+        for m, tag in (("single_station", "Single"), ("coverage", "Cov"),
+                       ("roundrobin", "RR"), ("no_cetsp", "NoCetsp")):
+            if m in d and d[m]["gain_vs_proposed_at_mstar_pct"]:
+                L += [r"\newcommand{\rMstarGain%s}{%.1f}" % (tag, float(d[m]["gain_vs_proposed_at_mstar_pct"])),
+                      r"\newcommand{\rMstarGain%sBai}{%.1f}" % (tag, float(d[m][g12]))]
+
+    # ---- R6-7d vong 1: ho so sanh, hieu chinh Holm, hat giong xau nhat ------
+    try:
+        r = rd("stats_family.csv")
+    except Exception:
+        r = []
+    if r:
+        d = {x["moc"]: x for x in r}
+        L += [r"\newcommand{\rFamN}{%d}" % len(r),
+              r"\newcommand{\rFamPHolmMax}{%.1f}" % (max(float(x["p_holm"]) for x in r) * 1e6),
+              r"\newcommand{\rFamWorstOverall}{%.1f}" % min(float(x["worst_eff"]) for x in r)]
+        for k, tag in ((("Single pooled station"), "Single"),
+                       ("Coverage-optimal placement", "Cov"),
+                       ("No CETSP (nearest-neighbour patrol)", "NoCetsp")):
+            if k in d:
+                x = d[k]
+                L += [r"\newcommand{\rFam%sMean}{%.1f}" % (tag, float(x["eff_mean"])),
+                      r"\newcommand{\rFam%sCiLo}{%.1f}" % (tag, float(x["ci_lo"])),
+                      r"\newcommand{\rFam%sCiHi}{%.1f}" % (tag, float(x["ci_hi"])),
+                      r"\newcommand{\rFam%sWorst}{%.1f}" % (tag, float(x["worst_eff"]))]
+
+    # ---- R5 diem 7: MOT DES chung cham moi phuong phap ---------------------
+    try:
+        r = rd("common_des_summary.csv")
+    except Exception:
+        r = []
+    if r:
+        d = {x["method"]: x for x in r}
+        giu = all(x["rank_analytic"] == x["rank_des"] for x in r)
+        bias = [100.0 * (float(x["aoi_analytic_min"]) - float(x["aoi_des_min"]))
+                / float(x["aoi_des_min"]) for x in r]
+        L += [r"\newcommand{\rDesRankSame}{%s}" % ("yes" if giu else "no"),
+              r"\newcommand{\rDesNMethods}{%d}" % len(r),
+              r"\newcommand{\rDesBiasLo}{%.1f}" % min(bias),
+              r"\newcommand{\rDesBiasHi}{%.1f}" % max(bias),
+              r"\newcommand{\rDesPropWins}{%s}" % d["proposed"]["proposed_wins_des"],
+              r"\newcommand{\rDesPropAna}{%.1f}" % float(d["proposed"]["aoi_analytic_min"]),
+              r"\newcommand{\rDesPropDes}{%.1f}" % float(d["proposed"]["aoi_des_min"]),
+              r"\newcommand{\rDesSingleDes}{%.1f}" % float(d["single_station"]["aoi_des_min"]),
+              r"\newcommand{\rDesGainDes}{%.1f}"
+              % (100.0 * (float(d["single_station"]["aoi_des_min"])
+                          - float(d["proposed"]["aoi_des_min"]))
+                 / float(d["single_station"]["aoi_des_min"]))]
+
+    # ---- R5-3 / R4-4: bao van hanh cua rang buoc kha dat tram --------------
+    try:
+        re_ = rd("reach_envelope.csv")
+    except Exception:
+        re_ = []
+    if re_:
+        du = [x for x in re_ if int(x["feasible_seeds"]) == int(x["n_seeds"])]
+        mot_phan = [x for x in re_ if 0 < int(x["feasible_seeds"]) < int(x["n_seeds"])]
+        khong = [x for x in re_ if int(x["feasible_seeds"]) == 0]
+        can3 = [x for x in re_ if str(x["stations_needed"]) == "3"]
+        can4 = [x for x in re_ if str(x["stations_needed"]) == "4"]
+        khong_cuu = [x for x in re_ if str(x["stations_needed"]) == ">6"]
+        # tam bay MOT CHIEU tinh tu vat ly, khong go tay
+        sys.path.insert(0, os.path.join(ROOT, "src"))
+        from scenario import DEFAULTS as _D
+        from energy import propulsion_power as _P
+        _reach = _D["E_reserve"] * _D["E_max"] / _P(_D["V"])
+        L += [r"\newcommand{\rReachS}{%.0f}" % _reach,
+              r"\newcommand{\rReachKm}{%.2f}" % (_reach * _D["V"] / 1000.0)]
+        L += [r"\newcommand{\rEnvFullKm}{%s}" % max(int(x["L_km"]) for x in du),
+              r"\newcommand{\rEnvFirstFailKm}{%s}"
+              % (min(int(x["L_km"]) for x in (mot_phan + khong)) if (mot_phan + khong) else "--"),
+              r"\newcommand{\rEnvNoneKm}{%s}"
+              % (min(int(x["L_km"]) for x in khong) if khong else "--"),
+              r"\newcommand{\rEnvMainKm}{15}",
+              r"\newcommand{\rEnvMainViol}{%.0f}"
+              % max([float(x["max_violation_s"]) for x in re_ if int(x["L_km"]) == 15] or [0]),
+              r"\newcommand{\rEnvThreeKm}{%s}"
+              % (max(int(x["L_km"]) for x in can3) if can3 else "--"),
+              r"\newcommand{\rEnvFourKm}{%s}"
+              % (max(int(x["L_km"]) for x in can4) if can4 else "--"),
+              r"\newcommand{\rEnvHopelessKm}{%s}"
+              % (min(int(x["L_km"]) for x in khong_cuu) if khong_cuu else "--")]
+
     # ---- Diem 5: thu hang duoi M/M so M/D -----------------------------------
     r = rd("prop2_ranking_md.csv")
     flips = sum(1 for x in r if x["flipped"] == "1")
@@ -190,6 +386,78 @@ def main():
     L += [r"\newcommand{\rReachMin}{%.1f}" % min(mn),
           r"\newcommand{\rReachSeeds}{%d}" % len(r),
           r"\newcommand{\rReachInfeasible}{%d}" % sum(1 for x in r if x["feasible"] == "0")]
+
+    # ---- BANG tab:optgap: truoc day GO TAY trong experiments.tex ----------
+    # Van xuoi quanh bang nay dung macro, rieng bang thi go tay. Dung lop loi
+    # "bang go tay thi chay lai thi nghiem khong cap nhat": doi may hay doi seed thi
+    # van xuoi doi con bang dung yen. Them luon cot "worst gap" ma R5-13 muon thay.
+    rg = rd("optimality_gap.csv")
+    rg.sort(key=lambda x: int(x["M"]))
+    def _f(v):
+        return "0" if float(v) < 5e-3 else "%.2f" % float(v)
+    tb = ["% Auto-generated by experiments/emit_r1_macros.py -- KHONG sua tay",
+          r"\begin{tabular}{l" + "c" * len(rg) + "}",
+          r"  \toprule",
+          r"  Swarm size $M$ & " + " & ".join(x["M"] for x in rg) + r" \\",
+          r"  \midrule",
+          r"  Mean gap (\%) & " + " & ".join(_f(x["gap_mean_pct"]) for x in rg) + r" \\",
+          r"  Worst gap (\%) & " + " & ".join(_f(x["gap_max_pct"]) for x in rg) + r" \\",
+          r"  Optimal seeds & " + " & ".join("%s/%s" % (x["optimal_hits"], x["n_seeds"])
+                                             for x in rg) + r" \\",
+          r"  \bottomrule", r"\end{tabular}", ""]
+    open(os.path.join(OUT, "tab_optgap.tex"), "w").write("\n".join(tb))
+    print("  ✅ ghi results/tables/tab_optgap.tex (%d cot M)" % len(rg))
+
+    # ---- BANG tab:mstar: go tay VA co o bi KIEM DUYET ---------------------
+    # R6 diem 7(a): "for entries with M*=20 the paper's own figures show a swarm-size
+    # CEILING, so report a CENSORED extremum (at least 20) or raise the ceiling, and do
+    # NOT use it as evidence of an interior extremum."
+    # Luoi that la range(1,21) trong validate_prop1_phys.py, nen M*=20 la CHAM TRAN.
+    TRAN_M = 20
+    rm = rd("prop1_phys_mstar.csv")
+    rm.sort(key=lambda x: int(x["c"]))
+    kd = sum(1 for x in rm if int(x["M_star"]) >= TRAN_M)
+    tb = ["% Auto-generated by experiments/emit_r1_macros.py -- KHONG sua tay",
+          r"\begin{tabular}{l" + "c" * len(rm) + "}",
+          r"  \toprule",
+          r"  Ports $c$ & " + " & ".join(x["c"] for x in rm) + r" \\",
+          r"  \midrule",
+          r"  $M^\star$ & " + " & ".join(
+              (r"$\ge %s$" % x["M_star"]) if int(x["M_star"]) >= TRAN_M else x["M_star"]
+              for x in rm) + r" \\",
+          r"  \bottomrule", r"\end{tabular}", ""]
+    open(os.path.join(OUT, "tab_mstar.tex"), "w").write("\n".join(tb))
+    L += [r"\newcommand{\rMstarCeil}{%d}" % TRAN_M,
+          r"\newcommand{\rMstarCensored}{%d}" % kd]
+    print("  ✅ ghi results/tables/tab_mstar.tex (%d cot, %d o bi kiem duyet)" % (len(rm), kd))
+
+    # ---- BANG bao van hanh + muc vi pham lon nhat cua tung rang buoc -------
+    try:
+        rv = rd("reach_envelope.csv")
+    except Exception:
+        rv = []
+    if rv:
+        tb = ["% Auto-generated by experiments/emit_r1_macros.py -- KHONG sua tay",
+              r"\begin{tabular}{lccc}", r"  \toprule",
+              r"  Field $L$ (km) & Feasible seeds & Max overshoot (s) & Stations needed \\",
+              r"  \midrule"]
+        for x in rv:
+            tb.append("  %s & %s/%s & %s & %s \\\\" % (
+                x["L_km"], x["feasible_seeds"], x["n_seeds"],
+                ("0" if float(x["max_violation_s"]) < 0.5 else "%.0f" % float(x["max_violation_s"])),
+                ("--" if str(x["stations_needed"]) == "2" else str(x["stations_needed"]))))
+        tb += [r"  \bottomrule", r"\end{tabular}", ""]
+        open(os.path.join(OUT, "tab_envelope.tex"), "w").write("\n".join(tb))
+        print("  ✅ ghi results/tables/tab_envelope.tex (%d dong)" % len(rv))
+    try:
+        ca = rd("constraint_audit.csv")
+    except Exception:
+        ca = []
+    if ca:
+        L += [r"\newcommand{\rCovViolMax}{%.2f}" % max(float(x["cov_m"]) for x in ca),
+              r"\newcommand{\rBudgetViol}{%d}"
+              % max(max(int(x["stations"]), int(x["ports"]), int(x["closed_assign"]))
+                    for x in ca)]
 
     L = [x for x in L if x]
     p = os.path.join(OUT, "r1_macros.tex")

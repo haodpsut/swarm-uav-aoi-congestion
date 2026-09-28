@@ -1,0 +1,13 @@
+truong,gia_tri
+thiet_bi,cuda
+gpu,NVIDIA GeForce RTX 4090
+torch,2.6.0+cu124
+cuda,12.4
+python,3.11.16
+may,sol1
+nhan_cpu,80
+lr,8.0
+iters,400
+reorder_rounds,3
+lambda_cov,50.0
+adam_steps_tong,799

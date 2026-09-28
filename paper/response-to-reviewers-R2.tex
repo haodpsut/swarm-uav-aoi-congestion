@@ -1,0 +1,268 @@
+% Sinh boi code/gen_response_r2.py tu reviews/so-nhan-xet.csv. KHONG sua tay.
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+\usepackage{enumitem}
+\setlist{nosep}
+\newcommand{\rev}[1]{\par\medskip\noindent\textit{#1}\par\smallskip}
+\newcommand{\act}[2]{\noindent\textbf{Action.} #1\par\noindent\textbf{Where.} #2\par}
+\title{Response to Reviewers\\ \large IoT-70170-2026.R1 --- Second Revision}
+\author{\normalsize Congestion-Aware Joint Charging-Station Placement, Capacity, and Swarm-UAV Trajectory Design for Age-Optimal Data Collection}
+\date{}
+\begin{document}
+\maketitle
+
+\section*{Before the point-by-point replies}
+
+We thank the reviewers and the Associate Editor. Two reviewers reported that our previous response letter did not reply to their comments, and they were right. The first-round decision letter carried five reviewers' comments in the body of the e-mail and one reviewer's comments as an attachment. Only the attachment reached our working copy, so the previous letter answered seven points while the reviewers had raised 46. Nothing was declined and nothing was judged unimportant; the material was simply never collected. We are sorry for the time this cost.
+
+This letter answers \textbf{every} numbered point of \textbf{every} reviewer from \textbf{both} rounds: 46 from the first round and 8 from the second, 54 in total. It is generated from a ledger with one row per comment, so the count can be checked rather than trusted.
+
+\textbf{Numbering.} Reviewer numbers changed between rounds. We therefore number every old point by its \emph{first-round} reviewer and give both numbers in each heading, so each reviewer can find their own comments where they left them.
+
+\textbf{Two things we must flag.} First, all results are now produced on a single machine, re-run from the submitted commit; 69 of 77 previously reported quantities are bit-identical and eight moved in the third significant digit, with no conclusion changed. Second, while answering Reviewer~5's request to report every constraint violation we found that our own feasibility claim held only at the smallest field size; Section~VI-I now states where the recharge-reachability constraint can and cannot be met. Neither issue was raised by a reviewer, and we report both.
+
+\section*{First-round comments}
+
+\subsection*{Reviewer 1 (first round) --- 6 comments}
+
+\paragraph{Comment 1.}
+\rev{Clarify the AoI objective: Eq (2) is a pathwise peak/limsup while (10) is a MEAN queueing delay used in (11). Reconcile, e.g. define an expected peak AoI representative, or use a tail/percentile delay measure if worst-case is truly intended.}
+\act{We redefined the objective as the \emph{expected} peak age rather than a sample-path worst case, so the mean queueing delay is now used inside a quantity of the same type. Section~VI-H measures the distance to both alternatives you mention: the expected peak is exactly $2.00\times$ the time-average on the configurations we tested, and the $95$th percentile of the wait exceeds the mean by a median factor of $1.40$.}{Sec.~III-E, Eq.~(2) and (11); Sec.~VI-H}
+
+\paragraph{Comment 2.}
+\rev{Homogeneous-source assumption: (6) and Algorithm 1 allow per-UAV flight times and station distances, while (7)-(10) use a common demand rate. State the approximation, or evaluate heterogeneous sources and validate for the optimized assignments.}
+\act{We now state explicitly that (7)--(10) aggregate heterogeneous per-UAV uptimes into a common rate, and we test whether that aggregation changes any decision rather than asserting that it does not. Section~VI-F re-scores the final design of every method with one common discrete-event simulator; the analytic model is conservative by $0.6$--$3.5\%$ and the ordering is unchanged.}{Sec.~III-D; Sec.~VI-B; Sec.~VI-F}
+
+\paragraph{Comment 3.}
+\rev{How does the solver enforce the feasibility constraints in (12), in particular charging-station reachability (12c) and inter-UAV separation (12i)? Since the trajectory block is computed before placement, an explicit feasibility check/repair step is needed, or a proof that the construction guarantees them.}
+\act{Section~V-E now lists which constraints Algorithm~1 enforces and which it relaxes. Reachability (12c) is re-evaluated at every candidate. Separation (12i) is \emph{not} enforced and cannot be at this level of abstraction; we say so, call the method a heuristic for a relaxed problem, and measure the cost: the closest approach between two UAVs' hover points is $199$~m over $1320$ pairs, with none below $100$~m.}{Sec.~V-E; Sec.~VI-I}
+
+\paragraph{Comment 4.}
+\rev{Strengthen or narrow Proposition 1. Assumption 2 gives non-decreasing increments but still permits equality; the proof appears to infer the limiting increment of Wq from the upper bound in (14). Supply the missing queueing argument and uniqueness conditions, or state it more cautiously as existence / quasi-convexity of an interior minimum.}
+\act{Assumption~2 is now part of the statement of Proposition~1, the asymptotic step was replaced by a finite floor on the congestion increment, and the uniqueness claim was weakened to a block of consecutive integers. Section~VI-C reports the numerical check.}{Prop.~1 and its proof, Sec.~IV-A; Sec.~VI-C}
+
+\paragraph{Comment 5.}
+\rev{Clarify the choice of M=12. Table II reports M* against per-station capacity c in one cell, while the main setup has C\_tot=4 spread over at most two stations. Re-check optimality under the actual placement and port split, and distinguish c from C\_tot throughout.}
+\act{You were right and the re-check changed what we can claim. Table~IV gives $M^\star{=}12$ for \emph{one} station with four ports, whereas the setup splits four ports over two stations. Sweeping $M$ under the actual placement and port split gives $M^\star{=}16$. We no longer call $M{=}12$ the AoI-optimal swarm size; it is a fixed, neutral operating point costing the proposed method $3.9\%$, and Section~VI-M repeats the comparison with every method at its own optimum.}{Sec.~VI-A; Sec.~VI-M}
+
+\paragraph{Comment 6.}
+\rev{Reproducibility: why does Algorithm 1 enumerate subsets of exactly S\_max stations when (12e) permits fewer, and can open sites with zero ports or unused sites represent fewer-station solutions?}
+\act{Section~V-D now explains that enumerating subsets of exactly $S_{\max}$ sites loses no solution: a subset that opens $S_{\max}$ sites but gives zero ports to one of them \emph{is} a fewer-station configuration, because a portless site can take no UAV.}{Sec.~V-D}
+
+\subsection*{Reviewer 2 (first round) --- 4 comments}
+
+\paragraph{Comment 1.}
+\rev{The practical benefit of the CETSP block is modest: peak AoI 41.1 min versus 42.8 min when CETSP is replaced by nearest-neighbour patrol, i.e. only about 3.9\%. Statistically significant but of limited practical effect relative to the algorithmic complexity.}
+\act{We agree and we now present the CETSP contribution as the smaller of the two components, with an effect size rather than a $p$-value: $3.9\%$ on average, bootstrap CI $[3.6,4.2]\%$, and $2.0\%$ on the worst seed, against $17.6\%$ for the contention-aware placement. The paper no longer leans on the trajectory block for its headline claim.}{Sec.~VI-J, Table~VI}
+
+\paragraph{Comment 2.}
+\rev{Baseline comparison is limited. Most competitors in Table III are simple baselines or internal ablations. Compare against recent multi-UAV AoI methods, charging-aware methods, or learning-based joint optimization.}
+\act{We added a dedicated related-work subsection that discusses seven recent works individually and a dimension-by-dimension comparison table. We did not add new learning-based solvers as competitors: doing so would require re-tuning another method's hyperparameters on our scenario, and a weak re-implementation would be worse evidence than none. We state that limitation explicitly instead.}{Sec.~II-E, Table~I; Sec.~VII}
+
+\paragraph{Comment 3.}
+\rev{Is fixing the swarm size at M=12 fair? M=12 is optimal under the authors own allocation model with four ports. The optimal swarm size may differ across schemes; each method should be allowed to optimize its own swarm size.}
+\act{Section~VI-M now lets every method choose its own swarm size. All five peak at the same $M^\star{=}16$, so a common $M$ disadvantages none of them, and the advantages are essentially unchanged: $11.6\%$ over the single pooled station at its own optimum versus $11.1\%$ at $M{=}12$.}{Sec.~VI-M}
+
+\paragraph{Comment 4.}
+\rev{No field validation. All results are simulated under fixed mobility, communication, battery and charging assumptions. No experiments with real UAVs, real charging stations or online data collection.}
+\act{This is correct and we have not removed the limitation. We do not have access to a UAV fleet with shared charging infrastructure, so every result remains simulation-based. We now say so plainly in the conclusion rather than leaving it to be inferred, and we strengthened the simulation side instead: one common discrete-event simulator now scores the final design of every method (Sec.~VI-F).}{Sec.~VII; Sec.~VI-F}
+
+\subsection*{Reviewer 3 (first round) = Reviewer 1 (second round) --- 6 comments}
+
+\paragraph{Comment 1.}
+\rev{The abstract should avoid notation or formulas such as M/M/C and p<10\textasciicircum{}-4.}
+\act{Removed. The abstract no longer contains $M/M/c$ or $p<10^{-4}$; it now says \emph{open-arrival queue} and reports the test by name without the $p$-value.}{Abstract}
+
+\paragraph{Comment 2.}
+\rev{In the large-scale M=60 experiment the number of charging ports grows linearly with the number of UAVs, one port per three UAVs, so the system is resource-rich, contradicting the contention scenario the paper emphasizes. Add an experiment with a small fixed number of ports to show degradation under extreme scarcity.}
+\act{Added. Section~VI-M now holds the port budget fixed at four while the swarm grows from $20$ to $60$, so the UAV-per-port ratio rises from $5$ to $15$: peak AoI degrades by a factor of $2.14$. A control with one port per UAV, where contention cannot arise, gives monotonically \emph{decreasing} AoI, which shows the degradation is contention and not swarm size.}{Sec.~VI-M, paragraph \emph{Extreme port scarcity}}
+
+\paragraph{Comment 3.}
+\rev{Section V describes the subproblems qualitatively. Give a mathematical formulation for each subproblem, especially the trajectory block in V-A. In the pseudocode, change Require/Ensure to Input/Output.}
+\act{\textsc{Require}/\textsc{Ensure} are now \textsc{Input}/\textsc{Output} throughout Algorithm~1. On the mathematical formulation per subproblem we did part of what you asked: the trajectory block has an explicit objective in (23), and Section~V-E now states precisely what the combinatorial blocks optimize and what they relax. We did not add a separate formal program for each block, because they are nested searches over the same objective (11) rather than independent problems, and writing them as separate programs would suggest a decomposition the solver does not perform.}{Algorithm~1; Eq.~(23); Sec.~V-E}
+
+\paragraph{Comment 4.}
+\rev{Add a Notations section at the end of the Introduction, and brief footnotes when queueing concepts are first used.}
+\act{A notation table was added at the end of the introduction.}{Table~II}
+
+\paragraph{Comment 5.}
+\rev{Standardize the writing: Section I-B uses TSP without giving the full form; Section II-A redefines Age of Information (AoI) a second time.}
+\act{Fixed. \emph{Traveling-salesman} is now spelled out at first use, and \emph{Age of Information (AoI)} is expanded twice only (abstract and first body use) instead of four times.}{Sec.~I-B; Sec.~II-A; Sec.~III-D}
+
+\paragraph{Comment 6.}
+\rev{Fig. 2 and Figs. 3 to 10 have inconsistent fonts, math fonts and font sizes, and some text is too small. Redraw following the journal guidelines.}
+\act{Redrawn, and we checked the result by measurement rather than by eye. Every figure is now generated at the true single-column width, so no figure is scaled down when placed, and the in-figure titles that were inflating three figures were removed since the captions already carry them. Measured on the final PDF, all nine figures now have a base text size of $9.3$--$10.9$~pt (previously as low as $6.5$~pt effective) and no overlapping labels. All use one font family.}{Figs.~1--10}
+
+\subsection*{Reviewer 4 (same number in both rounds) --- 7 comments}
+
+\paragraph{Comment 1.}
+\rev{Definition of peak AoI and the use of mean queueing delay. Clarify under what assumptions the mean charging delay in Eq. (10) can be used in the worst-case/peak AoI expression in Eq. (11); or state an expected peak AoI definition explicitly.}
+\act{Answered in the first-round revision by redefining (2) as the expected peak; Section~VI-H now also quantifies the distance to the two alternatives.}{Sec.~III-E; Sec.~VI-H}
+
+\paragraph{Comment 2.}
+\rev{Conditions used in Proposition 1: stated under Assumption 1 and Lemma 1 but the proof also relies on Assumption 2. Include all required assumptions in the statement, justify the asymptotic step, and clarify uniqueness of M* since a discretely convex sequence may have more than one minimizer.}
+\act{Answered in the first-round revision: Assumption~2 is in the statement, the asymptotic step was replaced, and uniqueness was weakened to a block of consecutive integers.}{Prop.~1, Sec.~IV-A}
+
+\paragraph{Comment 3.}
+\rev{Coupling between trajectory and station-placement decisions. Clarify the extent to which they are jointly optimized, discuss the approximation from fixing sub-fields and trajectories first, and if possible add a limited joint re-optimization to quantify the effect.}
+\act{Answered in the first-round revision with a limited joint re-optimization. On the single machine now used for all results it changes peak AoI by $0.00\%$, i.e.\ it is indistinguishable from no change, which strengthens rather than weakens the original answer.}{Sec.~VI-G}
+
+\paragraph{Comment 4.}
+\rev{Enforcement of the recharge-feasibility constraint. Clarify how (12b)-(12c) are enforced for each candidate placement and assignment after a UAV is reassigned, and report the minimum energy or reachability margin observed.}
+\act{Answered in the first round with a $7.7$~s minimum margin, but that answer was measured at a $5$~km field while the main comparison runs at $15$~km. We have corrected it: Section~VI-I now reports the field sizes at which (12c) can and cannot be met, and states that the large-field experiments run with it relaxed.}{Sec.~VI-I, Table~V}
+
+\paragraph{Comment 5.}
+\rev{Impact of the queue-model approximation on the optimized design. Examine whether the approximation changes the RANKING of candidate placements or capacity decisions; validate the main placement comparison using DES waiting times or an improved deterministic-service approximation.}
+\act{Answered in the first round under an $M/D$ correction; Section~VI-F now does the stronger test, scoring every method's final design with one common discrete-event simulator. The ordering is identical under both evaluators.}{Sec.~VI-F}
+
+\paragraph{Comment 6.}
+\rev{Interpretation of the placement-inversion result. In Proposition 2, configuration (A) has one station with c ports and (B) two stations with c ports each, so (B) also has larger total capacity. Compare under the same total port budget, or qualify the proposition as holding under a per-station capacity limit.}
+\act{Answered in the first-round revision by separating the matched-capacity comparison from the proposition and qualifying the proposition accordingly.}{Sec.~IV-B; Sec.~VI-E}
+
+\paragraph{Comment 7.}
+\rev{Minor presentation: standardize overpredicts / over-predicts; reconcile Section VI-D 19/20 instances with the Fig. 6 caption saying every seed; Section VI-G calls both blocks greedy although the placement search is described earlier as exhaustive.}
+\act{Answered in the first-round revision: spelling standardized, the 19/20 figure reconciled with the caption, and the exhaustive and greedy blocks named separately.}{Sec.~VI-D; Sec.~V-D}
+
+\subsection*{Reviewer 5 (same number in both rounds) --- 15 comments}
+
+\paragraph{Comment 1.}
+\rev{(11) is not a rigorous worst-case peak AoI. (2) is an infinite-horizon pathwise worst case while (11) uses Wq = Lq/lambda\_eff, a MEAN delay. Under M/M/c//N both delay and service have unbounded support, so the limsup in (2) may be unbounded. Redefine the objective as one of: expected peak AoI, high-percentile AoI, finite-horizon maximum AoI, or probability of exceeding a threshold, then make (11), the propositions and all nume\dots}
+\act{We took the first of your four options. The objective is now the \emph{expected} peak age, stated as such in (2), and (11), the propositions and all numerical results are consistent with it. Section~VI-H reports what the change costs: the expected peak is $2.00\times$ the time-average, and the tail factors ($p_{95}/\text{mean}$ $=1.40$, $\max/\text{mean}$ $=4.89$ median) are given so a reader can see when a mean-based surrogate is and is not adequate.}{Sec.~III-E, Eq.~(2), (11); Sec.~VI-H}
+
+\paragraph{Comment 2.}
+\rev{The queueing model ignores heterogeneity: T\_up,m differs per UAV so lambda\_m = 1/T\_up,m should be per-UAV, yet (7)-(10) use a common lambda. Use a heterogeneous model, or define the aggregation and prove by simulation that the approximation does not change design decisions. Also, the 4.2\% error holds only for a DES with matched exponential assumptions; for a near-deterministic process M/M/c//N overestimates delay by about 4.5x\dots}
+\act{Both parts are addressed. The aggregation into a common rate is now stated as an approximation, and Section~VI-F tests whether it changes decisions, not just values: with one common near-deterministic simulator the ordering of all five methods is identical. On the language, the paper no longer claims a general upper bound; it says the finite-source model \emph{empirically} overestimates on the configurations tested, and reports the $4.5\times$ overestimate under near-deterministic operation next to the $4.2\%$ matched-assumption agreement rather than in place of it.}{Sec.~III-D; Sec.~VI-B; Sec.~VI-F}
+
+\paragraph{Comment 3.}
+\rev{P0 and the implemented algorithm are inconsistent. The CETSP objective in (23) contains only tour length and a coverage penalty, with no flight-to-station energy, battery evolution, collision avoidance, time synchronization, queue and charging events, or strict satisfaction of the collection-radius constraint. The paper does not show Algorithm 1 returns a feasible solution to P0. Distinguish the original problem from the surro\dots}
+\act{Section~V-E now separates (P0) from what Algorithm~1 solves and lists every relaxation. Section~VI-I reports the maximum violation of each constraint on the returned configurations: station budget, port budget and open-station assignment are violated by zero on all seeds, the collection radius by at most $0.61$~m, separation is relaxed and measured separately, and reachability is the one that does not hold at large fields, which we now state with the field sizes at which it fails.}{Sec.~V-E; Sec.~VI-I, Table~V}
+
+\paragraph{Comment 4.}
+\rev{The joint claim is in fact decoupled. V-A states the trajectory block is independent of placement and solved once at the beginning, so trajectories cannot adapt to the chosen station locations. Either implement a genuine alternating optimization procedure, or NARROW the contribution to placement, capacity allocation and UAV assignment under fixed partitioning and trajectories.}
+\act{We narrowed the claim rather than implement full alternating optimization. Section~V-E states that the trajectory block is solved once and that Algorithm~1 is a heuristic for a relaxed problem, and Section~VI-G measures the price of the decoupling with one round of limited joint re-optimization: $0.00\%$ on average, i.e.\ indistinguishable from no change.}{Sec.~V-A, V-E; Sec.~VI-G}
+
+\paragraph{Comment 5.}
+\rev{The proof of Proposition 1 is incomplete, in four ways: (a) stated under Assumption 1 and Lemma 1 but the proof relies on Assumption 2; (b) the upper bound Wq <= (M-c)/(c mu) does NOT imply Delta Wq -> 1/(c mu), a lower bound or direct asymptotic analysis is needed; (c) a non-decreasing Delta AoI(M) may be ZERO over several M, so a unique minimizer does not follow; (d) the proof takes M -> infinity with K fixed and t\_loop(M) =\dots}
+\act{All four points are now reflected in the statement and proof: both assumptions are named in the statement, the bound argument was replaced by a finite floor on the increment, the uniqueness claim became a block of consecutive integers rather than a unique minimizer, and the scaling argument is now restricted to the regime where it holds.}{Prop.~1 and its proof, Sec.~IV-A}
+
+\paragraph{Comment 6.}
+\rev{Proposition 2 does not establish placement inversion under a fixed budget. Configuration A has one station with c ports, B has two stations with c ports each, i.e. total ports c versus 2c. B changes BOTH location and total capacity, so the improvement may come from doubling service capacity rather than from inversion of placement. Compare under the same total ports, total charging capacity, swarm size and station construction \dots}
+\act{The proposition is now stated as holding under a per-station capacity limit, and the matched-budget comparison is reported separately as an empirical result rather than as proof of the proposition: with the same total ports the traffic-driven siting still wins on $11$ of $12$ seeds. The monotonicity gap in (22) is acknowledged in the statement.}{Prop.~2, Sec.~IV-B; Sec.~VI-E}
+
+\paragraph{Comment 7.}
+\rev{The experiments do not confirm the ranking under a realistic system model. The main results appear to use the analytic M/M/c//N delay rather than evaluating every final design with a near-deterministic DES. An end-to-end evaluation is needed: DES on the actual patrol trajectories; ONE COMMON DES for the final design of EVERY method; comparison of the design chosen by the analytic model against the DES-preferred design; the DEC\dots}
+\act{We did the central part of the programme you set out and explain what we did not do. Done: one common discrete-event simulator applied to the final design of every method (Sec.~VI-F), and mean, standard deviation, bootstrap confidence interval, Holm-corrected family-wise tests and the \emph{worst-seed} result for every comparison (Sec.~VI-J). Under the common simulator the ordering is unchanged and the proposed design wins on $20$ of $20$ seeds. Not done, with reason: decision regret and sensitivity to synchronized charging phase would require a DES-in-the-loop solver, i.e.\ a different method rather than an additional measurement; we flag both as open.}{Sec.~VI-F; Sec.~VI-J; Sec.~VII}
+
+\paragraph{Comment 8.}
+\rev{AoI is defined in terms of data DELIVERED to a destination, while the system model mainly describes COLLECTION by the UAV. State explicitly when and over which link a collected update is considered delivered.}
+\act{Stated explicitly. Section~III-C now says we assume an ideal backhaul, so collection time equals delivery time, and spells out what a deliver-on-return model would change: the return flight would enter every peak and (11) would change, though the placement and capacity structure would survive.}{Sec.~III-C, paragraph \emph{Delivery semantics}}
+
+\paragraph{Comment 9.}
+\rev{P0 allows sum\_s x\_s <= S\_max, but Algorithm 1 enumerates subsets of EXACTLY S\_max sites, which may exclude solutions using fewer stations.}
+\act{Clarified in Section~V-D: a subset that opens $S_{\max}$ sites with zero ports at one of them is exactly a fewer-station configuration, so enumerating subsets of size exactly $S_{\max}$ excludes nothing.}{Sec.~V-D}
+
+\paragraph{Comment 10.}
+\rev{Fig. 2 suggests ALTERNATING optimization between the blocks, while the text says the trajectory block runs ONCE and station/port configurations are enumerated. Fix either the figure or the description.}
+\act{The figure caption and the text now agree: the trajectory block is solved once, before the placement search, and the figure says so.}{Fig.~2 and its caption}
+
+\paragraph{Comment 11.}
+\rev{The port-allocation procedure is described both as WATER FILLING and as EXHAUSTIVE ENUMERATION of integer port splits. These are not equivalent unless a formal water-filling derivation is given.}
+\act{Reconciled. The text now says the allocation is realized by scanning the integer port splits exhaustively, and uses \emph{water-filling} only as the interpretation of the resulting allocation, not as the algorithm.}{Sec.~V-B}
+
+\paragraph{Comment 12.}
+\rev{Section VI-D says the traffic-optimal placement wins in 19 of 20 runs with one tie, while the Fig. 6 caption says it wins on every seed. Reconcile the two statements.}
+\act{Reconciled: both the text and the caption now say the traffic-optimal placement wins strictly on $19$ of $20$ seeds and ties on the remaining one.}{Sec.~VI-D; Fig.~6 caption}
+
+\paragraph{Comment 13.}
+\rev{Exact optimum in Table IV applies only to the station/port/assignment subproblem under fixed per-UAV state, not to the exact optimum of P0. Call it a conditional combinatorial optimum.}
+\act{Renamed throughout to \emph{conditional combinatorial optimum}, with a sentence defining it and stating that it is \emph{not} the optimum of (P0). Table~VII is now generated from the result file and reports the worst-case gap ($0.99\%$ at $M{=}8$) alongside the mean.}{Sec.~I-B; Sec.~VI-L, Table~VII; Sec.~VII}
+
+\paragraph{Comment 14.}
+\rev{A complete parameter table is needed: rotary-wing power parameters, communication link parameters, packet size, CETSP hyperparameters, coverage penalty coefficient, DES warm-up time and simulation duration.}
+\act{Table~III lists every constant and is generated by importing the values from the artifact source, so it cannot drift from the code. The CETSP hyperparameters, the coverage-penalty weight, the seed count and the runtime, which were missing, are now reported in Section~VI-A.}{Table~III; Sec.~VI-A, paragraph \emph{Implementation, hyperparameters and runtime}}
+
+\paragraph{Comment 15.}
+\rev{The words optimal, proof, upper bound, real system and safe AoI estimate must be used more cautiously and consistently.}
+\act{We went through these words. The novelty claim is now conditional, \emph{exact optimum} became \emph{conditional combinatorial optimum}, the queueing bound is described as an empirical overestimate on the configurations tested rather than a proven upper bound, and \emph{safe AoI estimate} is now qualified by the operating regime in which it holds.}{Sec.~I-B; Sec.~VI-B; Sec.~VI-L; Sec.~VI-O}
+
+\subsection*{Reviewer 6 (same number in both rounds) --- 8 comments}
+
+\paragraph{Comment 1.}
+\rev{Reposition the related work and narrow the novelty claim. The sentence first work to jointly consider ... is too broad. Discuss each of the following individually, NOT merely add them to the bibliography: Chen et al. 2024 (10.1109/TTE.2024.3361692); Zhang et al. 2024 (10.1109/JIOT.2023.3285942); Won 2020 (10.1109/ICRA40945.2020.9197227); Santin et al. 2021 (10.3390/s21051705); Eldeeb et al. 2023 (10.1109/TVT.2022.3222092); Shi\dots}
+\act{Done in full. All seven works are now cited and discussed individually in a new subsection, the unconditional novelty claim is gone from both places it appeared, and Table~I compares the closest work dimension by dimension. The table omits four dimensions on which every listed work agrees and names them in the caption instead, so that the columns that remain are the ones that actually separate the works.}{Sec.~II-E, Table~I; Sec.~I-B}
+
+\paragraph{Comment 2.}
+\rev{Make the AoI definition consistent with the optimized quantity. (2) is an infinite-horizon pathwise peak while (11) adds a mean Wq into the cycle-time expression. With exponential service the waiting-time distribution has unbounded support so the pathwise limsup may be infinite even when the expectation is finite. Moreover max\_m E[W\_m] != E[max\_m W\_m]. Restate the objective and rederive (11) and the propositions for that metri\dots}
+\act{The objective is now the expected peak age and (11) and the propositions are consistent with it. We did not change the title: the title says \emph{age-optimal}, which remains accurate for the expected peak. Section~VI-H quantifies the error of the surrogate in both directions you identify.}{Sec.~III-E; Sec.~VI-H}
+
+\paragraph{Comment 3.}
+\rev{State the exact conditions and limits of Proposition 1. The U shape relies on Assumption 2, which is only verified numerically rather than derived from the finite-source queueing formulas, so present it explicitly as a CONDITIONAL result. The upper bound alone does not imply Delta Wq -> 1/(c mu); a throughput-saturation argument is needed. A monotone forward difference changing sign still permits a FLAT ZERO STRETCH, i.e. seve\dots}
+\act{Proposition~1 is now presented as a conditional result under both assumptions, the throughput-saturation step is stated explicitly, and the uniqueness claim was weakened to a block of consecutive integers, which admits the flat stretch you describe.}{Prop.~1, Sec.~IV-A}
+
+\paragraph{Comment 4.}
+\rev{Separate the effect of location from added capacity in Proposition 2. Comparing one station with c ports against two stations with c ports each changes total ports from c to 2c. Compare under the SAME number of stations and the same total ports, or impose and report a common infrastructure cost constraint. If the current comparison is kept, call it a threshold for opening an additional station AND adding capacity, not a pure p\dots}
+\act{The proposition is now qualified as holding under a per-station capacity limit, and the matched-port comparison is reported separately in Section~VI-E, which is exactly the decomposition you suggest: at equal total ports the traffic-driven siting still wins on $11$ of $12$ seeds.}{Prop.~2, Sec.~IV-B; Sec.~VI-E}
+
+\paragraph{Comment 5.}
+\rev{Clarify what Algorithm 1 solves relative to P0. Placement can change the return detour, battery feasibility, charging demand rate, route insertion points and the best assignment, so the trajectory block is NOT independent of placement. LIST EVERY RELAXATION in Algorithm 1, explain how the return-energy constraint (12c) and the UAV separation constraint (12i) are checked for each candidate, and clarify whether d(m,s) is RECOMPU\dots}
+\act{Section~V-E now lists every relaxation, states how (12c) is re-checked at each candidate, states that (12i) is relaxed and why, and clarifies that $d(m,s)$ is the centroid-to-station distance recomputed whenever the assignment changes. We describe Algorithm~1 as a heuristic for a relaxed problem, as you asked.}{Sec.~V-E}
+
+\paragraph{Comment 6.}
+\rev{Define whether collection equals delivery for AoI purposes. State the implicit communication assumption: collection is currently treated as INSTANT DELIVERY to the AoI destination, with no backhaul or data-carrying delay after the UAV collects a packet. If this is an idealized abstraction, acknowledge the scope and consequences, since a deliver-on-return model adds delay and MAY CHANGE the peak AoI expression.}
+\act{Stated explicitly in Section~III-C, together with the consequence that a deliver-on-return model would change (11).}{Sec.~III-C}
+
+\paragraph{Comment 7.}
+\rev{Strengthen the experiments and reproducibility details, six items: (a) for entries with M*=20 the papers own figures show a SWARM-SIZE CEILING, so report a CENSORED extremum (at least 20) or raise the ceiling, and do NOT use it as evidence of an interior extremum; (b) reconcile 19/20 with the Fig. 6 caption; (c) define d(m,s) precisely, and do not represent it by a single distance if it is in fact a time-varying trajectory qua\dots}
+\act{Five of the six items are done. (a)~Table~IV now marks the two entries that sit at the ceiling of the swept swarm size as $\ge 20$ and the caption says they are censored. (b)~The $19/20$ figure and the caption agree. (c)~$d(m,s)$ is defined and its recomputation stated. (d)~Section~VI-J now reports confidence intervals, effect sizes, the two-sided exact test and a Holm correction over the family of five comparisons, plus the worst seed. (e)~Section~VI-A reports the Adam learning rate, the step budget, the 2-opt frequency, the stopping rule, the seed count, the hardware and the runtime split between the GPU and CPU blocks. (f)~We did not add the four stronger baselines; see our reply to Reviewer~2, comment~2.}{Table~IV; Sec.~VI-D; Sec.~VI-J; Sec.~VI-A}
+
+\paragraph{Comment 8.}
+\rev{Narrow the claims about queue validation and generality. Agreement between the analytic M/M/c//N and a DES USING THE SAME exponential assumptions is mainly a sanity check of the implementation and does NOT by itself validate the queueing model for the UAV cycle. If the conservative upper bound claim is kept, provide a stochastic-ordering proof or parameter conditions; otherwise call it an empirical overestimate on the configur\dots}
+\act{Narrowed. The matched-assumption agreement is now described as a sanity check of the implementation, the conservative-bound language was replaced by an empirical overestimate on the configurations tested, the aggregation into a homogeneous arrival rate is stated as an approximation and tested in Section~VI-F, and \emph{saturation} is now qualified as bounded waiting for a fixed finite population.}{Sec.~III-D; Sec.~VI-B; Sec.~VI-F}
+
+\section*{Second-round comments}
+
+\subsection*{Reviewer 1 (second round) = Reviewer 3 of the first round --- 1 comment}
+
+\paragraph{Comment 1.}
+\rev{The response letter does not contain a point-by-point reply to the comments I raised AS REVIEWER 3 in the initial review round. None of the six comments have been addressed. Provide a point-by-point response and specify the EXACT LOCATIONS of the corresponding revisions. Until these issues are clarified, I cannot recommend acceptance.}
+\act{We apologize without qualification. The first-round decision letter carried five reviewers' comments in the body of the e-mail and one reviewer's comments as an attachment; only the attachment was transferred into our working copy, so the response letter answered seven points out of forty-six and never reached your six. That was our error in handling the material, not a judgement about your comments. This letter answers every numbered point of every reviewer from both rounds, and each of your six is answered above under \emph{Reviewer~3 (first round)} with the exact location of the change.}{This letter, Reviewer~3 (first round), comments 1--6}
+
+\subsection*{Reviewer 2 (second round) --- 1 comment}
+
+\paragraph{Comment 1.}
+\rev{Align the figures quoted in the abstract with those in the body: the abstract says within 0.1\% of the exact optimum whereas Section VI-L and Table V give exact optimality for M<=6, 0.03\% at M=7, and 0.11\% (worst case 0.99\%) at M=8; and the abstract says up to 12.2\% against the single pooled-station baseline whereas Section VI-K gives 10.2\% to 12.7\%.}
+\act{Corrected, and we removed the cause rather than only the symptom. Both figures were typed by hand in the text; they are now generated from the result files. The abstract now quotes $12.7\%$, which is the largest gain over the single pooled station reported anywhere in the paper, so the body can no longer exceed the abstract. The optimality figures moved into a generated table that reports the worst case ($0.99\%$ at $M{=}8$) next to the mean.}{Abstract; Sec.~VI-K; Sec.~VI-L, Table~VII}
+
+\subsection*{Reviewer 3 (second round) --- 1 comment}
+
+\paragraph{Comment 1.}
+\rev{Problem (P0) includes the inter-UAV separation constraint (12i), but the trajectory optimization and Algorithm 1 do not clearly state how this constraint is enforced in the returned solution. Briefly clarify WHERE and HOW (12i) is checked or enforced during the optimization.}
+\act{Clarified in Section~V-E. (12i) is \emph{not} enforced: the planner works in cycle times and does not resolve where each UAV is at a given instant, so the constraint cannot be checked at this abstraction. We say so, describe Algorithm~1 as a heuristic for a relaxed problem, and report a measurement instead of a claim: the closest approach between two UAVs' hover points is $199$~m over $1320$ pairs, with none closer than $100$~m.}{Sec.~V-E}
+
+\subsection*{Reviewer 5 (second round) --- 1 comment}
+
+\paragraph{Comment 1.}
+\rev{The response letter does not include a point-by-point reply to my report (Reviewer 5, Comments 1-15). Respond to EACH comment, explaining the ACTION TAKEN and identifying the corresponding section, page, equation, figure or table. Explicit cross-references are acceptable where concerns overlap, provided the full scope of each comment is addressed. IF A REQUESTED CHANGE HAS NOT BEEN MADE, PROVIDE A REASONED EXPLANATION.}
+\act{You are right that no reply reached your report, and the reason is the same handling error described in our reply to Reviewer~1 of this round: five reviewers' comments were in the body of the decision e-mail and were never transferred into our working copy. All fifteen of your comments are answered above, each with the action taken and the location. Where a request was not carried out (comment~7, decision regret and synchronized phase; comment~3's full re-formulation of P0) we say so and give the reason rather than leave a gap.}{This letter, Reviewer~5 (first round), comments 1--15}
+
+\subsection*{Reviewer 6 (second round) --- 4 comments}
+
+\paragraph{Comment 1.}
+\rev{Related work. Several highly relevant works identified in the previous review are STILL not cited or discussed (Eldeeb TVT 2022; Zhang IoT-J 2023; Chen TTE 2024; Won ICRA 2020; Santin Sensors 2021; Shi TGCN 2025). The unconditional claim we formulate the first joint ... problem REMAINS in the text; replace it with to the best of our knowledge or similar, preferably supported by a dimension-by-dimension comparison with existing\dots}
+\act{Done. All six works are now cited and discussed individually, the unconditional claim is replaced by \emph{to the best of our knowledge} in the two places it appeared, and Table~I gives the dimension-by-dimension comparison you suggested.}{Sec.~II-E, Table~I; Sec.~I-B}
+
+\paragraph{Comment 2.}
+\rev{Constraint (12i). The solver section still does not explain how the minimum inter-UAV separation constraint is handled or whether it is relaxed. A short clarification is required.}
+\act{Clarified; see our reply to Reviewer~3 of this round. The constraint is relaxed, we say so, and we report the measured separation of the returned tracks.}{Sec.~V-E}
+
+\paragraph{Comment 3.}
+\rev{Delivery semantics. AoI is settled at the moment of UAV collection, which implicitly assumes an ideal backhaul/downlink from UAV to the destination. This assumption should be stated explicitly in the system model.}
+\act{Stated explicitly in the system model.}{Sec.~III-C, paragraph \emph{Delivery semantics}}
+
+\paragraph{Comment 4.}
+\rev{Reproducibility details. Optimization hyperparameters (Adam learning rate, iteration count, 2-opt frequency, termination criteria) and RUNTIME are still not reported; they should be added, at least by reference to the artifact.}
+\act{Added. Section~VI-A now reports the Adam learning rate, the number of gradient steps, the 2-opt reordering frequency, the stopping rule, the seed count, the hardware, and the runtime split between the GPU trajectory block and the CPU combinatorial block at two swarm sizes. All results in the paper now come from a single documented machine.}{Sec.~VI-A, paragraph \emph{Implementation, hyperparameters and runtime}}
+
+\end{document}

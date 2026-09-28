@@ -24,6 +24,7 @@ feedback-siet-cong-phai-do-bao-dong-gia. Cong nay IN RA so don vi da kiem de kho
 nham "0 canh bao" voi "kiem 0 don vi".
 """
 import argparse
+import glob
 import os
 import re
 import sys
@@ -55,24 +56,38 @@ def load_macros(path):
 
 
 def find_duplicate_homes(macro_path):
-    """Tim moi ban sao cung ten trong cay thu muc cua bai."""
+    """Tim moi ban sao cung ten TRONG CAY CUA BAI NAY, va cho biet chung co GIONG NHAU.
+
+    ⛔ Hai loi cua ban truoc, ca hai deu do chinh cong nay gay ra:
+      (a) no leo len 4 cap tu tep macro, nen o bo cuc `<bai>/v3-revision/results/tables/`
+          thi root cham ca thu muc CHA chua cac bai KHAC, va no bao mot tep cua bai khac
+          la "ban thu hai". Bao dong gia thi lam nguoi ta tat cong.
+      (b) no dem SO BAN. Nhung dieu dang so khong phai co hai ban, ma la hai ban KHAC
+          NHAU: quy trinh sinh o mot cho roi chep sang thu muc dung bai thi hai ban la
+          binh thuong. Phep kiem dung cho muc dich da khai la SO NOI DUNG.
+    Nay: root = thu muc BAI (co reviews/ hoac build-submit*.sh), va tra ve them bam.
+    """
+    import hashlib
     name = os.path.basename(macro_path)
-    root = os.path.abspath(macro_path)
-    for _ in range(4):
-        root = os.path.dirname(root)
+    root = os.path.dirname(os.path.abspath(macro_path))
+    for _ in range(6):
+        cha = os.path.dirname(root)
+        if cha == root:
+            break
+        if (os.path.isdir(os.path.join(root, "reviews"))
+                or glob.glob(os.path.join(root, "build-submit*.sh"))):
+            break
+        root = cha
     hits = []
     for dirpath, dirnames, filenames in os.walk(root):
-        # Bo cac thu muc DAU RA. Ban sao trong `submit/pkg/` la do chinh buoc dong goi
-        # tao ra va no PHAI o do; dem no thanh "ban thu hai" la bao dong gia, va bao
-        # dong gia thi lam nguoi ta tat cong. Chi cac cho co the bi ban thao NAP moi
-        # tinh. Xem feedback-siet-cong-phai-do-bao-dong-gia.
         dirnames[:] = [d for d in dirnames
                        if d not in (".git", "node_modules", "__pycache__", "build",
                                     "submit", "pkg", ".latexmk")]
         if name in filenames:
-            hits.append(os.path.relpath(os.path.join(dirpath, name), root))
+            f = os.path.join(dirpath, name)
+            h = hashlib.sha256(open(f, "rb").read()).hexdigest()[:12]
+            hits.append((os.path.relpath(f, root), h))
     return root, sorted(hits)
-
 
 def main():
     ap = argparse.ArgumentParser()
@@ -92,14 +107,19 @@ def main():
 
     # ---- A. mot ban duy nhat ------------------------------------------------
     root, homes = find_duplicate_homes(a.macros)
-    if len(homes) > 1:
-        print("  ⛔ %s co %d BAN trong cay thu muc, ban thao co the nap nham ban cu:"
-              % (os.path.basename(a.macros), len(homes)))
-        for h in homes:
-            print("       %s" % h)
+    bams = {h for _, h in homes}
+    if len(bams) > 1:
+        print("  ⛔ %s co %d ban KHAC NHAU trong cay cua bai, ban thao co the nap nham:"
+              % (os.path.basename(a.macros), len(bams)))
+        for f, h in homes:
+            print("       %s  %s" % (h, f))
         bad += 1
+    elif len(homes) > 1:
+        print("  %d ban, GIONG HET nhau (%s) ✅" % (len(homes), list(bams)[0]))
+        for f, _ in homes:
+            print("       %s" % f)
     else:
-        print("  mot ban duy nhat: %s ✅" % (homes[0] if homes else a.macros))
+        print("  mot ban duy nhat: %s ✅" % (homes[0][0] if homes else a.macros))
 
     # ---- B. khong go tay ----------------------------------------------------
     # chi cac gia tri co dau thap phan; xem ghi chu pham vi o dau tep

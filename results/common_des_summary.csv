@@ -1,0 +1,6 @@
+method,aoi_analytic_min,aoi_des_min,rank_analytic,rank_des,proposed_wins_des
+proposed,41.102886,40.415895,1,1,20
+no_cetsp,42.759415,42.172392,2,2,
+coverage,50.391572,48.690689,4,4,
+roundrobin,56.711693,55.684686,5,5,
+single_station,46.230360,45.939954,3,3,

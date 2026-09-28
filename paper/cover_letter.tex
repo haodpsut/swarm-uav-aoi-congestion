@@ -1,17 +1,26 @@
 \documentclass[11pt]{article}
 
-\usepackage[a4paper,margin=0.9in]{geometry}
+\usepackage[a4paper,margin=0.85in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage[colorlinks=true,allcolors=blue]{hyperref}
 \usepackage{parskip}
-\setlength{\parskip}{0.5em}
+\setlength{\parskip}{0.42em}
+
+% Do phu cua ban danh dau, do build-submit-r2.sh sinh ra tu chinh tep diff. ⛔ Khong
+% duoc go tay con so nay: no la loi khai voi bien tap ve mot thu ho se mo ra xem.
+% Nap CUNG tep macro ma ban thao va thu tra loi dung. Cover letter la MAT TIEN:
+% bien tap doc no truoc, va no la cho de nhat de mot con so lech am tham.
+\input{../results/tables/r1_macros}
+\IfFileExists{../results/tables/markup_coverage.tex}
+  {\input{../results/tables/markup_coverage.tex}}{}
+\providecommand{\markupNote}{}   % chi dung khi CHUA chay build-submit-r2.sh
 
 \begin{document}
 
 \thispagestyle{empty}
 
 \begin{flushright}
-July 2026
+October 2026
 \end{flushright}
 
 \vspace{-1em}
@@ -22,52 +31,82 @@ The Editor-in-Chief, \textit{IEEE Internet of Things Journal}
 \vspace{0.6em}
 
 \noindent
-Dear Editor,
+Dear Editor, dear Dr.~Tsai,
 
-We are pleased to submit our manuscript entitled ``Congestion-Aware Joint
-Charging-Station Placement, Capacity, and Swarm-UAV Trajectory Design for
-Age-Optimal Data Collection'' for consideration for publication in the
-\textit{IEEE Internet of Things Journal}.
+We are submitting the second revision of \textbf{IoT-70170-2026},
+``Congestion-Aware Joint Charging-Station Placement, Capacity, and Swarm-UAV
+Trajectory Design for Age-Optimal Data Collection''. The title, the problem, and the
+contributions are unchanged.
 
-Unmanned aerial vehicles increasingly collect time-sensitive Internet of Things
-data, where the quality metric is the Age of Information. Practical deployments
-use a swarm of energy-limited UAVs that recharge at a few shared charging
-stations, which then become a contended resource whose waiting time inflates the
-Age of Information. Jointly deciding where to place the stations, how many
-charging ports to install, how the swarm should fly, and which UAV recharges
-where is a coupled problem that, to our knowledge, has not been addressed as a
-whole.
+\textbf{We must begin with an apology.} Two reviewers reported that our previous
+response letter did not answer their comments. They were right, and the cause was
+ours. The first-round decision letter carried five reviewers' comments in the body of
+the e-mail and one reviewer's comments as an attachment. Only the attachment reached
+our working copy, so the previous letter answered seven points while the reviewers had
+raised forty-six. Nothing was declined and nothing was judged unimportant; the
+material was never collected. The accompanying response letter now answers
+\textbf{every numbered point of every reviewer from both rounds}: forty-six from the
+first round and eight from the second, fifty-four in total. It is generated from a
+ledger with one row per comment, so its completeness can be checked by counting rather
+than taken on trust. Because the reviewer numbering changed between rounds, every old
+point is numbered by its \emph{first-round} reviewer and both numbers appear in each
+heading.
 
-Our contributions are: (i) the first joint formulation of charging-station
-placement, port capacity, swarm trajectory, and assignment for peak-Age-of-Information
-data collection with a contended, multi-server charging resource; (ii) a
-finite-source (machine-repair) queue model, validated against a discrete-event
-simulation, which shows that the commonly assumed open $M/M/c$ queue overpredicts
-the waiting time by roughly six times and would distort the design; (iii) two
-proved structural results, a congestion threshold that makes the Age of
-Information non-monotone in the swarm size with a provisioning law, and a
-placement inversion from coverage-driven to traffic-driven; and (iv) a
-block-coordinate solver with a GPU close-enough traveling-salesman trajectory
-optimizer, evaluated against several baselines with large-swarm scaling,
-robustness, and optimality-gap studies.
+Three changes alter what the paper claims, and we list them here rather than leave
+them to be found:
 
-The topic aligns with the scope of the journal and will interest its readership
-working on UAV-assisted data collection, Age of Information, and energy-aware
-Internet of Things systems.
+\begin{itemize}
+\item \textbf{$M{=}12$ is no longer described as the optimal swarm size.} A reviewer
+asked us to re-check that claim under the actual placement and port split, and the
+check contradicted it: the table we had cited gives $M^\star{=}12$ for one station with
+four ports, whereas the setup splits four ports over two stations. Sweeping $M$ under
+the real configuration gives $M^\star{=}\rMstarOwn$. We keep $M{=}12$ as a fixed and
+neutral operating point, note that it costs the proposed method $\rMstarPropCost\%$,
+and repeat the entire comparison with every method at its own optimum, where the
+advantages are essentially unchanged.
 
-We confirm that the manuscript is original, has not been published previously,
-and is not under consideration elsewhere; all authors approved the submission and
-declare no conflict of interest. To support reproducibility, the source code and
-data are available at \url{https://github.com/haodpsut/swarm-uav-aoi-congestion}.
+\item \textbf{The feasibility claim held only at the smallest field size.} While
+answering a request to report the violation of every constraint, we found that our own
+statement that the returned designs are ``feasible with margin to spare'' was measured
+at a $5$~km field, whereas the main comparison runs at $15$~km, where the
+recharge-reachability constraint is in fact relaxed. The paper now reports the field
+sizes at which that constraint can and cannot be met, states that the large-field
+results hold under an idealized-reachability assumption, and turns the finding into a
+provisioning guideline. No reviewer raised this; we found it and we report it.
 
-Thank you for considering our manuscript.
+\item \textbf{The claims about the queueing model are narrower.} The agreement between
+the analytic model and the simulator under matched assumptions is now described as a
+sanity check of the implementation rather than as validation of the model, and the
+``conservative upper bound'' language is replaced by an empirical overestimate on the
+configurations tested. To answer the underlying concern we applied one \emph{common}
+near-deterministic simulator to the final design of all five methods: the ordering is
+identical to the analytic ordering and the proposed design wins on $\rDesPropWins$ of
+$\rSeeds$ seeds.
+\end{itemize}
+
+Two procedural notes. First, all results in this version were regenerated on a single
+documented machine, re-run from the exact commit that was submitted last time; of
+$77$ previously reported quantities, $69$ are bit-identical and eight moved in the
+third significant digit, with no conclusion changed. Second, the figures were redrawn
+at the true column width after we measured that several were being scaled down on
+placement, leaving text as small as $6.5$~pt; all figures now print at
+$9.3$~pt or larger.
+
+All changes are marked in the accompanying highlighted PDF, in blue for added text and
+dark red for deleted text. \markupNote
+
+Every reported quantity is generated from the artifact by script, and a single command
+reproduces the measurements, recording a SHA-256 digest per result file so a rerun can
+be checked rather than trusted:
+\url{https://github.com/haodpsut/swarm-uav-aoi-congestion}.
+
+We are grateful to the reviewers for their patience, and particularly to those who
+told us plainly that their comments had gone unanswered.
 
 \vspace{0.4em}
 
 \noindent
 Sincerely,\\
-Truong Duy Dinh (corresponding author), on behalf of\\
-Phuc Hao Do, Tran Duc Le, Truong Duy Dinh, and Van Dai Pham\\
-\href{mailto:duydt@ptit.edu.vn}{duydt@ptit.edu.vn}
+Truong Duy Dinh, on behalf of all authors
 
 \end{document}

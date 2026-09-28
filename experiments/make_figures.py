@@ -58,15 +58,30 @@ METHOD_COLOR = {
     "roundrobin":     OI["purple"],
 }
 
+# ⛔ R3 diem 6 (vong 1): "Fig. 2 and Figs. 3 to 10 have inconsistent fonts, math fonts
+# and font sizes, and some text is too small."
+# Do duoc 28/09/2026: cac hinh von ve o khong 3.4 den 6.6 inch roi bi \includegraphics thu
+# ve be rong mot cot (3.5 in), nen chu co theo he so thu. Co chu IN RA thuc te:
+#   fig_sensitivity 3.5 pt, fig_prop1_phys 4.5 pt, fig_prop1_mstar 5.1 pt, fig_scale 7.0 pt.
+# 3.5 pt la khong doc noi tren giay. Cach sua dung la VE DUNG KHO SE IN, de he so thu bang 1
+# va co chu danh ra dung co chu that. COL_IN duoi day la be rong mot cot cua IEEEtran.
+COL_IN = 3.5          # be rong mot cot IEEEtran, inch
+
+
+def _col(w, h):
+    """Quy figsize ve be rong MOT COT, giu nguyen ty le cao tren rong."""
+    return (COL_IN, h * COL_IN / w)
+
+
 plt.rcParams.update({
     "figure.dpi": 200,
     "savefig.dpi": 600,          # crisp high-res PNG previews
     "font.size": 11,
     "axes.labelsize": 12,
     "axes.titlesize": 12,
-    "xtick.labelsize": 10,
-    "ytick.labelsize": 10,
-    "legend.fontsize": 9,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+    "legend.fontsize": 8.5,
     "axes.linewidth": 0.8,
     "lines.linewidth": 1.8,
     "figure.autolayout": False,
@@ -126,7 +141,7 @@ def fig_des():
     mmc_over = float(np.mean(mmc[sig] / de[sig]))       # how far M/M/c overshoots DES
     fs_err = float(np.mean(np.abs(fs[sig] - de[sig]) / de[sig]) * 100.0)
 
-    fig, ax = plt.subplots(figsize=(3.7, 3.3))
+    fig, ax = plt.subplots(figsize=_col(3.7, 3.3))
     ax.plot(rho, mmc, marker="x", ms=5, ls="--", color=OI["verm"],
             label="open M/M/c (assumes $\\infty$ sources)")
     ax.plot(rho, fs, marker="s", ms=4, ls="-", color=OI["blue"],
@@ -163,7 +178,7 @@ def fig_des():
             fontsize=8.5, color=OI["blue"], ha="left", va="center",
             bbox=dict(facecolor="white", alpha=0.85, edgecolor="none", pad=1))
 
-    leg = ax.legend(loc="lower right", frameon=True, fontsize=7.4,
+    leg = ax.legend(loc="lower right", frameon=True, fontsize=8,
                     framealpha=0.9, edgecolor="none")
     leg.get_frame().set_facecolor("white")
     save(fig, "fig_des_validation.png")
@@ -182,7 +197,7 @@ def fig_prop1_phys():
         by_c.setdefault(int(r["c"]), []).append(r)
     cs = sorted(by_c)
 
-    fig, ax = plt.subplots(figsize=(3.8, 3.5))
+    fig, ax = plt.subplots(figsize=_col(3.8, 3.5))
     norm = Normalize(vmin=min(cs), vmax=max(cs))
     cmap = plt.get_cmap("viridis")
 
@@ -251,7 +266,7 @@ def fig_mstar():
     ms = np.array([int(r["M_star"]) for r in rows])
     cap_cap = 20  # swarm-size grid ceiling
 
-    fig, ax = plt.subplots(figsize=(4.3, 3.0))
+    fig, ax = plt.subplots(figsize=_col(4.3, 3.0))
     ax.plot(cap, ms, marker="s", ms=6, color=ACCENT, zorder=4)
     ax.fill_between(cap, ms, 0, color=ACCENT, alpha=0.08)
 
@@ -295,7 +310,7 @@ def fig_prop2():
     cov, traf = cov[order], traf[order]
     ypos = np.arange(n)
 
-    fig, ax = plt.subplots(figsize=(3.5, 4.0))
+    fig, ax = plt.subplots(figsize=_col(3.5, 4.0))
     # connector = the per-seed improvement
     for i in range(n):
         ax.plot([traf[i], cov[i]], [ypos[i], ypos[i]], color=OI["grey"],
@@ -306,7 +321,7 @@ def fig_prop2():
                label="traffic-optimal (ours)")
 
     ax.set_yticks(ypos)
-    ax.set_yticklabels([str(i + 1) for i in range(n)], fontsize=7)
+    ax.set_yticklabels([str(i + 1) for i in range(n)], fontsize=8)
     ax.set_ylabel("seed (sorted by coverage AoI)")
     ax.set_xlabel("Peak AoI (min)")
     ax.set_ylim(-1, n)
@@ -334,7 +349,7 @@ def fig_crossover():
     cov = np.array([float(r["coverage_min"]) for r in rows])
     gain = np.array([float(r["gain_pct"]) for r in rows])
 
-    fig, ax = plt.subplots(figsize=(3.5, 3.2))
+    fig, ax = plt.subplots(figsize=_col(3.5, 3.2))
     # shaded band = the advantage of the proposed method over coverage baseline
     ax.fill_between(L, prop, cov, color=ACCENT, alpha=0.12, zorder=1,
                     label="advantage region")
@@ -393,7 +408,7 @@ def fig_ablation():
     vals = [means[m] for m in order]
     colors = [ACCENT if m == "proposed" else OI["grey"] for m in order]
 
-    fig, ax = plt.subplots(figsize=(3.6, 3.2))
+    fig, ax = plt.subplots(figsize=_col(3.6, 3.2))
     bars = ax.bar(range(len(order)), vals, color=colors, width=0.68,
                   edgecolor="white", linewidth=0.6)
     for b, v in zip(bars, vals):
@@ -420,14 +435,15 @@ def fig_optgap():
     M = [int(r["M"]) for r in rows]
     gmean = [float(r["gap_mean_pct"]) for r in rows]
     gmax = [float(r["gap_max_pct"]) for r in rows]
-    fig, ax = plt.subplots(figsize=(3.4, 2.8))
+    fig, ax = plt.subplots(figsize=_col(3.4, 2.8))
     ax.plot(M, gmean, marker="o", color=ACCENT, label="mean gap")
     ax.plot(M, gmax, marker="s", ls="--", color=OI["orange"], label="max gap")
     ax.axhline(0, color=OI["grey"], lw=0.8)
     ax.set_xlabel("Swarm size $M$")
     ax.set_ylabel("Optimality gap (%)")
     ax.set_ylim(bottom=-0.5)
-    ax.set_title("Greedy solver vs exact optimum")
+    # tieu de bo di: chu thich LaTeX da noi, va no lam no khung hinh
+    # ax.set_title("Greedy solver vs exact optimum")
     style_axes(ax)
     ax.legend(frameon=False, fontsize=8)
     save(fig, "fig_optgap.png")
@@ -450,15 +466,18 @@ def fig_sensitivity():
         else:
             labels.append(sw)
         gains.append(float(r["gain_pct"]))
-    fig, ax = plt.subplots(figsize=(6.6, 3.0))
+    # Hinh nay hep lai sau khi ve dung kho cot, nen nhan truc x phai xoay dung hon
+    # va hinh phai cao hon, neu khong cac nhan de len nhau (do duoc 16 cap).
+    fig, ax = plt.subplots(figsize=(COL_IN, 2.9))
     x = range(len(labels))
     ax.bar(x, gains, color=ACCENT)
     for i, g in enumerate(gains):
         ax.text(i, g + 0.3, "%.1f" % g, ha="center", va="bottom", fontsize=8)
     ax.set_xticks(list(x))
-    ax.set_xticklabels(labels, rotation=20, ha="right", fontsize=8)
+    ax.set_xticklabels(labels, rotation=42, ha="right", fontsize=8)
     ax.set_ylabel("Gain over single (%)")
-    ax.set_title("Robustness: proposed vs single pooled station (L=14 km)")
+    # tieu de bo di: chu thich LaTeX da noi, va no lam no khung hinh
+    # ax.set_title("Robustness: proposed vs single pooled station (L=14 km)")
     style_axes(ax, grid_axis="y")
     save(fig, "fig_sensitivity.png")
 
@@ -472,13 +491,14 @@ def fig_scale():
     prop = [float(r["proposed_min"]) for r in rows]
     single = [float(r["single_min"]) for r in rows]
     cov = [float(r["coverage_min"]) for r in rows]
-    fig, ax = plt.subplots(figsize=(3.5, 3.0))
+    fig, ax = plt.subplots(figsize=_col(3.5, 3.0))
     ax.plot(M, cov, marker="^", color=OI["verm"], label="coverage-optimal")
     ax.plot(M, single, marker="s", color=OI["green"], label="single pooled station")
     ax.plot(M, prop, marker="o", color=ACCENT, label="proposed (ours)")
     ax.set_xlabel("Swarm size $M$ ($K{=}8M$ sensors)")
     ax.set_ylabel("Peak AoI (min)")
-    ax.set_title("Scaling to a large swarm (capacity grows with $M$)")
+    # tieu de bo di: chu thich LaTeX da noi, va no lam no khung hinh
+    # ax.set_title("Scaling to a large swarm (capacity grows with $M$)")
     style_axes(ax)
     ax.legend(frameon=False, fontsize=8)
     save(fig, "fig_scale.png")

@@ -1,0 +1,6 @@
+method,mstar,aoi_at_mstar_min,aoi_at_M12_min,gain_vs_proposed_at_mstar_pct,gain_vs_proposed_at_M12_pct
+proposed,16,39.496562,41.102886,,
+no_cetsp,16,41.047393,42.759415,3.778147,3.874068
+coverage,16,49.210274,50.391572,19.739196,18.433016
+roundrobin,16,54.108989,56.711693,27.005544,27.523085
+single_station,16,44.684881,46.230360,11.610905,11.091141

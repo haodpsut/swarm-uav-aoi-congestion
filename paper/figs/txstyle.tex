@@ -1,0 +1,35 @@
+% =====================================================================
+%  Transaction-grade TikZ style kit (flow / architecture figures)
+%  Triết lý: nền xám trắng, 1 màu nhấn cho khối Đề xuất, nét mảnh đều,
+%  góc vuông/bo rất nhẹ, mũi tên một trọng số, không bóng/gradient.
+%  \input{txstyle.tex} sau \usepackage{tikz}.
+% =====================================================================
+\usetikzlibrary{arrows.meta, positioning, fit, backgrounds, calc}
+
+% ---- ONE accent color per paper (đổi mã HEX này theo từng bài) ----
+\definecolor{accent}{HTML}{2C6E9B}   % muted steel blue
+\definecolor{inkgray}{HTML}{3A3F47}
+
+\tikzset{
+  >={Latex[length=2mm, width=1.6mm]},
+  font=\footnotesize,
+  % --- khối thường: xám rất nhạt, góc vuông, nét 0.5pt ---
+  blk/.style={draw=inkgray, line width=0.5pt, fill=black!3,
+              minimum width=22mm, minimum height=10mm, align=center,
+              inner sep=3pt, rounded corners=0.6pt},
+  % --- khối ĐỀ XUẤT: nhấn accent nhẹ, nét đậm hơn chút ---
+  prop/.style={blk, draw=accent, fill=accent!7, line width=0.8pt},
+  % --- node nhỏ (vệ tinh / cell) ---
+  sml/.style={draw=inkgray, line width=0.5pt, fill=black!3,
+              minimum width=16mm, minimum height=8mm, align=center,
+              inner sep=2pt, font=\scriptsize, rounded corners=0.6pt},
+  % --- luồng dữ liệu (liền) và hồi tiếp/điều khiển (đứt) ---
+  flow/.style={->, draw=inkgray, line width=0.55pt},
+  fb/.style={->, draw=inkgray!75, line width=0.55pt, dashed, dash pattern=on 3pt off 2pt},
+  % --- nhãn cạnh mũi tên: nhỏ, nghiêng, xám ---
+  alab/.style={font=\scriptsize\itshape, text=inkgray!75, inner sep=1.5pt},
+  % --- vùng nhóm: khung đứt mảnh + nhãn in hoa nhỏ ---
+  zone/.style={draw=inkgray!45, line width=0.4pt, dashed,
+               dash pattern=on 2pt off 2pt, inner sep=4mm, rounded corners=1pt},
+  zlab/.style={font=\scriptsize\bfseries, text=inkgray!70},
+}

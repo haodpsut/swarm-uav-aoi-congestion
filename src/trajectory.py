@@ -9,10 +9,13 @@ HOVER points whose r_c-disks cover all assigned sensors -- a Close-Enough TSP
 
     loss = sum_uav [ closed_tour_length(waypoints) + lambda_cov * coverage_pen ]
 
-The waypoint cyclic ORDER is fixed at init (angular sort around each sub-field
-centroid); only positions slide, which keeps the length term differentiable. All
-UAVs of a scenario are optimised in ONE padded/masked batch, so many UAVs (and,
-by stacking seeds, whole sweeps) run in parallel on the GPU.
+The waypoint cyclic ORDER is initialised by an angular sort around each sub-field
+centroid and held fixed WITHIN a gradient block, which keeps the length term
+differentiable; between blocks it is re-optimised by a discrete nearest-neighbour
+plus 2-opt pass (see optimize_trajectories, reorder_rounds). So order and positions
+are optimised alternately, not frozen at initialisation. All UAVs of a scenario are
+optimised in ONE padded/masked batch, so many UAVs (and, by stacking seeds, whole
+sweeps) run in parallel on the GPU.
 
 Returns each UAV's optimised tour length; peak AoI uses tour_len / V for the
 flight part of the revisit period.
@@ -67,7 +70,8 @@ def _n_way_for(group, r_c):
 
 
 def optimize_trajectories(groups, r_c, V, iters=400, lr=8.0, lambda_cov=50.0,
-                          device=None, seed=0, reorder_rounds=3):
+                          device=None, seed=0, reorder_rounds=3,
+                          return_waypoints=False):
     """Batched CETSP trajectory optimisation for all UAV sub-fields.
 
     groups : list of M sensor-coord lists (one per UAV).
@@ -145,4 +149,11 @@ def optimize_trajectories(groups, r_c, V, iters=400, lr=8.0, lambda_cov=50.0,
         mind = torch.linalg.norm(diff, dim=3).min(dim=2).values
         max_viol = (torch.clamp(mind - r_c, min=0.0) * smask).max().item()
     t_fly = (tour_len / V).cpu().tolist()
+    if return_waypoints:
+        # Chi de DO, khong tham gia tinh toan nao o tren: mac dinh False nen moi ket qua
+        # da cong bo khong doi mot chu so. Dung cho experiments/separation_check.py,
+        # tra loi cau hoi cua phan bien ve rang buoc gian cach (12i).
+        wps = [[[float(x) for x in wp.detach()[u, j].cpu().numpy()]
+                for j in range(nways[u])] for u in range(M)]
+        return t_fly, max_viol, wps
     return t_fly, max_viol

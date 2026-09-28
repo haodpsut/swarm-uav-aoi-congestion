@@ -1,6 +1,12 @@
-__pycache__/
-*.pyc
-.venv/
-.ipynb_checkpoints/
-results/*.png
+*.aux
+*.fdb_latexmk
+*.fls
 *.log
+*.out
+*.pyc
+*.synctex.gz
+.DS_Store
+.ipynb_checkpoints/
+.venv/
+__pycache__/
+results/*.png

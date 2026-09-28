@@ -43,7 +43,7 @@ $\mathcal{S}=\{1,\dots,S\}$ of candidate charging-station sites is given, with
 site $s$ at $\mathbf{b}_s\in\mathbb{R}^2$; the system may build a station and
 provision it with charging ports.
 
-Freshness is measured by the Age of Information (AoI)~\cite{kaul2012aoi}. Let
+Freshness is measured by the AoI~\cite{kaul2012aoi}. Let
 $u_k(t)$ be the generation time of the freshest update from sensor $k$ that has
 been delivered by time $t$. The instantaneous AoI is
 \begin{equation}
@@ -53,12 +53,41 @@ been delivered by time $t$. The instantaneous AoI is
 which grows at unit rate and drops on each successful collection: when a UAV
 collects at time $\tau$ a packet generated at $g$, $u_k$ jumps to $g$ and
 $\Aoi_k(\tau^{+})=\tau-g$. Following the base setting, the network objective is
-the worst-case peak AoI,
+the peak AoI across sensors,
+% ⛔ DOI o vong sua R1, theo diem 1 cua phan bien. Ban truoc dinh nghia \bar{A} la
+% worst-case theo QUY DAO MAU (limsup) nhung moi bieu thuc sau do lai dung Wq TRUNG
+% BINH. Hai dai luong khac nhau mang chung mot ten. Da DO xem thay the co duoc khong:
+% ti so cho o phan vi 99 tren cho trung binh len toi 82,9 lan o che do cap du dat,
+% nen KHONG duoc. Nay dinh nghia la KY VONG, tuc dung thu that su duoc toi uu.
+% ⚠ Cot mot cot cua IEEEtran chi rong ~252pt: viet ca cong thuc va cum giai thich
+% tren MOT dong thi tran 67pt. Tach cum giai thich xuong van xuoi.
+let $t_{k,1}<t_{k,2}<\cdots$ be the epochs at which an update from sensor $k$ is
+delivered, so that $\Aoi_k(t_{k,i}^-)$ is the age reached just before the $i$-th
+delivery, i.e. the \emph{peak} of cycle $i$. The objective is the expected peak age of
+the worst sensor,
 \begin{equation}
-  \bar{A} \;=\; \max_{k\in\mathcal{K}}\ \limsup_{t\to\infty}\ \Aoi_k(t),
+  \bar{A} \;=\; \max_{k\in\mathcal{K}}\ \limsup_{N\to\infty}\
+  \frac{1}{N}\sum_{i=1}^{N}\Aoi_k\!\left(t_{k,i}^{-}\right),
   \label{eq:peakaoi}
 \end{equation}
-which we seek to minimize. A UAV collects from sensor $k$ while
+which we seek to minimize.
+
+Three points about this definition, since an earlier version of this work was
+inconsistent about it. First, \eqref{eq:peakaoi} is an \emph{expectation over cycles},
+not a sample-path worst case: the earlier form $\max_k\limsup_t \Aoi_k(t)$ is withdrawn,
+and \eqref{eq:P0} below optimizes \eqref{eq:peakaoi} rather than restating a different
+functional. Second, \eqref{eq:peakaoi} is the average of the \emph{peaks}, not the
+time-average of the age; those differ by a factor close to two, and we measure rather
+than assert it. Across the $\rPaoiConfigs$ configurations of
+Section~\ref{sec:metric-gap} the ratio of the expected peak to the time-average age
+is $\rPaoiRatioLo$ to $\rPaoiRatioHi$, because the age sawtooths from zero to the
+revisit interval and the cycle length varies little (coefficient of variation at most
+$\rPaoiCvHi$). Reporting a time-average under the name ``peak AoI'' would therefore
+halve every number in this paper. Third, using the \emph{mean} charging wait $\Wq$
+inside \eqref{eq:peakaoi} is legitimate precisely because \eqref{eq:peakaoi} is itself
+an expectation; it would not be legitimate under the withdrawn sample-path form, and
+Section~\ref{sec:metric-gap} quantifies that gap: in the well-provisioned regime this
+paper recommends, the largest observed wait exceeds the mean by up to $\rMaxHi\times$. A UAV collects from sensor $k$ while
 $\|\mathbf{q}_m(t)-\mathbf{w}_k\|\le r_c$.
 
 \subsection{Rotary-wing energy}
@@ -134,8 +163,19 @@ the round-trip travel to the station and not the flight budget alone:
   T_{\mathrm{up}} = \tau_{\mathrm{fly}} + \frac{2\,d(m,s)}{V},
   \label{eq:uptime}
 \end{equation}
-where $d(m,s)=\|\mathbf{q}_m-\mathbf{b}_s\|$. Omitting the travel term overstates
-$\lambda$ and over-predicts the wait by roughly a factor of two.
+where $d(m,s)=\|\mathbf{q}_m-\mathbf{b}_s\|$. Omitting the travel term overstates $\lambda$ and overpredicts the wait by roughly a
+factor of two.
+
+\emph{Delivery semantics.} Two reviewers asked us to state when a collected update
+counts as \emph{delivered}, since the age is defined by delivery while the system model
+describes collection. We assume an ideal backhaul: the instant a UAV collects an update
+it is available at the destination, so collection time equals delivery time and no
+backhaul or data-carrying delay enters the age. This is an idealization, appropriate
+only when a persistent air-to-ground or satellite backhaul is present. A
+deliver-on-return model, in which the UAV carries the data to a ground node, would add
+the return flight to every peak and would change \eqref{eq:peak_m}; the placement and
+capacity structure we study would survive, but the absolute ages would not. We state
+the assumption here rather than leave it implicit.
 
 Let $n\in\{0,\dots,N_s\}$ be the number of UAVs at the station. The birth-death
 chain has state-dependent rates
@@ -166,16 +206,18 @@ queue wait are
 Because the population is finite, no stability constraint (of the form
 $\rho_s<1$) is needed: the wait \emph{saturates} rather than diverging. This
 finite-source model replaces the open $M/M/c$ (Erlang-C) form, which treats
-arrivals as an inexhaustible stream and, for the cycling swarm, over-predicts the
+arrivals as an inexhaustible stream and, for the cycling swarm, overpredicts the
 wait by roughly a factor of six. A discrete-event validation of the true cycling
 UAVs, reported in Section~\ref{sec:exp}, confirms that \eqref{eq:wq} tracks the
 simulation to within a few percent and is a conservative upper bound on the real,
 near-deterministic wait.
 
 \subsection{Peak-AoI expression}
+\label{subsec:aoi}
 \label{subsec:peakaoi}
-For a UAV $m$ that patrols a sub-field and leaves it to recharge, the worst-case
-revisit gap seen by its sensors is one patrol period plus one charging excursion:
+For a UAV $m$ that patrols a sub-field and leaves it to recharge, the expected revisit
+interval seen by its sensors is one patrol period plus one charging excursion, and the
+age of a sensor peaks at exactly that interval just before the next delivery:
 \begin{equation}
   \Aoi_m = t_{\mathrm{loop},m}
          + \frac{2\,d(m,s)}{V}
@@ -185,8 +227,11 @@ revisit gap seen by its sensors is one patrol period plus one charging excursion
 \end{equation}
 The first term is the patrol revisit period, the second the round trip to the
 assigned station, the third the finite-source queue wait from \eqref{eq:wq} (the
-term that couples the swarm), and the last the charging time. The network peak
-AoI \eqref{eq:peakaoi} is the maximum of \eqref{eq:peak_m} over the swarm. The
+term that couples the swarm), and the last the charging time. Because every term is a
+mean, \eqref{eq:peak_m} is the expected cycle peak of \eqref{eq:peakaoi} for the
+sensors served by UAV $m$; the network objective \eqref{eq:peakaoi} is the maximum of
+\eqref{eq:peak_m} over the swarm. This is the quantity Algorithm~1 minimizes, and it
+is the same functional that \eqref{eq:P0} states. The
 coupling in $\Wq$ is the mechanism behind the non-monotone behavior of
 $\bar{A}$ in the swarm size $M$: more UAVs shrink the coverage term but lengthen
 the wait, up to the ceiling set by the finite population.
@@ -201,7 +246,7 @@ $\{a_m\}$. The problem is
 \begin{align}
   \text{(P0)}\quad
   \argmin_{\substack{\mathbf{x},\,\mathbf{c},\\ \{\mathbf{q}_m\},\,\{a_m\}}}\ \
-    & \bar{A}=\max_{k\in\mathcal{K}}\ \limsup_{t\to\infty}\ \Aoi_k(t)
+    & \bar{A}\ \text{ as defined in }\eqref{eq:peakaoi}
     \label{eq:P0obj}\\
   \text{s.t.}\quad
     & e_m(t)\in[0,E_{\max}],\ \forall m,t,

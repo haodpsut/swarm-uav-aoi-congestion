@@ -107,16 +107,20 @@ Section~\ref{sec:exp}.
 
 \begin{proposition}[Congestion threshold and provisioning law]
 \label{prop:ushape}
-Under Assumption~\ref{ass:coverage} and Lemma~\ref{lem:wq}, the peak AoI
-$\Aoi(M)$ in \eqref{eq:aoi-decomp} is quasi-convex in the swarm size $M$ and
-admits a unique interior minimizer
+Under Assumptions~\ref{ass:coverage} and~\ref{ass:wq-convex} and
+Lemma~\ref{lem:wq}, the peak AoI $\Aoi(M)$ in \eqref{eq:aoi-decomp} is discretely
+convex in the swarm size $M$, and its set of minimizers
 \begin{equation}
-M^\star \;=\; \argmin_{M\in\{1,2,\dots\}} \Aoi(M),
+\mathcal{M}^\star \;=\; \argmin_{M\in\{1,2,\dots\}} \Aoi(M),
+\qquad M^\star \;\triangleq\; \min\mathcal{M}^\star ,
 \end{equation}
-so that adding UAVs strictly reduces AoI for $M<M^\star$ (coverage dominates) and
-strictly increases it for $M>M^\star$ (charging congestion dominates). Moreover
-$M^\star$ is non-decreasing in the port capacity $c$: enlarging a station never
-lowers the optimal swarm size.
+is non-empty, finite, and a block of consecutive integers. Adding UAVs strictly
+reduces AoI for $M<M^\star$ (coverage dominates) and strictly increases it for
+$M>\max\mathcal{M}^\star$ (charging congestion dominates). The minimizer is
+unique, $\mathcal{M}^\star=\{M^\star\}$, if and only if $\Delta\Aoi(M)\neq0$ for
+every $M$; a tie requires the coverage gain and the congestion penalty to cancel
+\emph{exactly} at the crossing index. Moreover $M^\star$ is non-decreasing in the
+port capacity $c$: enlarging a station never lowers the optimal swarm size.
 \end{proposition}
 
 \begin{IEEEproof}
@@ -133,15 +137,33 @@ Hence the right-hand side of
 \eqref{eq:delta-aoi} is a sum of two non-decreasing terms, so $\Delta\Aoi(M)$ is
 non-decreasing in $M$: the sequence $\Aoi(M)$ is discretely convex.
 
-It remains to check the endpoints of the sign of $\Delta\Aoi$. For small $M$
+It remains to fix the sign of $\Delta\Aoi$ at the two ends. For small $M$
 (in particular $M\le c$) the queue is empty, $\Delta\Wq(M)=0$, while
-$\Delta c_1(M)<0$, so $\Delta\Aoi(M)<0$: AoI is still falling. As $M\to\infty$,
-$\Delta c_1(M)=\Theta(1/M)-\Theta(1/(M{+}1))\to0^{-}$ while, by
-\eqref{eq:wq-bound}, $\Delta\Wq(M)\to 1/(c\mu)>0$, so $\Delta\Aoi(M)>0$
-eventually: AoI is rising. A non-decreasing difference sequence that is negative
-for small $M$ and positive for large $M$ changes sign exactly once, from negative
-to positive. The last index with $\Delta\Aoi(M)<0$ is the unique interior
-minimizer $M^\star$, which establishes the U-shape.
+$\Delta c_1(M)<0$, so $\Delta\Aoi(M)<0$: AoI is still falling.
+
+For large $M$ we do not need the exact saturation slope, only a strictly positive
+floor on the congestion increment; \eqref{eq:wq-bound} bounds $\Wq$ from above and
+so cannot supply that floor by itself. By Lemma~\ref{lem:wq} the wait is strictly
+increasing once $M>c$, hence $\delta\triangleq\Delta\Wq(c{+}1,c)>0$, and by
+Assumption~\ref{ass:wq-convex} the increments are non-decreasing, so
+$\Delta\Wq(M)\ge\delta$ for every $M\ge c+1$. On the coverage side
+Assumption~\ref{ass:coverage} gives $c_1(M)=\Theta(1/M)$, whence
+$|\Delta c_1(M)|=\Theta(1/M^{2})\to0$, and there is a finite $M_1\ge c+1$ with
+$|\Delta c_1(M)|<\delta$ for all $M\ge M_1$. For those $M$,
+$\Delta\Aoi(M)\ge\delta-|\Delta c_1(M)|>0$: AoI is strictly rising, and no
+minimizer lies beyond $M_1$, so $\mathcal{M}^\star$ is finite.
+
+A non-decreasing difference sequence that is negative for small $M$ and strictly
+positive for every $M\ge M_1$ changes sign exactly once. Let $M^\star$ be the
+first index at which $\Delta\Aoi$ stops being negative. Then $\Aoi$ is strictly
+decreasing on $\{1,\dots,M^\star\}$ and non-decreasing afterwards, so
+$\mathcal{M}^\star$ consists of $M^\star$ together with the run of consecutive
+indices immediately above it on which $\Delta\Aoi$ vanishes. That set is a block
+of consecutive integers, and it collapses to the singleton $\{M^\star\}$ exactly
+when no forward difference is zero. This establishes the U-shape. We note that
+discrete convexity alone does \emph{not} force uniqueness: a single vanishing
+forward difference at the crossing produces two minimizers of equal value, which
+is why the statement is phrased in terms of $\mathcal{M}^\star$.
 
 For the provisioning law, fix $M$ and increase $c$. The same monotone coupling,
 now applied to the down-rates $\min(n,c)\mu$ (which increase with $c$), makes the
@@ -154,6 +176,24 @@ unchanged. Hence for $c'>c$ we have $\Delta\Aoi(M;c')\le\Delta\Aoi(M;c)$ for all
 $M$, so the single sign change of $\Delta\Aoi(\cdot;c')$ occurs at an index at
 least as large as that of $\Delta\Aoi(\cdot;c)$, i.e. $M^\star(c')\ge M^\star(c)$.
 \end{IEEEproof}
+
+\noindent
+\emph{Is the tie a real risk, and does the data support Assumption~\ref{ass:wq-convex}?}
+Both questions are settled by measurement rather than by assertion, on the
+physical AoI curves of Section~\ref{sec:exp}. Across the $\rUniqCaps$ port
+capacities we simulate, the minimizer is unique in all $\rUniqCaps$ cases, and
+the closest competing swarm size sits at least $\rUniqSepMin\%$ above the
+minimum, so no configuration comes near the exact cancellation that would enlarge
+$\mathcal{M}^\star$. In $\rUniqInterior$ of the $\rUniqCaps$ cases the minimizer
+is interior; for the two largest capacities the curve is still falling at the
+largest swarm size we simulate, so the threshold lies beyond the tested range and
+we do not claim to have observed it there. For
+Assumption~\ref{ass:wq-convex}, $\rUniqViol$ of the $\rUniqSecondDiffs$ second
+differences of the simulated curves are negative, but $\rUniqViolMC$ of them
+exceed twice the Monte-Carlo standard error of the differences involved. The
+observed departures from convexity are therefore consistent with simulation
+noise, and we found no configuration in which convexity fails by a margin the
+simulation can resolve.
 
 \noindent
 Proposition~\ref{prop:ushape} says that congestion is a genuine, capacity-limited
@@ -230,6 +270,17 @@ the minimum-detour placement (A) is strictly AoI-suboptimal, so the AoI-optimal
 placement must open the offset site and balance the charging load, even at the cost
 of a longer detour.
 \end{IEEEproof}
+
+\noindent
+\emph{What this proposition does and does not claim.} The mechanism above is the
+per-station cap: opening the second site is what makes the extra ports available, so
+configurations (A) and (B) differ in total capacity as well as in geometry. The
+proposition is therefore an existence result about placement \emph{under a cap}, and it
+should not be read as separating a siting effect from a capacity effect. That separation
+is an empirical question, and Section~\ref{sec:matched-ports} answers it by measurement:
+at a fixed total port budget, and on the subset of instances where the two strategies buy
+an identical allocation, traffic-driven siting still wins. We have no proof of the
+matched-capacity statement and do not claim one.
 
 \noindent
 Proposition~\ref{prop:inversion} formalises the inversion: as the swarm grows, the

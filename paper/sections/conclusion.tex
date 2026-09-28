@@ -9,16 +9,14 @@ by roughly $6\times$ and distorts the design. Two structural results followed: a
 congestion threshold that makes the AoI non-monotone in the swarm size, with a
 provisioning law linking the optimal swarm size to the charging capacity, and a
 placement inversion in which the AoI-optimal placement becomes traffic-driven
-rather than coverage-driven. A block-coordinate solver with a GPU
-close-enough-TSP trajectory optimizer realized these gains, reducing peak AoI
-across field sizes against strong baselines.
+rather than coverage-driven. A block-coordinate solver with a GPU close-enough-TSP trajectory optimizer
+realized these gains against strong baselines.
 
-Several limitations remain. The finite-source model assumes exponential
-operating and service times; the deterministic-service $M/D/c//N$ approximation
-we introduce tightens the bound, but a residual gap remains from the
-near-deterministic operating process, which a full non-exponential treatment
-would close. The trajectory block uses a close-enough-TSP heuristic with $2$-opt
-reordering rather than an exact solver; it matches the exact optimum on the small
-instances where enumeration is tractable, but tighter guarantees at scale are
-open. Finally, extending the model to stochastic data arrivals and online
+Several limitations remain. The finite-source model assumes exponential operating
+and service times; our deterministic-service $M/D/c//N$ approximation tightens the
+bound, but a residual gap from the near-deterministic operating process would need a
+full non-exponential treatment. The trajectory block is a close-enough-TSP heuristic
+with $2$-opt reordering, not an exact solver: it matches the conditional
+combinatorial optimum wherever enumeration is tractable, but guarantees at scale
+remain open. Finally, extending the model to stochastic data arrivals and online
 operation would move the design from planning toward real-time control.

@@ -88,8 +88,14 @@ assignments.
 \label{subsec:place_block}
 The open-site subset $\mathbf{x}$ is chosen by an outer search over the candidate
 combinations. Candidate sites are the interior nodes of a regular grid over the
-field, and the search enumerates the $\binom{S}{S_{\max}}$ subsets of size
-$S_{\max}$. For each subset, the inner blocks (port allocation, assignment, and
+field, and the search enumerates the $\binom{S}{S_{\max}}$ subsets of size exactly $S_{\max}$.
+Two reviewers asked why it does not also consider \emph{fewer} than $S_{\max}$
+stations, which the budget constraint permits. It does, implicitly: a subset that
+opens $S_{\max}$ sites but gives zero ports to one of them is evaluated inside the
+port-split enumeration and \emph{is} a configuration with fewer open stations, since a
+portless site can take no UAV. Enumerating subsets of exactly $S_{\max}$ sites
+therefore loses no solution; it only changes how the same set is indexed. For each
+subset, the inner blocks (port allocation, assignment, and
 the queue evaluation) are run and the resulting peak AoI recorded; the subset
 with the lowest peak AoI is kept. This outer search is where the placement flips
 from coverage-driven to traffic-driven: a subset that spreads stations to split
@@ -134,6 +140,32 @@ finite-source queue.
 \end{algorithmic}
 \end{algorithm}
 
+\emph{What Algorithm~1 relaxes.} Reviewers asked us to state precisely which
+constraints of (P0) the solver enforces and which it does not, so we list them.
+Enforced at every candidate: the station and port budgets \eqref{eq:P0bud},
+\eqref{eq:P0cap} by construction of the enumeration; assignment to open stations
+\eqref{eq:P0asg} by construction; and the recharge-reachability constraint
+\eqref{eq:P0e2}, which is re-checked after \emph{every} reassignment because the
+peak-AoI evaluation returns $+\infty$ when any UAV would exceed its one-way energy
+budget, and the greedy local search calls that evaluation on each candidate move.
+Section~\ref{sec:feasible} reports the resulting margin.
+
+\emph{Relaxed:} the inter-UAV separation constraint \eqref{eq:P0sep}. It is not
+enforced, and it cannot be enforced at this level of abstraction, because the planner
+works in cycle times $(t_{\mathrm{loop}},\tau_{\mathrm{fly}})$ and does not resolve
+where each UAV is at a given instant; two UAVs on adjacent sub-fields could in
+principle be close at some moment that the model does not represent. Algorithm~1 is
+therefore a heuristic for a \emph{relaxed} problem, not a solver for (P0) as written.
+What we can do is measure the cost of the relaxation, and we do: over
+$\rSepSeeds$ seeds and $\rSepPairs$ UAV pairs, the closest approach between the hover
+points of two different UAVs is $\rSepMin$~m, with a median pair separation of
+$\rSepMed$~m; $\rSepBelowHundred$ pairs fall below $100$~m and
+$\rSepBelowTwoHundred$ falls below $200$~m. The returned tracks are thus spatially
+well separated even though nothing in the solver forces them to be. This is a spatial
+statement about patrol tracks, not a time-resolved collision guarantee; a deployment
+would still delegate separation to a lower-layer avoidance controller or to altitude
+stratification.
+
 \emph{Complexity and convergence.} The trajectory block costs one batched
 GPU optimization independent of the placement search. The outer loops evaluate
 $\binom{S}{S_{\max}}$ placements times the number of port splits, and each
@@ -143,7 +175,7 @@ zero) and there are finitely many assignments. For a fixed placement and port
 split, the returned assignment is a local optimum of \eqref{eq:peak_m} under
 single-UAV moves; because the placement and port searches are exhaustive over the
 candidate grid and the integer splits, and the best configuration is retained,
-the solver returns the lowest peak AoI it evaluates. We do not claim global
-optimality: the trajectory order is fixed and the assignment search is greedy, so
-the result is the best configuration reachable by this search from the
+the solver returns the lowest peak AoI it evaluates. We do not claim global optimality: the hover-point positions and their visiting order
+are optimized only to a local optimum of \eqref{eq:cetsp_loss}, and the assignment search
+is greedy, so the result is the best configuration reachable by this search from the
 nearest-station initialization, not necessarily the global optimum of (P0).

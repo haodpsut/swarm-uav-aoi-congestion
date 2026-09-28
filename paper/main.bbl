@@ -205,6 +205,46 @@ D.~Gross, J.~F. Shortle, J.~M. Thompson, and C.~M. Harris, \emph{Fundamentals
   of Queueing Theory}, 4th~ed.\hskip 1em plus 0.5em minus 0.4em\relax Wiley,
   2008.
 
+\bibitem{won2020ubat}
+M.~Won, ``{UBAT}: On jointly optimizing {UAV} trajectories and placement of
+  battery swap stations,'' in \emph{2020 IEEE International Conference on
+  Robotics and Automation (ICRA)}, 2020, pp. 427--433.
+
+\bibitem{santin2021matheur}
+R.~Santin, L.~Assis, A.~Vivas, and L.~C.~A. Pimenta, ``Matheuristics for
+  multi-{UAV} routing and recharge station location for complete area
+  coverage,'' \emph{Sensors}, vol.~21, no.~5, p. 1705, 2021.
+
+\bibitem{chen2024ev}
+Z.~Chen, Z.~Hu, Z.~Bao, and W.~Xu, ``{UAV} charging station planning and route
+  optimization considering stochastic delivery demand,'' \emph{IEEE
+  Transactions on Transportation Electrification}, vol.~10, no.~4, pp.
+  9328--9341, 2024.
+
+\bibitem{eldeeb2022recharge}
+E.~Eldeeb, J.~M. de~Souza~Sant'Ana, D.~E. Pérez, M.~Shehab, N.~H. Mahmood, and
+  H.~Alves, ``Multi-{UAV} path learning for age and power optimization in {IoT}
+  with {UAV} battery recharge,'' \emph{IEEE Transactions on Vehicular
+  Technology}, vol.~72, no.~4, pp. 5356--5360, 2023.
+
+\bibitem{shi2025aoi}
+K.~Shi, J.~Liu, L.~Xie, Z.~Zhou, H.~Chen, and G.~Feng, ``{AoI}-aware data
+  collection and energy replenishment for multi-{UAV}-enabled {IoT} systems,''
+  \emph{IEEE Transactions on Green Communications and Networking}, vol.~9,
+  no.~4, pp. 1755--1768, 2025.
+
+\bibitem{lee2024madrl}
+C.~Lee, S.~Lee, T.~Kim, I.~Bang, J.~H. Lee, and S.~H. Chae, ``Multi-agent deep
+  reinforcement learning-based multi-{UAV} path planning for wireless data
+  collection and energy transfer,'' in \emph{2024 Fifteenth International
+  Conference on Ubiquitous and Future Networks (ICUFN)}, 2024, pp. 500--504.
+
+\bibitem{zhang2023deploy}
+Y.~Zhang, Y.~Huang, C.~Huang, H.~Huang, and A.-T. Nguyen, ``Joint optimization
+  of deployment and flight planning of multi-{UAV}s for long-distance data
+  collection from large-scale {IoT} devices,'' \emph{IEEE Internet of Things
+  Journal}, vol.~11, no.~1, pp. 791--804, 2024.
+
 \bibitem{zeng2019energy}
 Y.~Zeng, J.~Xu, and R.~Zhang, ``Energy minimization for wireless communication
   with rotary-wing {UAV},'' \emph{IEEE Transactions on Wireless
