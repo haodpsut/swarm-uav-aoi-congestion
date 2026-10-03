@@ -10,9 +10,10 @@
 % duoc go tay con so nay: no la loi khai voi bien tap ve mot thu ho se mo ra xem.
 % Nap CUNG tep macro ma ban thao va thu tra loi dung. Cover letter la MAT TIEN:
 % bien tap doc no truoc, va no la cho de nhat de mot con so lech am tham.
-\input{results/tables/r1_macros}
-\IfFileExists{results/tables/markup_coverage.tex}
-  {\input{results/tables/markup_coverage.tex}}{}
+\input{../results/tables/r1_macros}
+\input{../results/tables/r2_9km_macros}
+\IfFileExists{../results/tables/markup_coverage.tex}
+  {\input{../results/tables/markup_coverage.tex}}{}
 \providecommand{\markupNote}{}   % chi dung khi CHUA chay build-submit-r2.sh
 
 \begin{document}
@@ -97,13 +98,21 @@ captions of Table~VI and Figs.~6 and~7, not only in the body.
 expected.} Table~V indicates that a third station restores reachability at $9$~km, so we
 re-ran the full comparison there with $S_{\max}{=}3$ and reachability enforced rather than
 assumed. Two results are worth the editor's attention. A third station restores
-feasibility on $11$ of $20$ seeds, not all of them, so the ``stations needed'' column is a
-per-seed minimum and we had over-read it. And the single pooled station, the strong
-baseline the paper compares against throughout, is infeasible on all $20$ seeds at that
-field size: it is not merely worse there, it cannot be flown, so the percentage comparison
-we report elsewhere does not exist at $9$~km. Against the strongest baseline that remains
-feasible, the proposed method improves the mean peak AoI by $5.8\%$ and by $3.6\%$ on the
-worst seed, winning $11$ of $11$ paired seeds.
+feasibility on $\rNineFeas$ of $\rNineSeeds$ seeds, not all of them, so the ``stations
+needed'' column is a per-seed minimum and we had over-read it; the caption now says so.
+And the single pooled station, the strong baseline the paper compares against throughout,
+is infeasible on all $\rNineSeeds$ seeds at that field size: it is not merely worse there,
+it cannot be flown, so the percentage comparison we report elsewhere does not exist at
+$9$~km. Against the strongest baseline that remains feasible, our own no-CETSP ablation,
+the proposed method improves the mean peak AoI by $\rNineGain\%$ and by $\rNineWorst\%$ on
+the worst seed, winning $\rNineWins$ of $\rNinePairs$ paired seeds. That ablation is
+feasible on exactly the same $\rNineAblFeas$ seeds, so no seed is flyable for it and not
+for the proposed solver. We also checked that the $\rNineGain\%$ is not an artefact of
+conditioning on our own feasibility: with reachability relaxed so that all
+$\rNineSeeds$ seeds return a design, the advantage is $\rNineGainKept\%$ on the retained
+seeds against $\rNineGainExcl\%$ on the excluded ones ($p=\rNineGainP$ by label
+permutation). The excluded seeds differ only geometrically: three candidate sites cannot
+cover their sub-fields within the $\rReachKm$\,km one-way budget.
 
 \item \textbf{Two reporting gaps are closed.} The discrete-event agreement is now
 reported with its exclusions: $8$ of $33$ configurations fall below the one-second

@@ -240,6 +240,20 @@ def main():
               % (100.0 * (float(d["single_station"]["aoi_des_min"])
                           - float(d["proposed"]["aoi_des_min"]))
                  / float(d["single_station"]["aoi_des_min"]))]
+        # Co dong cua phep thu nay: doc HANG SO ma chinh experiments/common_des.py dung,
+        # bang ast (khong chay tep, no keo torch). CSV khong ghi L, nen neu go tay vao bai
+        # thi con so khong co cho o va se troi khi doi cau hinh thi nghiem.
+        import ast
+        src = open(os.path.join(HERE, "common_des.py")).read()
+        l_m = None
+        for nd in ast.walk(ast.parse(src)):
+            if isinstance(nd, ast.Assign) and isinstance(nd.targets[0], ast.Tuple):
+                ten = [t.id for t in nd.targets[0].elts if isinstance(t, ast.Name)]
+                if "L" in ten:
+                    l_m = ast.literal_eval(nd.value.elts[ten.index("L")])
+        if l_m is None:
+            sys.exit("⛔ khong doc duoc hang so L trong experiments/common_des.py")
+        L.append(r"\newcommand{\rDesKm}{%g}" % (l_m / 1000.0))
 
     # ---- R5-3 / R4-4: bao van hanh cua rang buoc kha dat tram --------------
     try:
@@ -442,10 +456,15 @@ def main():
               r"  Field $L$ (km) & Feasible seeds & Max overshoot (s) & Stations needed \\",
               r"  \midrule"]
         for x in rv:
+            # ⛔ 03/10: o cho nay bo sinh in ">6" tran, va ai do (toi) da sua tay thanh
+            # "$>6$" trong ban sao cua bai cho LaTeX khong keu. Bang go tay thi lan chay
+            # lai sau KHONG cap nhat no. Boc dau $ vao ngay tai bo sinh.
+            sn = str(x["stations_needed"])
+            sn = "--" if sn == "2" else ("$%s$" % sn if sn.startswith(">") else sn)
             tb.append("  %s & %s/%s & %s & %s \\\\" % (
                 x["L_km"], x["feasible_seeds"], x["n_seeds"],
                 ("0" if float(x["max_violation_s"]) < 0.5 else "%.0f" % float(x["max_violation_s"])),
-                ("--" if str(x["stations_needed"]) == "2" else str(x["stations_needed"]))))
+                sn))
         tb += [r"  \bottomrule", r"\end{tabular}", ""]
         open(os.path.join(OUT, "tab_envelope.tex"), "w").write("\n".join(tb))
         print("  ✅ ghi results/tables/tab_envelope.tex (%d dong)" % len(rv))

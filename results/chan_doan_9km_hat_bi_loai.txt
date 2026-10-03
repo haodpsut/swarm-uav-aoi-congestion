@@ -1,0 +1,9 @@
+kha_thi=[0, 1, 2, 3, 4, 6, 7, 13, 14, 17, 18]
+bi_loai=[5, 8, 9, 10, 11, 12, 15, 16, 19]
+bk_kha_thi_max_km=3.2819
+bk_bi_loai_min_km=3.4092
+nguong_km=3.3801
+loi_kha_thi_pc=5.9582
+loi_bi_loai_pc=5.8959
+chenh_pp=0.0624
+p_tron=0.9365

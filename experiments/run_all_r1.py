@@ -41,6 +41,10 @@ JOBS = [
      "Doc ngoai: DINH moi chu ky so voi TRUNG BINH THEO THOI GIAN cua cung chu ky"),
     ("des_validation.py",    "des_summary.csv",
      "nen: mo hinh hang doi so voi DES (da co tu ban dau)"),
+    ("ablation_9km_3tram.py", "ablation_9km_3st.csv",
+     "Doc ngoai vong 1: so sanh chinh o 9 km / 3 tram, che do THAT SU bay duoc"),
+    ("chan_doan_hat_bi_loai.py", "chan_doan_9km_hat_bi_loai.txt",
+     "Doc ngoai vong 2: 9 hat bi loai khac 11 hat kia o dau, va 5,8% co bi thien lech khong"),
 ]
 
 

@@ -43,7 +43,7 @@
 % ⛔ Duong dan PHAI la ../results, giong het duong dan cua cac hinh. Ban truoc dung
 %    results/... nen no tro vao MOT BAN SAO thu hai trong v2-revision/results va
 %    ban thao im lang nap ban CU (24 macro thay vi 42). Mot con so mot cho o.
-\input{results/tables/r1_macros}
+\input{../results/tables/r1_macros}
 \input{../results/tables/r2_9km_macros}
 
 \begin{document}
@@ -78,31 +78,25 @@ Vietnam (e-mail: daipv11@fe.edu.vn).}%
 \maketitle
 
 \begin{abstract}
-Unmanned aerial vehicle (UAV) swarms can keep Internet of Things data fresh, but
-energy-limited UAVs must recharge at a few shared stations, which then become a
-contended resource. We study the joint design of charging-station placement, port
-capacity, swarm trajectory, and UAV-to-station assignment to minimize the network
-peak Age of Information (AoI). Our solver targets a relaxation: it enforces
-recharge reachability only up to a field side of $\rEnvFullKm$~km and never enforces
-inter-UAV separation. A key observation is that the charging system is a closed
-population of only $M$ UAVs, so it must be modeled as a finite-source
-(machine-repair) queue rather than an open-arrival one; a discrete-event simulation
-agrees with the finite-source model to within about $4\%$ under matched assumptions
-and the model overestimates the near-deterministic wait on every configuration
-tested, whereas the open queue overpredicts the wait by roughly $6\times$ and
-distorts the design. We prove two structural results: a congestion threshold making
-peak AoI non-monotone in swarm size, with a provisioning law linking the optimal
-swarm size to the charging capacity, and a placement inversion showing that the
-coverage-optimal placement is AoI-suboptimal under contention. We then develop a
-block-coordinate solver with a GPU close-enough traveling-salesman trajectory
-optimizer. Results are reported by feasibility regime. Where every returned design
-can be flown (field side up to $\rEnvFullKm$~km), the method cuts peak AoI by
-$4.1\%$ against a strong single pooled-station baseline at $M{=}12$ and four ports,
-and by $1.1\%$ on the worst seed. At a $9$~km field with three stations the pooled
-station is infeasible on all $\rNineSeeds$ seeds, and the method beats the strongest
-still-feasible baseline by $\rNineGain\%$ on average and $\rNineWorst\%$ at worst,
-on the $\rNineFeas$ of $\rNineSeeds$ feasible seeds. Larger fields exceed the energy
-budget and are reported as an idealized-reachability study.
+Unmanned aerial vehicle (UAV) swarms keep Internet of Things data fresh, but
+energy-limited UAVs must recharge at a few shared stations, a
+contended resource. We jointly design station placement, port capacity, swarm
+trajectory, and UAV-to-station assignment to minimize network peak Age of
+Information (AoI). Our solver targets a relaxation: recharge reachability is
+enforced only to a field side of $\rEnvFullKm$~km, inter-UAV separation never. The charging system is a closed population of only $M$ UAVs,
+so it needs a finite-source (machine-repair) rather than open-arrival queue; a discrete-event simulation agrees within about $4\%$ and the
+model overestimates the near-deterministic wait on every configuration tested;
+the open queue overpredicts it by roughly $6\times$ and distorts the design. We prove a congestion threshold making peak AoI non-monotone in swarm size,
+with a provisioning law linking swarm size to charging capacity, and a placement
+inversion: the coverage-optimal placement is AoI-suboptimal under contention. Our block-coordinate solver uses a GPU close-enough
+traveling-salesman optimizer. Results are reported by feasibility regime.
+Where every returned design can be flown (field side up to $\rEnvFullKm$~km), the
+method cuts peak AoI by $\rSingleGainMin\%$ against a strong single pooled-station baseline at
+$M{=}12$ and four ports, and $\rFamCovWorst\%$ on the worst seed. At a $9$~km field with
+three stations no prior-art baseline is feasible, so the remaining $\rNineGain\%$
+gain is measured against our own ablation and quantifies that component, not
+an advantage over prior art. Larger fields exceed the energy budget
+and are reported as an idealized-reachability study.
 \end{abstract}
 
 \begin{IEEEkeywords}
