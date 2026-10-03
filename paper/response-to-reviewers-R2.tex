@@ -265,4 +265,17 @@ This letter answers \textbf{every} numbered point of \textbf{every} reviewer fro
 \rev{Reproducibility details. Optimization hyperparameters (Adam learning rate, iteration count, 2-opt frequency, termination criteria) and RUNTIME are still not reported; they should be added, at least by reference to the artifact.}
 \act{Added. Section~VI-A now reports the Adam learning rate, the number of gradient steps, the 2-opt reordering frequency, the stopping rule, the seed count, the hardware, and the runtime split between the GPU trajectory block and the CPU combinatorial block at two swarm sizes. All results in the paper now come from a single documented machine.}{Sec.~VI-A, paragraph \emph{Implementation, hyperparameters and runtime}}
 
+\section*{Appendix: passages deleted since the submitted version}
+
+The highlighted PDF marks additions reliably but only about half of the deletions, because \texttt{latexdiff} does not mark removals inside float and table environments. Rather than ask the reviewers to trust that explanation, we list what was removed. Comparing the submitted version with this one sentence by sentence gives $38$ sentences removed outright and $20$ reworded with the same content. The removals group as follows.
+
+\begin{itemize}[leftmargin=1.4em]
+\item \textbf{Claims we withdrew (13 sentences, Sec.~VI and Sec.~III).} Every sentence asserting that the finite-source model is a \emph{conservative upper bound} on the real wait, and the two sentences saying the simulation \emph{confirms} the formula. These are replaced by an empirical statement over the configurations actually tested. This is the change Reviewer~1 asked for and the one our previous cover letter described before it had been made.
+\item \textbf{Statements superseded by a measurement (12 sentences).} Text asserting a result that is now reported with numbers instead: the provisioning law summary, the placement-inversion description, and the optimality-gap argument, each now carried by a table or a figure with per-seed data.
+\item \textbf{Novelty wording narrowed (5 sentences, Sec.~I and Sec.~II).} Sentences of the form ``no prior formulation simultaneously carries all four'' and ``we formulate the first joint \dots{} problem''. The comparison table in Sec.~II now makes the same point dimension by dimension, which is checkable.
+\item \textbf{Redundant after compression (8 sentences).} Definitions restated in two places, and one derivation duplicated between Sec.~III and Sec.~VI.
+\end{itemize}
+
+No result, table entry or figure was removed. The removals are claims and restatements; the measurements all survive and several are now reported in more detail than before.
+
 \end{document}

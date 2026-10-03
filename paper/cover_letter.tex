@@ -10,9 +10,9 @@
 % duoc go tay con so nay: no la loi khai voi bien tap ve mot thu ho se mo ra xem.
 % Nap CUNG tep macro ma ban thao va thu tra loi dung. Cover letter la MAT TIEN:
 % bien tap doc no truoc, va no la cho de nhat de mot con so lech am tham.
-\input{../results/tables/r1_macros}
-\IfFileExists{../results/tables/markup_coverage.tex}
-  {\input{../results/tables/markup_coverage.tex}}{}
+\input{results/tables/r1_macros}
+\IfFileExists{results/tables/markup_coverage.tex}
+  {\input{results/tables/markup_coverage.tex}}{}
 \providecommand{\markupNote}{}   % chi dung khi CHUA chay build-submit-r2.sh
 
 \begin{document}
@@ -82,6 +82,38 @@ configurations tested. To answer the underlying concern we applied one \emph{com
 near-deterministic simulator to the final design of all five methods: the ordering is
 identical to the analytic ordering and the proposed design wins on $\rDesPropWins$ of
 $\rSeeds$ seeds.
+\item \textbf{The headline is now stated by feasibility regime, and the abstract no
+longer leads with a number measured where the design cannot be flown.} Table~V shows that
+the returned designs meet the recharge-reachability constraint only up to a $6$~km field;
+beyond that the energy shortfall reaches $3.86\times$ the battery at $15$~km and
+$5.14\times$ at $20$~km. The previous abstract led with ``up to $12.7\%$'', a figure taken
+from the $20$~km study. The abstract now reports $4.1\%$ (worst seed $1.1\%$) in the
+regime where every design is flyable, names the configuration of the single-station
+comparison, drops ``up to'', and states that the solver targets a relaxation of (P0),
+naming both relaxed constraints. The same reachability caveat is now carried in the
+captions of Table~VI and Figs.~6 and~7, not only in the body.
+
+\item \textbf{We added a flyable mid-field comparison, and it did not go the way we
+expected.} Table~V indicates that a third station restores reachability at $9$~km, so we
+re-ran the full comparison there with $S_{\max}{=}3$ and reachability enforced rather than
+assumed. Two results are worth the editor's attention. A third station restores
+feasibility on $11$ of $20$ seeds, not all of them, so the ``stations needed'' column is a
+per-seed minimum and we had over-read it. And the single pooled station, the strong
+baseline the paper compares against throughout, is infeasible on all $20$ seeds at that
+field size: it is not merely worse there, it cannot be flown, so the percentage comparison
+we report elsewhere does not exist at $9$~km. Against the strongest baseline that remains
+feasible, the proposed method improves the mean peak AoI by $5.8\%$ and by $3.6\%$ on the
+worst seed, winning $11$ of $11$ paired seeds.
+
+\item \textbf{Two reporting gaps are closed.} The discrete-event agreement is now
+reported with its exclusions: $8$ of $33$ configurations fall below the one-second
+threshold at which a relative error against a near-zero reference carries no information,
+and six of those have at least as many ports as UAVs, so no UAV ever queues. And
+Section~VI now states what Proposition~1 predicts for the actual two-station,
+four-port configuration: $12$ UAVs under an even split, against the $16$ we measure. We
+report that four-UAV miss rather than widening the law to a multi-station case our proof
+does not cover.
+
 \end{itemize}
 
 Two procedural notes. First, all results in this version were regenerated on a single

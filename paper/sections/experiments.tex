@@ -13,7 +13,7 @@ Table~\ref{tab:mstar} gives $M^\star{=}12$ for a \emph{per-station} capacity of
 $c{=}4$, i.e.\ for one station with four ports; the comparison setup instead splits
 $C_{\mathrm{tot}}{=}4$ over up to two stations, which is not the same queue. Sweeping
 $M$ directly under the actual placement and port split at the comparison field size
-(Section~\ref{sec:permstar}) gives $M^\star{=}\rMstarOwn$, not $12$. We keep $M{=}12$,
+(Section~\ref{sec:permstar}) gives $M^\star{=}\rMstarOwn$, not $12$. It is worth asking what Proposition~1 predicts for that configuration, since a provisioning law that only applies to the single-station case is a weaker claim than the one we make. Table~\ref{tab:mstar} is computed per station: at $c{=}2$ ports it gives $M^\star{=}6$, so under an even split of the swarm across two stations the law predicts $12$ for the cluster, against the $\rMstarOwn$ we measure. The law therefore under-predicts here by four UAVs. The gap is not noise: the solver does not split the swarm evenly, and the placement it chooses changes which station each UAV queues at, so the per-station population is itself a decision variable rather than $M/2$. We state the law as a design heuristic for a single contended station and report this out-of-sample miss rather than widening the claim to cover the multi-station case, which our proof does not. We keep $M{=}12$,
 which costs the proposed method $\rMstarPropCost\%$ relative to its own optimum, for
 two reasons: every method peaks at the \emph{same} $M^\star{=}\rMstarOwn$, so the
 choice favours none of them, and Section~\ref{sec:permstar} repeats the whole
@@ -66,11 +66,14 @@ a long horizon after a warm-up, then measure the true mean queue wait.
 Fig.~\ref{fig:des} compares three predictions against the DES. Under
 matched assumptions (exponential operating and service), the finite-source
 $M/M/c//N$ formula matches the DES to a mean relative error of $\rDesRelErr\%$
-over the $\rDesFormulaN$ configurations in which the DES wait is resolvable, which
-confirms the formula. For the realistic system (near-deterministic operating and
-charging), the DES wait is lower, so the finite-source model is a
-\emph{conservative upper bound} (it exceeds the real wait in
-$\rDesConsHits/\rDesRealN$ configurations). In contrast, the open $M/M/c$ queue overpredicts the DES wait
+over the $\rDesFormulaN$ of $33$ configurations in which the DES wait is resolvable. The $8$ excluded configurations are those whose simulated wait is at most one second, where a relative error against a near-zero reference carries no information; six of them have at least as many ports as UAVs, so no UAV ever queues and the wait is identically zero. For the near-deterministic comparison the same threshold leaves $\rDesRealN$ of $33$. We read
+this as a \emph{sanity check} on the formula under its own assumptions, not as a
+validation of the model for the deployed system, whose operating and charging times
+are near-deterministic rather than exponential. For the realistic system (near-deterministic operating and
+charging), the DES wait is lower, so the finite-source model is an
+\emph{empirical overestimate} on the configurations tested: it exceeds the real wait in
+$\rDesConsHits/\rDesRealN$ of them. We make no claim that it bounds the real wait in
+general, and we have no proof that it does. In contrast, the open $M/M/c$ queue overpredicts the DES wait
 by a mean factor of $\rDesOpenOver$, because it ignores the closed
 population: only $M$ UAVs
 exist, so the arrival rate falls as more of them are already charging. Using the
@@ -92,7 +95,9 @@ AoI values remain safe rather than optimistic.
   \includegraphics[width=\columnwidth]{results/fig_des_validation.pdf}
   \caption{Queue-model validation against discrete-event simulation. The
   finite-source model matches the DES under matched (exponential) assumptions
-  and is a conservative upper bound for the real near-deterministic system,
+  and empirically overestimates the wait of the real near-deterministic system on
+  every configuration tested, which is an observation on those configurations and
+  not a proven bound,
   whereas the open $M/M/c$ overpredicts the wait about $6\times$.}
   \label{fig:des}
 \end{figure}
@@ -319,6 +324,32 @@ discussed in Section~\ref{sec:solver}.
   \input{results/tables/tab_envelope}
 \end{table}
 
+\subsection{A feasible mid-field comparison: $9$~km with three stations}
+\label{sec:ninekm}
+Table~\ref{tab:envelope} shows that a third station restores reachability at a $9$~km
+field, so we repeat the comparison there with $S_{\max}{=}3$ and the same four ports, and
+with the reachability constraint \emph{enforced} rather than assumed. This is the only
+mid-field result in the paper that is flyable, and two things about it are worth stating
+plainly.
+
+First, a third station does not restore feasibility everywhere: $\rNineFeas$ of
+$\rNineSeeds$ seeds admit a feasible design, not all of them. The ``stations needed''
+column of Table~\ref{tab:envelope} is a per-seed minimum, not a guarantee across the
+sampled fields, and we had read it as the latter before running this.
+
+Second, the strong baseline disappears. The single pooled station is feasible on
+$\rNineSingleFeas$ of $\rNineSeeds$ seeds and round-robin assignment on
+$\rNineRRFeas$: at this field size the pooled design is not merely worse than the
+proposed one, it cannot be flown at all, so the percentage comparison that the rest of
+the paper reports against it does not exist here. Against the strongest baseline that
+remains feasible, the no-CETSP ablation, the proposed method lowers the mean peak AoI to
+$\rNineAoI$~min, an improvement of $\rNineGain\%$ on average and $\rNineWorst\%$ on the
+least favourable seed, winning $\rNineWins$ of $\rNinePairs$ paired seeds.
+
+We report this regime separately rather than folding it into the headline, because the
+comparison set differs: at $5$--$\rEnvFullKm$~km every method is feasible and the pooled
+station is a genuine competitor, while at $9$~km it is not a competitor at all.
+
 \subsection{Joint solver versus baselines}
 We compare the proposed joint solver (CETSP trajectory with traffic-optimal
 placement) against: a single pooled station (all ports at one central station,
@@ -360,7 +391,7 @@ number rather than the mean.
 
 \begin{table}[t]
   \centering
-  \caption{Ablation at a $15$~km field ($M{=}12$, mean peak AoI in minutes).}
+  \caption{Ablation at a $15$~km field ($M{=}12$, mean peak AoI in minutes). All numbers at this field size assume idealized recharge reachability: constraint~\eqref{eq:P0e2} is not met by the returned designs at $L>\rEnvFullKm$~km (Table~\ref{tab:envelope}), so they should be read as a study of the placement problem rather than of a flyable deployment.}
   \label{tab:ablation}
   \begin{tabular}{lc}
     \toprule
@@ -390,7 +421,7 @@ removes this artifact, and the distributed placement is preferred throughout.
   \centering
   \includegraphics[width=\columnwidth]{results/fig_crossover.pdf}
   \caption{Field-size sweep. The proposed distributed placement beats the single
-  pooled station at all sizes, with a widening margin as travel cost grows.}
+  pooled station at all sizes, with a widening margin as travel cost grows. All numbers at this field size assume idealized recharge reachability: constraint~\eqref{eq:P0e2} is not met by the returned designs at $L>\rEnvFullKm$~km (Table~\ref{tab:envelope}), so they should be read as a study of the placement problem rather than of a flyable deployment.}
   \label{fig:crossover}
 \end{figure}
 
@@ -415,7 +446,7 @@ small fleets.
   \includegraphics[width=\columnwidth]{results/fig_scale.pdf}
   \caption{Scaling to a large swarm ($M$ up to $60$, $K=8M$ sensors, capacity
   $C_{\mathrm{tot}}=\lceil M/3\rceil$ growing with the swarm). The proposed
-  placement keeps its advantage over the baselines at scale.}
+  placement keeps its advantage over the baselines at scale. All numbers at this field size assume idealized recharge reachability: constraint~\eqref{eq:P0e2} is not met by the returned designs at $L>\rEnvFullKm$~km (Table~\ref{tab:envelope}), so they should be read as a study of the placement problem rather than of a flyable deployment.}
   \label{fig:scale}
 \end{figure}
 
@@ -521,7 +552,7 @@ sensible only in small fields, where travel is cheap.
 
 Fourth, the queueing model matters as much as the optimizer: an open $M/M/c$ queue
 overstates the wait by about $6\times$ and can flip a design decision, as the
-spurious small-field crossover above shows. The finite-source model removes this bias and, being a conservative upper bound on
+spurious small-field crossover above shows. The finite-source model removes this bias and, overestimating on every configuration we tested
 the near-deterministic reality, yields safe rather than optimistic estimates; it is
 the default we recommend for swarm recharging with a bounded fleet.
 
